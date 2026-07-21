@@ -1,0 +1,27 @@
+{
+  "chainId": 5042002,
+  "rpcUrl": "https://rpc.testnet.arc.network",
+  "explorer": "https://testnet.arcscan.app",
+  "usdc": "0x3600000000000000000000000000000000000000",
+  "erc8004": {
+    "identityRegistry": "0x8004A818BFB912233c491871b3d84c89A494BD9e",
+    "reputationRegistry": "0x8004B663056A597Dffe9eCcC1965A193B7388713",
+    "validationRegistry": "0x8004Cb1BF31DAf7788923b405b754f57acEB4272"
+  },
+  "erc8183Job": "0x0747EEf0706327138c69792bF28Cd525089e4583",
+  "eurc": "0x89B50855Aa3bE2F677cD6303Cec089B5F319D72a",
+  "agenture": {
+    "greeter": "0x0aa0469e369049E695E8c3c190ea391c501329Cb",
+    "fund": "0xa28Aa701E6390d477937F9F9F634840f75B84bEf",
+    "revenueShare": "0x0D9cCC9A04BB518Cbd704afA7C9394aC50ef6f7f",
+    "operator": "0x3E6AAfA597fC658cF5b7E42a9F07711785a9519E",
+    "judges": [
+      {
+        "name": "alpha",
+        "wallet": "0x7F2733B91b12bcF2cfE99E2aa2617286b93cA7de",
+        "agentId": 851598,
+        "mandate": "6000000"
+      }
+    ]
+  }
+}
