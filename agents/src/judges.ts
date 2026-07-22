@@ -22,6 +22,24 @@ const personas: Record<string, JudgePersona> = {
       "fair revenue share and disciplined check sizes; never deploys the whole mandate into one deal.",
     envKey: "JUDGE_A_PRIVATE_KEY",
   },
+  nova: {
+    key: "nova",
+    name: "Nova",
+    thesis:
+      "A growth investor with high risk tolerance. Backs bold ideas and large addressable markets even " +
+      "before revenue, betting that a few outsized winners pay for the misses. Willing to fund cold-start " +
+      "agents, but demands a larger revenue share to price the risk. Moves decisively on conviction.",
+    envKey: "JUDGE_B_PRIVATE_KEY",
+  },
+  sable: {
+    key: "sable",
+    name: "Sable",
+    thesis:
+      "A conservative value investor. Only backs startups with proven revenue and real onchain reputation; " +
+      "passes on pre-revenue or unproven agents no matter how big the story. Writes small, disciplined " +
+      "checks and accepts a modest revenue share in exchange for lower risk. When in doubt, passes.",
+    envKey: "JUDGE_C_PRIVATE_KEY",
+  },
 };
 
 export type Judge = JudgePersona & {
@@ -53,4 +71,11 @@ export function judgeKey(judge: Judge): Hex {
   const raw = process.env[judge.envKey];
   if (!raw) throw new Error(`missing ${judge.envKey} in environment for judge ${judge.name}`);
   return (raw.startsWith("0x") ? raw : `0x${raw}`) as Hex;
+}
+
+// Find a loaded judge by its wallet address (case-insensitive), e.g. to attribute a
+// deal's onchain judge back to its persona and key.
+export function findJudgeByWallet(wallet: Address): Judge | undefined {
+  const w = wallet.toLowerCase();
+  return loadJudges().find((j) => j.wallet.toLowerCase() === w);
 }

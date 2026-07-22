@@ -10,6 +10,7 @@ export type Decision = {
   invest: boolean;
   amountUsdc: number;
   revenueShareBps: number;
+  score: number; // 0-100 conviction, used to rank pitches when mandate is scarce
   rationale: string;
 };
 
@@ -54,7 +55,9 @@ export async function decide(
     `the revenue share you negotiate, so price risk into the share. Pitch numbers are self-reported ` +
     `and unverified; trust the onchain diligence over claims. ` +
     `Respond with ONLY a JSON object and nothing else, of the form ` +
-    `{"invest": boolean, "amountUsdc": number, "revenueShareBps": integer 0-10000, "rationale": string}. ` +
+    `{"invest": boolean, "amountUsdc": number, "revenueShareBps": integer 0-10000, ` +
+    `"score": integer 0-100, "rationale": string}. score is your conviction in this deal, ` +
+    `used to prioritise it against other pitches when your budget is tight. ` +
     `If you pass, set invest to false and amountUsdc to 0.`;
 
   const user =
@@ -69,18 +72,19 @@ export async function decide(
 
   const raw = await generateJson<Partial<Decision>>(system, user, 0.3);
   if (!raw) {
-    return { invest: false, amountUsdc: 0, revenueShareBps: 0, rationale: "no parseable decision; passed" };
+    return { invest: false, amountUsdc: 0, revenueShareBps: 0, score: 0, rationale: "no parseable decision; passed" };
   }
 
   const invest = Boolean(raw.invest);
   const amountUsdc = invest ? clamp(Number(raw.amountUsdc), 0, budget) : 0;
   const revenueShareBps = Math.round(clamp(Number(raw.revenueShareBps), 0, 10000));
+  const score = Math.round(clamp(Number(raw.score), 0, 100));
   const rationale = cleanRationale(raw.rationale);
 
   // An "invest" with nothing to deploy is really a pass.
   if (invest && amountUsdc <= 0) {
-    return { invest: false, amountUsdc: 0, revenueShareBps, rationale: rationale || "no budget to deploy; passed" };
+    return { invest: false, amountUsdc: 0, revenueShareBps, score, rationale: rationale || "no budget to deploy; passed" };
   }
 
-  return { invest, amountUsdc, revenueShareBps, rationale };
+  return { invest, amountUsdc, revenueShareBps, score, rationale };
 }

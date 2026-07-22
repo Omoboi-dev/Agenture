@@ -1,4 +1,4 @@
-import type { Address } from "viem";
+import type { Address, Hex } from "viem";
 
 // A startup agent pitching for capital. The pitch numbers are SELF-REPORTED and
 // unverified on purpose: the judge's job is to weigh these claims against the real
@@ -38,7 +38,7 @@ export const startups: Startup[] = [
     name: "PixelForge",
     wallet: "0x8A2cf1406e8eF32D7AeAc685303D3eeC08f48267",
     keyEnv: "STARTUP_PIXELFORGE_PRIVATE_KEY",
-    agentId: null,
+    agentId: 851661n,
     pitch: {
       idea: "A generative image agent that sells renders to other agents. Pre-revenue but claims a large addressable market.",
       monthlyRevenueUsdc: 0,
@@ -50,7 +50,7 @@ export const startups: Startup[] = [
     name: "DataOracle",
     wallet: "0xC686ba6A5A41312Fd87414b707d1d04b4CeA6593",
     keyEnv: "STARTUP_DATAORACLE_PRIVATE_KEY",
-    agentId: null,
+    agentId: 851662n,
     pitch: {
       idea: "A price and event data feed for trading agents, charging per query over x402. Some early paying users, no onchain record yet.",
       monthlyRevenueUsdc: 300,
@@ -59,3 +59,16 @@ export const startups: Startup[] = [
     },
   },
 ];
+
+export function findStartupByWallet(wallet: Address): Startup | undefined {
+  const w = wallet.toLowerCase();
+  return startups.find((s) => s.wallet.toLowerCase() === w);
+}
+
+// A startup's key, read from the environment only when it needs to sign (settling
+// revenue). Throws a clear error if it is missing.
+export function startupKey(s: Startup): Hex {
+  const raw = process.env[s.keyEnv];
+  if (!raw) throw new Error(`missing ${s.keyEnv} in environment for startup ${s.name}`);
+  return (raw.startsWith("0x") ? raw : `0x${raw}`) as Hex;
+}

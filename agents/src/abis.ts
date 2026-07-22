@@ -28,6 +28,71 @@ export const erc20Abi = [
     inputs: [{ name: "account", type: "address" }],
     outputs: [{ name: "", type: "uint256" }],
   },
+  {
+    type: "function",
+    name: "approve",
+    stateMutability: "nonpayable",
+    inputs: [
+      { name: "spender", type: "address" },
+      { name: "amount", type: "uint256" },
+    ],
+    outputs: [{ name: "", type: "bool" }],
+  },
+  {
+    type: "function",
+    name: "transfer",
+    stateMutability: "nonpayable",
+    inputs: [
+      { name: "to", type: "address" },
+      { name: "amount", type: "uint256" },
+    ],
+    outputs: [{ name: "", type: "bool" }],
+  },
+] as const;
+
+// ERC-8004 IdentityRegistry: register(uri) mints a fresh agentId to the caller.
+export const identityAbi = [
+  {
+    type: "function",
+    name: "register",
+    stateMutability: "nonpayable",
+    inputs: [{ name: "uri", type: "string" }],
+    outputs: [{ name: "agentId", type: "uint256" }],
+  },
+] as const;
+
+// ERC-8004 ReputationRegistry write side: a client (a judge) rates an agent (a startup).
+export const reputationWriteAbi = [
+  {
+    type: "function",
+    name: "giveFeedback",
+    stateMutability: "nonpayable",
+    inputs: [
+      { name: "agentId", type: "uint256" },
+      { name: "value", type: "int128" },
+      { name: "decimals", type: "uint8" },
+      { name: "tag1", type: "string" },
+      { name: "tag2", type: "string" },
+      { name: "endpoint", type: "string" },
+      { name: "uri", type: "string" },
+      { name: "hash", type: "bytes32" },
+    ],
+    outputs: [],
+  },
+] as const;
+
+// Agenture RevenueShare: the startup reports revenue and pays the fund's cut.
+export const revenueShareAbi = [
+  {
+    type: "function",
+    name: "settle",
+    stateMutability: "nonpayable",
+    inputs: [
+      { name: "dealId", type: "uint256" },
+      { name: "revenueAmount", type: "uint256" },
+    ],
+    outputs: [],
+  },
 ] as const;
 
 // The pieces of the Fund the orchestrator drives: read judge state and cash, invest
@@ -72,6 +137,45 @@ export const fundAbi = [
     stateMutability: "view",
     inputs: [],
     outputs: [{ name: "", type: "uint256" }],
+  },
+  {
+    type: "function",
+    name: "getDeal",
+    stateMutability: "view",
+    inputs: [{ name: "dealId", type: "uint256" }],
+    outputs: [
+      {
+        name: "",
+        type: "tuple",
+        components: [
+          { name: "judge", type: "address" },
+          { name: "startup", type: "address" },
+          { name: "amount", type: "uint256" },
+          { name: "revenueShareBps", type: "uint16" },
+          { name: "returned", type: "uint256" },
+          { name: "status", type: "uint8" },
+          { name: "pitchRef", type: "string" },
+        ],
+      },
+    ],
+  },
+  {
+    type: "function",
+    name: "depositCapital",
+    stateMutability: "nonpayable",
+    inputs: [{ name: "amount", type: "uint256" }],
+    outputs: [],
+  },
+  {
+    type: "function",
+    name: "registerJudge",
+    stateMutability: "nonpayable",
+    inputs: [
+      { name: "judge", type: "address" },
+      { name: "agentId", type: "uint256" },
+      { name: "mandate", type: "uint256" },
+    ],
+    outputs: [],
   },
   {
     type: "event",

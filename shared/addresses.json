@@ -11,7 +11,6 @@
   "erc8183Job": "0x0747EEf0706327138c69792bF28Cd525089e4583",
   "eurc": "0x89B50855Aa3bE2F677cD6303Cec089B5F319D72a",
   "agenture": {
-    "greeter": "0x0aa0469e369049E695E8c3c190ea391c501329Cb",
     "fund": "0xa28Aa701E6390d477937F9F9F634840f75B84bEf",
     "revenueShare": "0x0D9cCC9A04BB518Cbd704afA7C9394aC50ef6f7f",
     "operator": "0x3E6AAfA597fC658cF5b7E42a9F07711785a9519E",
@@ -20,6 +19,18 @@
         "name": "alpha",
         "wallet": "0x7F2733B91b12bcF2cfE99E2aa2617286b93cA7de",
         "agentId": 851598,
+        "mandate": "6000000"
+      },
+      {
+        "name": "nova",
+        "wallet": "0xf2fD1775118E21Ea5B9507235d3556C97181a9F7",
+        "agentId": 851659,
+        "mandate": "6000000"
+      },
+      {
+        "name": "sable",
+        "wallet": "0x62050AB71Cd055cD48ed4fc2aD940606F7d63467",
+        "agentId": 851660,
         "mandate": "6000000"
       }
     ]

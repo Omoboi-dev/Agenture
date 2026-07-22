@@ -4,7 +4,9 @@
   "type": "module",
   "scripts": {
     "typecheck": "tsc --noEmit",
-    "round": "tsx src/round.ts"
+    "setup": "tsx src/setup.ts",
+    "round": "tsx src/round.ts",
+    "close-loop": "tsx src/close-loop.ts"
   },
   "dependencies": {
     "@ai-sdk/openai-compatible": "^1.0.0",

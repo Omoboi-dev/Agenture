@@ -1,6 +1,6 @@
 import type { Address, Hex } from "viem";
 import { parseEventLogs } from "viem";
-import { publicClient, walletFromKey, withRpcRetry } from "./chain.js";
+import { publicClient, walletFromKey, withRpcRetry, waitReceipt } from "./chain.js";
 import { addresses } from "./config.js";
 import { fundAbi } from "./abis.js";
 
@@ -52,7 +52,7 @@ export async function invest(
     args: [startup, amount, revenueShareBps, pitchRef],
   });
 
-  const receipt = await publicClient.waitForTransactionReceipt({ hash: txHash });
+  const receipt = await waitReceipt(txHash);
   const logs = parseEventLogs({ abi: fundAbi, eventName: "Invested", logs: receipt.logs });
   const dealId = logs[0]?.args.dealId;
   if (dealId === undefined) throw new Error(`invest tx ${txHash} did not emit Invested`);

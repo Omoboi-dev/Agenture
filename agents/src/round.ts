@@ -54,20 +54,28 @@ async function runRound() {
         `deployed ${usdc(state.deployed)}, remaining ${usdc(remainingBase)}`,
     );
 
+    // First hear every pitch, then allocate scarce mandate to the highest-conviction
+    // deals. The judge sees its full remaining budget for each decision; ranking is what
+    // decides which deals actually get funded when the budget runs out.
+    const remainingUsdc = Number(formatUnits(remainingBase, 6));
+    const cashUsdc = Number(formatUnits(cashBase, 6));
+
+    const decisions = [];
     for (const { startup, dd } of dossiers) {
+      decisions.push({ startup, decision: await decide(judge, startup, dd, remainingUsdc, cashUsdc) });
+    }
+
+    const wants = decisions.filter((d) => d.decision.invest).sort((a, b) => b.decision.score - a.decision.score);
+    const passes = decisions.filter((d) => !d.decision.invest);
+
+    for (const { startup, decision } of passes) {
+      console.log(`  ${startup.name}: PASS (score ${decision.score}) — ${decision.rationale}`);
+    }
+
+    for (const { startup, decision } of wants) {
       const budgetBase = remainingBase < cashBase ? remainingBase : cashBase;
-      const remainingUsdc = Number(formatUnits(remainingBase, 6));
-      const cashUsdc = Number(formatUnits(cashBase, 6));
-
       if (budgetBase <= 0n) {
-        console.log(`  ${startup.name}: no budget left, skipping.`);
-        continue;
-      }
-
-      const decision = await decide(judge, startup, dd, remainingUsdc, cashUsdc);
-
-      if (!decision.invest) {
-        console.log(`  ${startup.name}: PASS — ${decision.rationale}`);
+        console.log(`  ${startup.name}: WANTED (score ${decision.score}) but no budget left`);
         continue;
       }
 
@@ -75,23 +83,21 @@ async function runRound() {
       let amountBase = parseUnits(decision.amountUsdc.toFixed(6), 6);
       if (amountBase > budgetBase) amountBase = budgetBase;
       if (amountBase <= 0n) {
-        console.log(`  ${startup.name}: PASS — nothing left to deploy`);
+        console.log(`  ${startup.name}: WANTED (score ${decision.score}) but nothing left to deploy`);
         continue;
       }
 
-      const pitchRef = `agenture:${judge.key}:${startup.name}`;
-
       if (DRY_RUN) {
         console.log(
-          `  ${startup.name}: WOULD INVEST ${usdc(amountBase)} @ ${decision.revenueShareBps}bps` +
-            `\n    ${decision.rationale}`,
+          `  ${startup.name}: WOULD INVEST ${usdc(amountBase)} @ ${decision.revenueShareBps}bps ` +
+            `(score ${decision.score})\n    ${decision.rationale}`,
         );
-        // Reflect the intended commitment so later pitches see a shrinking budget.
         remainingBase -= amountBase;
         cashBase -= amountBase;
         continue;
       }
 
+      const pitchRef = `agenture:${judge.key}:${startup.name}`;
       const { dealId, txHash } = await invest(
         judgeKey(judge),
         startup.wallet,
@@ -105,7 +111,7 @@ async function runRound() {
 
       console.log(
         `  ${startup.name}: INVEST ${usdc(amountBase)} @ ${decision.revenueShareBps}bps ` +
-          `-> deal #${dealId} (tx ${txHash})\n    ${decision.rationale}`,
+          `(score ${decision.score}) -> deal #${dealId} (tx ${txHash})\n    ${decision.rationale}`,
       );
     }
     console.log("");
