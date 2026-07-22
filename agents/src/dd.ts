@@ -1,5 +1,5 @@
 import type { Address } from "viem";
-import { publicClient } from "./chain.js";
+import { publicClient, withRpcRetry } from "./chain.js";
 import { addresses } from "./config.js";
 import { reputationAbi } from "./abis.js";
 
@@ -18,12 +18,14 @@ export async function readReputationSummary(
   tag1: string,
   tag2 = "",
 ): Promise<ReputationSummary> {
-  const [count, value, decimals] = (await publicClient.readContract({
-    address: addresses.erc8004.reputationRegistry as Address,
-    abi: reputationAbi,
-    functionName: "getSummary",
-    args: [agentId, clients, tag1, tag2],
-  })) as [bigint, bigint, number];
+  const [count, value, decimals] = (await withRpcRetry(() =>
+    publicClient.readContract({
+      address: addresses.erc8004.reputationRegistry as Address,
+      abi: reputationAbi,
+      functionName: "getSummary",
+      args: [agentId, clients, tag1, tag2],
+    }),
+  )) as [bigint, bigint, number];
 
   return { count: Number(count), value: Number(value), decimals };
 }

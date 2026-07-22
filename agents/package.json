@@ -3,7 +3,8 @@
   "private": true,
   "type": "module",
   "scripts": {
-    "typecheck": "tsc --noEmit"
+    "typecheck": "tsc --noEmit",
+    "round": "tsx src/round.ts"
   },
   "dependencies": {
     "@ai-sdk/openai-compatible": "^1.0.0",
