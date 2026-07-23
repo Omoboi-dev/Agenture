@@ -8,7 +8,7 @@ Think Shark Tank, run by AI, settled onchain in real stablecoin. Built for the E
 
 ## Status
 
-Live on Arc testnet, end to end. Judges and startups each hold a Circle Developer Controlled Wallet and sign their own onchain actions. A round runs due diligence over real ERC-8004 reputation, the judges decide with a live model, and the winners are funded onchain; the return half settles each deal's revenue share and writes the ERC-8004 feedback that the next round reads. The one part still stubbed is startup earning, which currently uses an operator transfer as a stand in for real x402. See the roadmap at the end.
+Live on Arc testnet, end to end. Judges and startups each hold a Circle Developer Controlled Wallet and sign their own onchain actions. A round runs due diligence over real ERC-8004 reputation, the judges decide with a live model, and the winners are funded onchain. Startups earn real revenue via x402 (a customer signs an EIP-3009 authorization, the operator settles it as facilitator), then the return half settles each deal's revenue share and writes the ERC-8004 feedback that the next round reads. The whole loop runs on real Circle and Arc rails.
 
 ## Repo layout
 
@@ -40,7 +40,7 @@ Operator setup (one time, when onboarding new agents):
 
 ```bash
 bun run provision-circle       # mint a Circle wallet per agent
-bun run onboard-circle         # gas fund the wallets and register judges in the Fund
+bun run onboard-circle         # gas fund agent wallets, fund the customer, register judges
 bun run setup                  # deposit capital (SKIP_DEPOSIT=1 to skip the deposit)
 ```
 
@@ -139,7 +139,8 @@ The agents are TypeScript on viem, the Vercel AI SDK, and the Circle Developer C
 - **startups.ts**: the fixture roster of startup agents, each with a Circle wallet address, walletId, an optional ERC-8004 agentId, and a pitch (idea, self reported revenue, estimated worth, ask).
 - **diligence.ts**: gathers the real onchain picture for a startup: its ERC-8004 reputation aggregated over the fund's trusted raters (current judges plus historical raters kept for continuity), and its live USDC wallet balance. This is what the judge reasons over, independent of what the pitch claims.
 - **judge.ts**: the brain. It builds a persona system prompt and a pitch plus diligence user prompt, asks the model, and coerces the result into a decision (invest, amount, revenue share bps, a conviction score, and a rationale), clamped to the judge's remaining mandate and the fund's cash. A parse failure becomes a safe pass.
-- **fund.ts / feedback.ts / revenue.ts / identity.ts**: onchain action wrappers. Agent actions (invest, settle, give feedback) sign through Circle; operator actions (pay revenue, register identity) use viem.
+- **fund.ts / feedback.ts / revenue.ts / identity.ts**: onchain action wrappers. Agent actions (invest, settle, give feedback) sign through Circle; operator actions (register identity, facilitate x402) use viem.
+- **x402.ts**: the earning rail. A customer agent's Circle wallet signs an EIP-3009 `transferWithAuthorization` off-chain (gasless), and the operator submits it onchain as the x402 facilitator, so a startup earns real USDC agent to agent.
 - **Entry points**: `round.ts` (the investment half), `close-loop.ts` (the return half), `setup.ts` and `onboard-circle.ts` (operator onboarding), `provision-circle.ts` (mint the agent wallets).
 
 ## Signing model
@@ -170,7 +171,8 @@ sequenceDiagram
   C-->>S: USDC to the startup, deal registered
 
   Note over O,C: Return half (close-loop.ts)
-  S->>S: earn revenue (x402)
+  O->>Ci: customer signs x402 payment (EIP-3009)
+  O->>C: operator settles x402, USDC to the startup
   O->>Ci: settle() as the startup wallet
   Ci->>C: cut returns to Fund, credited to the judge
   O->>Ci: giveFeedback() as the judge wallet
@@ -184,7 +186,7 @@ Step by step:
 3. **Decision.** Each judge, independently, reasons over every pitch with its own persona and returns a decision with a conviction score.
 4. **Rank then allocate.** Each judge sorts the pitches it wants by conviction and funds them in order until its mandate or the fund's cash runs out. This is why the batched arena matters: a judge compares the whole cohort before spending scarce budget, instead of committing to whoever pitched first.
 5. **Invest.** For each funded pitch the judge's Circle wallet signs `Fund.invest`. The deal is registered with RevenueShare and USDC moves to the startup.
-6. **Earn.** The startup runs its service and earns USDC. In a full deployment this is x402 revenue.
+6. **Earn.** A customer pays the startup for its service via x402: the customer's Circle wallet signs an EIP-3009 authorization and the operator settles it onchain as facilitator. The startup receives real USDC, agent to agent.
 7. **Settle.** The startup's Circle wallet calls `RevenueShare.settle`, paying the fund's cut. The rest stays with the startup.
 8. **Feedback.** The deal's judge rates the startup on ERC-8004. That score is what the next round's due diligence reads, closing the loop.
 
@@ -202,15 +204,16 @@ This beats deciding per arrival because a judge can rank the whole cohort and sp
 
 Authorization is expressed by who signs each transaction.
 
-- **Operator** (the deployer wallet, a viem EOA) is the fund admin. It deposits capital, registers judges, and, in the current earning stand in, plays the paying customer. It is the only address that can onboard judges.
+- **Operator** (the deployer wallet, a viem EOA) is the fund admin and the x402 facilitator. It deposits capital, registers judges, and submits customers' signed x402 authorizations onchain. It is the only address that can onboard judges.
 - **Judge wallets** (Circle DCW) sign their own investments and their own feedback. The Fund checks the caller is a registered active judge, so a judge cannot spend beyond its mandate and no one else can invest on its behalf.
 - **Startup wallets** (Circle DCW) sign their own settlements. RevenueShare checks the caller is the deal's startup, so only the startup can report and pay its own revenue.
+- **Customer wallet** (Circle DCW) pays startups for their services via x402. It signs EIP-3009 authorizations off-chain and never submits a transaction itself; the facilitator does that.
 
 Agent keys live inside Circle under MPC and are never exported. The operator key lives in a gitignored `.env` and is read only at signing time. Nothing signs on behalf of another role.
 
 ## Configuration and secrets
 
-- `shared/addresses.json` is the single source of truth: chain id, RPC, explorer, USDC, the ERC-8004 and ERC-8183 addresses, and the Agenture deployment (Fund, RevenueShare, operator, the Circle wallet set, and the judges with their Circle wallet address, walletId, agentId, and mandate). Both the agents and a future frontend read it.
+- `shared/addresses.json` is the single source of truth: chain id, RPC, explorer, USDC, the ERC-8004 and ERC-8183 addresses, and the Agenture deployment (Fund, RevenueShare, operator, the customer wallet, the Circle wallet set, and the judges with their Circle wallet address, walletId, agentId, and mandate). Both the agents and a future frontend read it.
 - `agents/.env` (gitignored) holds the LLM endpoint (`LLM_BASE_URL`, `LLM_API_KEY`, `LLM_MODEL`), the Circle credentials (`CIRCLE_API_KEY`, `ENTITY_SECRET`), and the operator key. `.env.example` documents every variable. Agents are driven by their Circle `walletId`, not by keys.
 
 ## Current deployed state (Arc testnet, chain id 5042002)
@@ -219,6 +222,7 @@ Agent keys live inside Circle under MPC and are never exported. The operator key
 - Fund: `0xa28Aa701E6390d477937F9F9F634840f75B84bEf`
 - RevenueShare: `0x0D9cCC9A04BB518Cbd704afA7C9394aC50ef6f7f`
 - Operator: `0x3E6AAfA597fC658cF5b7E42a9F07711785a9519E`
+- Customer (x402 payer): `0xd4d1bae70e727c9f66c3ed0efbf7bf57b46fd92f`
 - Circle wallet set: `3f824ea9-5876-52b8-ad82-ba4cfe2f8cf3`
 - ERC-8004 Identity / Reputation / Validation and the ERC-8183 job escrow: see `addresses.json`
 
@@ -242,13 +246,13 @@ Deals so far: #0 the deploy spike; #1 to #5 the first live rounds on the agents'
 
 ## What is real and what is stubbed
 
-- Real: the contracts, the mandates and deal accounting, the ERC-8004 identity and reputation reads and writes, the USDC movements, agent signing through Circle Developer Controlled Wallets, the judge decisions from a live model over live onchain data, and rank then allocate.
-- Stubbed for now: the earning step. A startup's revenue is currently a USDC transfer from the operator standing in for a customer. The seam for real x402 is in `revenue.ts`, a real deployment settles earnings with EIP-3009 transferWithAuthorization.
+- Real: the contracts, the mandates and deal accounting, the ERC-8004 identity and reputation reads and writes, the USDC movements, agent signing through Circle Developer Controlled Wallets, x402 earning via EIP-3009 `transferWithAuthorization`, the judge decisions from a live model over live onchain data, and rank then allocate.
+- Simplified for now: the customer is a single wallet paying a fixed amount per deal, standing in for a market of paying users, and a round is triggered by the operator rather than a live timer. Both are on the roadmap.
 
 ## Not yet built (roadmap)
 
-- Real x402 earning for startups, replacing the operator transfer stand in.
 - A single automated loop that runs a round and then closes it, on a timer or cron, so rounds are fully autonomous.
+- A market of customer agents paying startups via x402, replacing the single fixed customer.
 - An onchain Arena registry where startups self submit pitches, replacing the fixture roster.
 - The frontend (web/): an arena view, a fund dashboard, and an LP panel.
 - Judge to judge and portfolio level reputation, and withdrawal for LPs.
