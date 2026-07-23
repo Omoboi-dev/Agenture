@@ -6,8 +6,9 @@ import { addresses } from "./config.js";
 import { fundAbi } from "./abis.js";
 import { findStartupByWallet } from "./startups.js";
 import { findJudgeByWallet } from "./judges.js";
-import { payRevenue, settle } from "./revenue.js";
+import { settle } from "./revenue.js";
 import { giveFeedback } from "./feedback.js";
+import { payViaX402 } from "./x402.js";
 import { withRpcRetry } from "./chain.js";
 
 const FUND = addresses.agenture.fund as Address;
@@ -69,16 +70,22 @@ async function main() {
         `cut ${formatUnits(cut, 6)} USDC (${deal.revenueShareBps}bps) back to ${judge.name}.`,
     );
 
-    // 1. Customer pays the startup (stand-in for x402 revenue).
-    await payRevenue(operatorKey, deal.startup, revenue);
+    // 1. The customer pays the startup for its service via x402: the customer's Circle
+    // wallet signs an EIP-3009 authorization, the operator settles it as facilitator.
+    const customer = addresses.agenture.customer;
+    await payViaX402(customer.walletId, customer.wallet as Address, operatorKey, deal.startup, revenue);
     // 2. Startup settles the fund's cut from its own Circle wallet.
     await settle(startup.walletId, dealId, revenue);
     console.log(`  settled: ${formatUnits(cut, 6)} USDC returned to the Fund.`);
 
     // 3. Judge rates the startup on ERC-8004 (builds reputation for next round).
     if (startup.agentId !== null) {
-      await giveFeedback(judge.walletId, startup.agentId, score);
-      console.log(`  ${judge.name} rated ${startup.name} (agentId ${startup.agentId}) score ${score}.`);
+      try {
+        await giveFeedback(judge.walletId, startup.agentId, score);
+        console.log(`  ${judge.name} rated ${startup.name} (agentId ${startup.agentId}) score ${score}.`);
+      } catch (e) {
+        console.log(`  feedback skipped (${String((e as Error).message).split("\n")[0]}).`);
+      }
     } else {
       console.log(`  ${startup.name} has no ERC-8004 identity yet; skipped feedback.`);
     }
