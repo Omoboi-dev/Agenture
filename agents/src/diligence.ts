@@ -29,12 +29,21 @@ async function readUsdcBalance(wallet: Address): Promise<number> {
 // ERC-8004 getSummary requires an explicit set of raters (it reverts on an empty list).
 // Agenture trusts its own circle: the fund operator, every judge, and known historical
 // raters from earlier rounds. Reputation is aggregated over feedback from these clients.
+// Judges that gave feedback from their old EOA wallets before the Circle migration.
+// Kept here so the reputation they already wrote still shows up in getSummary.
+const HISTORICAL_RATERS = [
+  "0x7F2733B91b12bcF2cfE99E2aa2617286b93cA7de", // alpha's old EOA
+  "0xf2fD1775118E21Ea5B9507235d3556C97181a9F7", // nova's old EOA
+  "0x62050AB71Cd055cD48ed4fc2aD940606F7d63467", // sable's old EOA
+  "0xcA76529b251502130b8AAaD091c03b72F37e0008", // spike rater
+];
+
 const KNOWN_CLIENTS: Address[] = Array.from(
   new Set(
     [
       addresses.agenture.operator,
       ...addresses.agenture.judges.map((j) => j.wallet),
-      "0xcA76529b251502130b8AAaD091c03b72F37e0008", // spike rater, has prior feedback
+      ...HISTORICAL_RATERS,
     ].map((a) => a.toLowerCase()),
   ),
 ) as Address[];

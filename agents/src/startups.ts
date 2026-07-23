@@ -1,4 +1,4 @@
-import type { Address, Hex } from "viem";
+import type { Address } from "viem";
 
 // A startup agent pitching for capital. The pitch numbers are SELF-REPORTED and
 // unverified on purpose: the judge's job is to weigh these claims against the real
@@ -6,8 +6,8 @@ import type { Address, Hex } from "viem";
 // identity when it has one; null means it has no onchain reputation yet (cold start).
 export type Startup = {
   name: string;
-  wallet: Address; // where investment USDC is sent, and the deal's revenue source
-  keyEnv: string; // env var holding this startup's key (for settling revenue later)
+  wallet: Address; // the startup's Circle wallet: receives investment, signs settle()
+  walletId: string; // Circle Developer Controlled Wallet id
   agentId: bigint | null;
   pitch: {
     idea: string;
@@ -24,8 +24,8 @@ export type Startup = {
 export const startups: Startup[] = [
   {
     name: "MeshRelay",
-    wallet: "0xcA76529b251502130b8AAaD091c03b72F37e0008",
-    keyEnv: "CLIENT_PRIVATE_KEY",
+    wallet: "0xa4d99d25a286d22b5750854f670ce03b84054aba",
+    walletId: "0360c94d-a70d-5218-ab29-f31c989a9a80",
     agentId: 851590n,
     pitch: {
       idea: "An x402 relayer that batches gasless USDC payments for other agents on Arc and takes a thin fee per settled payment.",
@@ -36,8 +36,8 @@ export const startups: Startup[] = [
   },
   {
     name: "PixelForge",
-    wallet: "0x8A2cf1406e8eF32D7AeAc685303D3eeC08f48267",
-    keyEnv: "STARTUP_PIXELFORGE_PRIVATE_KEY",
+    wallet: "0x043ce85e81adfb6adaead53351cd3db20891e964",
+    walletId: "e7a3de7c-49b4-5de1-9fc8-0475d0d27a7a",
     agentId: 851661n,
     pitch: {
       idea: "A generative image agent that sells renders to other agents. Pre-revenue but claims a large addressable market.",
@@ -48,8 +48,8 @@ export const startups: Startup[] = [
   },
   {
     name: "DataOracle",
-    wallet: "0xC686ba6A5A41312Fd87414b707d1d04b4CeA6593",
-    keyEnv: "STARTUP_DATAORACLE_PRIVATE_KEY",
+    wallet: "0xa447673b7a01dbb90272fcb5e3d775a0e58d7bc0",
+    walletId: "9244cac6-a947-5eef-b420-239e0392356e",
     agentId: 851662n,
     pitch: {
       idea: "A price and event data feed for trading agents, charging per query over x402. Some early paying users, no onchain record yet.",
@@ -63,12 +63,4 @@ export const startups: Startup[] = [
 export function findStartupByWallet(wallet: Address): Startup | undefined {
   const w = wallet.toLowerCase();
   return startups.find((s) => s.wallet.toLowerCase() === w);
-}
-
-// A startup's key, read from the environment only when it needs to sign (settling
-// revenue). Throws a clear error if it is missing.
-export function startupKey(s: Startup): Hex {
-  const raw = process.env[s.keyEnv];
-  if (!raw) throw new Error(`missing ${s.keyEnv} in environment for startup ${s.name}`);
-  return (raw.startsWith("0x") ? raw : `0x${raw}`) as Hex;
 }

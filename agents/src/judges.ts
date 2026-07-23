@@ -43,7 +43,8 @@ const personas: Record<string, JudgePersona> = {
 };
 
 export type Judge = JudgePersona & {
-  wallet: Address;
+  wallet: Address; // the judge's Circle wallet address (what it signs from)
+  walletId: string; // Circle Developer Controlled Wallet id
   agentId: bigint;
   mandate: bigint; // base units (6dp)
 };
@@ -58,6 +59,7 @@ export function loadJudges(): Judge[] {
     out.push({
       ...persona,
       wallet: entry.wallet as Address,
+      walletId: entry.walletId,
       agentId: BigInt(entry.agentId),
       mandate: BigInt(entry.mandate),
     });

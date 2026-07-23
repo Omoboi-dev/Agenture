@@ -1,6 +1,6 @@
 import "dotenv/config";
 import { formatUnits, parseUnits } from "viem";
-import { loadJudges, judgeKey } from "./judges.js";
+import { loadJudges } from "./judges.js";
 import { startups } from "./startups.js";
 import { gatherDiligence } from "./diligence.js";
 import { decide } from "./judge.js";
@@ -99,7 +99,7 @@ async function runRound() {
 
       const pitchRef = `agenture:${judge.key}:${startup.name}`;
       const { dealId, txHash } = await invest(
-        judgeKey(judge),
+        judge.walletId,
         startup.wallet,
         amountBase,
         decision.revenueShareBps,

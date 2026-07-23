@@ -4,8 +4,8 @@ import { formatUnits, parseUnits } from "viem";
 import { publicClient } from "./chain.js";
 import { addresses } from "./config.js";
 import { fundAbi } from "./abis.js";
-import { findStartupByWallet, startupKey } from "./startups.js";
-import { findJudgeByWallet, judgeKey } from "./judges.js";
+import { findStartupByWallet } from "./startups.js";
+import { findJudgeByWallet } from "./judges.js";
 import { payRevenue, settle } from "./revenue.js";
 import { giveFeedback } from "./feedback.js";
 import { withRpcRetry } from "./chain.js";
@@ -71,13 +71,13 @@ async function main() {
 
     // 1. Customer pays the startup (stand-in for x402 revenue).
     await payRevenue(operatorKey, deal.startup, revenue);
-    // 2. Startup settles the fund's cut.
-    await settle(startupKey(startup), dealId, revenue);
+    // 2. Startup settles the fund's cut from its own Circle wallet.
+    await settle(startup.walletId, dealId, revenue);
     console.log(`  settled: ${formatUnits(cut, 6)} USDC returned to the Fund.`);
 
     // 3. Judge rates the startup on ERC-8004 (builds reputation for next round).
     if (startup.agentId !== null) {
-      await giveFeedback(judgeKey(judge), startup.agentId, score);
+      await giveFeedback(judge.walletId, startup.agentId, score);
       console.log(`  ${judge.name} rated ${startup.name} (agentId ${startup.agentId}) score ${score}.`);
     } else {
       console.log(`  ${startup.name} has no ERC-8004 identity yet; skipped feedback.`);

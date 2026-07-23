@@ -1,8 +1,9 @@
 import type { Address, Hex } from "viem";
 import { parseEventLogs } from "viem";
-import { publicClient, walletFromKey, withRpcRetry, waitReceipt } from "./chain.js";
+import { publicClient, withRpcRetry, waitReceipt } from "./chain.js";
 import { addresses } from "./config.js";
 import { fundAbi } from "./abis.js";
+import { circleExecute } from "./circle.js";
 
 const FUND = addresses.agenture.fund as Address;
 
@@ -35,22 +36,22 @@ export async function fundCash(): Promise<bigint> {
   )) as bigint;
 }
 
-// Send an investment from the judge's own wallet and read the dealId back out of the
-// Invested event. The judge authorizes its own decision onchain by signing this tx.
+// Send an investment from the judge's own Circle wallet and read the dealId back out of
+// the Invested event. The judge authorizes its own decision onchain by signing this tx
+// through Circle; we then read the receipt with viem to pull the dealId.
 export async function invest(
-  judgeKey: Hex,
+  judgeWalletId: string,
   startup: Address,
   amount: bigint,
   revenueShareBps: number,
   pitchRef: string,
 ): Promise<{ dealId: bigint; txHash: Hex }> {
-  const wallet = walletFromKey(judgeKey);
-  const txHash = await wallet.writeContract({
-    address: FUND,
-    abi: fundAbi,
-    functionName: "invest",
-    args: [startup, amount, revenueShareBps, pitchRef],
-  });
+  const txHash = await circleExecute(judgeWalletId, FUND, "invest(address,uint256,uint16,string)", [
+    startup,
+    amount.toString(),
+    revenueShareBps.toString(),
+    pitchRef,
+  ]);
 
   const receipt = await waitReceipt(txHash);
   const logs = parseEventLogs({ abi: fundAbi, eventName: "Invested", logs: receipt.logs });
