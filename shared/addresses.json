@@ -14,22 +14,32 @@
     "fund": "0xa28Aa701E6390d477937F9F9F634840f75B84bEf",
     "revenueShare": "0x0D9cCC9A04BB518Cbd704afA7C9394aC50ef6f7f",
     "operator": "0x3E6AAfA597fC658cF5b7E42a9F07711785a9519E",
+    "circle": {
+      "walletSetId": "3f824ea9-5876-52b8-ad82-ba4cfe2f8cf3",
+      "blockchain": "ARC-TESTNET"
+    },
     "judges": [
       {
         "name": "alpha",
-        "wallet": "0x7F2733B91b12bcF2cfE99E2aa2617286b93cA7de",
+        "wallet": "0x92e4c32549c34ee2191057d8d6d8fd4399770172",
+        "walletId": "064d94e1-e312-5412-afc6-b8b32456360f",
+        "eoaWallet": "0x7F2733B91b12bcF2cfE99E2aa2617286b93cA7de",
         "agentId": 851598,
         "mandate": "6000000"
       },
       {
         "name": "nova",
-        "wallet": "0xf2fD1775118E21Ea5B9507235d3556C97181a9F7",
+        "wallet": "0xf291bef691d954807327b0d8cba06536d6af9490",
+        "walletId": "d8e7aefc-d29b-5d50-ac4a-0dfc306dd07b",
+        "eoaWallet": "0xf2fD1775118E21Ea5B9507235d3556C97181a9F7",
         "agentId": 851659,
         "mandate": "6000000"
       },
       {
         "name": "sable",
-        "wallet": "0x62050AB71Cd055cD48ed4fc2aD940606F7d63467",
+        "wallet": "0xb6f5a90894463660da0ea4dba71b2b2077cf1281",
+        "walletId": "86f85201-279a-50b1-940b-4677af9754df",
+        "eoaWallet": "0x62050AB71Cd055cD48ed4fc2aD940606F7d63467",
         "agentId": 851660,
         "mandate": "6000000"
       }
