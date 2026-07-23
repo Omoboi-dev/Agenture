@@ -53,6 +53,20 @@ async function main() {
     await sleep(1500);
   }
 
+  // 1b. Fund the customer (market) wallet with USDC so it can pay startups via x402.
+  const customer = addresses.agenture.customer;
+  const customerFund = parseUnits(process.env.CUSTOMER_USDC ?? "10", 6);
+  if ((await balanceOf(customer.wallet as Address)) >= customerFund) {
+    console.log("customer: already funded, skipping.");
+  } else {
+    const h = await withRpcRetry(() =>
+      op.writeContract({ address: USDC, abi: erc20Abi, functionName: "transfer", args: [customer.wallet as Address, customerFund] }),
+    );
+    await waitReceipt(h);
+    console.log(`customer: sent ${formatUnits(customerFund, 6)} USDC -> ${customer.wallet}`);
+    await sleep(1500);
+  }
+
   // 2. Register judges in the Fund at their Circle addresses.
   for (const j of judges) {
     if ((await getJudgeState(j.wallet)).active) {

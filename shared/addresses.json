@@ -14,6 +14,11 @@
     "fund": "0xa28Aa701E6390d477937F9F9F634840f75B84bEf",
     "revenueShare": "0x0D9cCC9A04BB518Cbd704afA7C9394aC50ef6f7f",
     "operator": "0x3E6AAfA597fC658cF5b7E42a9F07711785a9519E",
+    "customer": {
+      "name": "market",
+      "wallet": "0xd4d1bae70e727c9f66c3ed0efbf7bf57b46fd92f",
+      "walletId": "565eae4e-5069-597f-90d1-f75a9c857f68"
+    },
     "circle": {
       "walletSetId": "3f824ea9-5876-52b8-ad82-ba4cfe2f8cf3",
       "blockchain": "ARC-TESTNET"
