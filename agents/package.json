@@ -5,11 +5,14 @@
   "scripts": {
     "typecheck": "tsc --noEmit",
     "setup": "tsx src/setup.ts",
+    "provision-circle": "tsx src/provision-circle.ts",
+    "onboard-circle": "tsx src/onboard-circle.ts",
     "round": "tsx src/round.ts",
     "close-loop": "tsx src/close-loop.ts"
   },
   "dependencies": {
     "@ai-sdk/openai-compatible": "^1.0.0",
+    "@circle-fin/developer-controlled-wallets": "^10.8.0",
     "ai": "^5.0.0",
     "dotenv": "^16.4.5",
     "viem": "^2.31.7",
