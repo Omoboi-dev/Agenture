@@ -10,14 +10,16 @@ Think Shark Tank, run by AI, settled onchain in real stablecoin. Built for the E
 
 Live on Arc testnet, end to end. Judges and startups each hold a Circle Developer Controlled Wallet and sign their own onchain actions. A round runs due diligence over real ERC-8004 reputation, the judges decide with a live model, and the winners are funded onchain. Startups earn real revenue via x402 (a customer signs an EIP-3009 authorization, the operator settles it as facilitator), then the return half settles each deal's revenue share and writes the ERC-8004 feedback that the next round reads. The whole loop runs on real Circle and Arc rails.
 
+The frontend reads Arc live and is partly built: the fund dashboard, the arena and the round archive are in, the judge and startup rosters and the LP panel are not.
+
 ## Repo layout
 
 ```
 agenture/
   contracts/   Foundry: Fund, RevenueShare, tests
   agents/      TypeScript: judges, startups, orchestrator, due diligence, Circle signing
-  web/         React + Vite frontend (planned: Arena, Fund dashboard, LP panel)
-  shared/      addresses.json (chain + deployed contracts + agent wallets)
+  web/         React + Vite frontend: fund dashboard, arena, round archive
+  shared/      addresses.json (chain + contracts + agent wallets), rounds.json (round archive)
 ```
 
 ## Running
@@ -44,12 +46,25 @@ bun run onboard-circle         # gas fund agent wallets, fund the customer, regi
 bun run setup                  # deposit capital (SKIP_DEPOSIT=1 to skip the deposit)
 ```
 
+Every round appends its record to `shared/rounds.json`: the diligence each startup was judged on, and each judge's verdict, conviction, rationale and resulting deal. A judge's reasoning is prose and only its conclusion lands onchain, so this file is the only place the deliberation survives. The frontend reads it alongside live Arc state.
+
 ### Contracts
 
 ```bash
 cd contracts
 forge test                     # unit tests for Fund and RevenueShare
 ```
+
+### Frontend
+
+```bash
+cd web
+bun install
+bun run dev                    # http://localhost:5173
+bun run build                  # type check and build
+```
+
+Read only: it reads Arc through a fallback across four public RPC providers and polls every 60 seconds. `VITE_ARC_RPC` prepends your own node.
 
 ## Network
 
@@ -190,6 +205,8 @@ Step by step:
 7. **Settle.** The startup's Circle wallet calls `RevenueShare.settle`, paying the fund's cut. The rest stays with the startup.
 8. **Feedback.** The deal's judge rates the startup on ERC-8004. That score is what the next round's due diligence reads, closing the loop.
 
+A judge whose mandate is already spent is skipped rather than asked: prompting it with a zero budget only produces a pass that reads like a rejection it never made. Those are recorded as abstentions.
+
 ## The arena model
 
 Agenture uses continuous intake with periodic closing rounds.
@@ -254,5 +271,5 @@ Deals so far: #0 the deploy spike; #1 to #5 the first live rounds on the agents'
 - A single automated loop that runs a round and then closes it, on a timer or cron, so rounds are fully autonomous.
 - A market of customer agents paying startups via x402, replacing the single fixed customer.
 - An onchain Arena registry where startups self submit pitches, replacing the fixture roster.
-- The frontend (web/): an arena view, a fund dashboard, and an LP panel.
+- The rest of the frontend: judge and startup rosters, the LP panel, and detail pages.
 - Judge to judge and portfolio level reputation, and withdrawal for LPs.
