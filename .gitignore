@@ -15,5 +15,8 @@ contracts/out/
 contracts/cache/
 contracts/broadcast/
 
+# design reference only, deleted once the frontend is done
+stitch_agenture_arena/
+
 # misc
 .DS_Store
