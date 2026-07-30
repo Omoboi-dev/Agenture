@@ -1,0 +1,93 @@
+@import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=JetBrains+Mono:wght@400;500;600&display=swap');
+@import 'tailwindcss';
+
+/* Institutional Intelligence: modern institutional, deep cobalt on warm-dark, soft
+   rounded, subtle depth, Inter chrome + JetBrains Mono data. */
+@theme {
+  --font-sans: 'Inter', ui-sans-serif, system-ui, sans-serif;
+  --font-mono: 'JetBrains Mono', ui-monospace, monospace;
+
+  --color-bg: #0b0e14;
+  --color-surface: #10131a;
+  --color-surface-2: #191c22;
+  --color-surface-3: #1d2026;
+  --color-surface-4: #272a31;
+  --color-line: #262a33;
+  --color-line-bright: #363a44;
+
+  --color-ink: #e1e2eb;
+  --color-subtle: #c5c5d3;
+  --color-muted: #8f909d;
+  --color-faint: #5f616c;
+
+  --color-primary: #b6c4ff;
+  --color-primary-deep: #2947a3;
+  --color-on-primary: #05297a;
+
+  --color-gain: #74dca6;
+  --color-loss: #ff9a90;
+  --color-caution: #ffce85;
+
+  --radius-sm: 4px;
+  --radius-md: 8px;
+  --radius-lg: 12px;
+  --radius-xl: 16px;
+}
+
+@layer base {
+  html {
+    background-color: var(--color-bg);
+    color-scheme: dark;
+  }
+  body {
+    margin: 0;
+    background-color: var(--color-bg);
+    color: var(--color-ink);
+    font-family: var(--font-sans);
+    -webkit-font-smoothing: antialiased;
+    text-rendering: optimizeLegibility;
+  }
+  /* USDC amounts, addresses, deltas and timers read as aligned instrument data. */
+  .tnum {
+    font-family: var(--font-mono);
+    font-variant-numeric: tabular-nums;
+    font-feature-settings: 'tnum' 1;
+  }
+  ::selection {
+    background: color-mix(in srgb, var(--color-primary) 35%, transparent);
+    color: #fff;
+  }
+  * {
+    scrollbar-width: thin;
+    scrollbar-color: var(--color-line-bright) transparent;
+  }
+}
+
+@layer components {
+  /* Uppercase Inter label, the institutional metadata voice. */
+  .eyebrow {
+    font-family: var(--font-sans);
+    font-size: 11px;
+    font-weight: 600;
+    letter-spacing: 0.08em;
+    text-transform: uppercase;
+    color: var(--color-muted);
+  }
+  /* AI judge quote: cobalt left-border with a faint cobalt wash. */
+  .rationale {
+    border-left: 2px solid color-mix(in srgb, var(--color-primary) 70%, transparent);
+    background: color-mix(in srgb, var(--color-primary) 6%, transparent);
+  }
+  /* Sticky header / nav glass. */
+  .glass {
+    background: color-mix(in srgb, var(--color-surface) 80%, transparent);
+    backdrop-filter: blur(12px);
+  }
+  @keyframes pulse-dot {
+    0%, 100% { opacity: 1; }
+    50% { opacity: 0.35; }
+  }
+  .pulse {
+    animation: pulse-dot 1.8s ease-in-out infinite;
+  }
+}
