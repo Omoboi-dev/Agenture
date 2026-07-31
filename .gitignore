@@ -18,5 +18,8 @@ contracts/broadcast/
 # design reference only, deleted once the frontend is done
 stitch_agenture_arena/
 
+# private planning notes, kept local
+project.md
+
 # misc
 .DS_Store
