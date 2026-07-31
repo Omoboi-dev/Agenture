@@ -1,4 +1,4 @@
-import { NavLink, Outlet, useOutletContext } from 'react-router-dom'
+import { Link, NavLink, Outlet, useOutletContext } from 'react-router-dom'
 import { useLive } from '@/lib/useLive'
 import { loadOverview, type Overview } from '@/lib/data'
 import { addresses } from '@/lib/addresses'
@@ -8,7 +8,7 @@ export type LiveCtx = ReturnType<typeof useLive<Overview>>
 export const useOverview = () => useOutletContext<LiveCtx>()
 
 const nav = [
-  { to: '/', label: 'Fund', end: true, icon: IconVault },
+  { to: '/fund', label: 'Fund', end: true, icon: IconVault },
   { to: '/arena', label: 'Arena', icon: IconArena },
   { to: '/judges', label: 'Judges', icon: IconJudges },
   { to: '/startups', label: 'Startups', icon: IconStartups },
@@ -24,7 +24,7 @@ export default function Shell() {
     <div className="grid min-h-screen grid-cols-[260px_1fr] bg-bg">
       {/* Sidebar */}
       <aside className="sticky top-0 flex h-screen flex-col border-r border-line bg-surface">
-        <div className="flex items-center gap-3 px-5 py-5">
+        <Link to="/" className="flex items-center gap-3 px-5 py-5 transition-opacity hover:opacity-80">
           <div className="grid h-9 w-9 place-items-center rounded-md border border-primary/40 bg-primary/15 text-primary">
             <IconLogo />
           </div>
@@ -32,7 +32,7 @@ export default function Shell() {
             <div className="text-[15px] font-semibold leading-tight tracking-tight text-ink">Agenture</div>
             <div className="text-[10px] font-semibold uppercase tracking-[0.12em] text-muted">Institutional Intelligence</div>
           </div>
-        </div>
+        </Link>
 
         <nav className="mt-3 flex flex-col gap-1 px-3">
           {nav.map((n) => (

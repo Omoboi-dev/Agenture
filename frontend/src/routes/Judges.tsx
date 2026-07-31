@@ -1,3 +1,4 @@
+import { Link } from 'react-router-dom'
 import { useOverview } from '@/components/Shell'
 import { Card, CardHeader, Pill, Meter, AddressChip, Rationale } from '@/components/ui'
 import { PageTitle, LoadingState, Empty } from '@/routes/Dashboard'
@@ -71,7 +72,12 @@ function JudgeCard({ j, data }: { j: JudgeRow; data: Overview }) {
             {j.name.slice(0, 2)}
           </span>
           <div>
-            <h2 className="text-[19px] font-semibold capitalize leading-tight tracking-tight text-ink">{j.name}</h2>
+            <Link
+              to={`/judges/${j.name.toLowerCase()}`}
+              className="text-[19px] font-semibold capitalize leading-tight tracking-tight text-ink transition-colors hover:text-primary"
+            >
+              {j.name}
+            </Link>
             <div className="eyebrow mt-1">{j.label}</div>
           </div>
         </div>

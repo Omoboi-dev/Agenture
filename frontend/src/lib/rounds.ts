@@ -56,6 +56,28 @@ export function dossierFor(round: RoundLog, startup: string): Dossier | undefine
   return round.dossiers.find((d) => d.name === startup)
 }
 
+/** Every verdict matching a startup and/or judge, newest round first, with its round. */
+export function verdictHistory(filter: { startup?: string; judge?: string }): { round: RoundLog; verdict: Verdict }[] {
+  const out: { round: RoundLog; verdict: Verdict }[] = []
+  for (const round of rounds) {
+    for (const verdict of round.verdicts) {
+      if (filter.startup && verdict.startup !== filter.startup) continue
+      if (filter.judge && verdict.judge !== filter.judge) continue
+      out.push({ round, verdict })
+    }
+  }
+  return out
+}
+
+/** The most recent diligence snapshot recorded for a startup. */
+export function latestDossier(startup: string): Dossier | undefined {
+  for (const round of rounds) {
+    const d = round.dossiers.find((x) => x.name === startup)
+    if (d) return d
+  }
+  return undefined
+}
+
 /** Total USDC a round actually deployed. */
 export function roundAllocated(round: RoundLog): number {
   return round.verdicts.reduce((a, v) => a + (v.outcome === 'committed' ? v.allocatedUsdc : 0), 0)

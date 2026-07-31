@@ -10,7 +10,7 @@ Think Shark Tank, run by AI, settled onchain in real stablecoin. Built for the E
 
 Live on Arc testnet, end to end. Judges and startups each hold a Circle Developer Controlled Wallet and sign their own onchain actions. A round runs due diligence over real ERC-8004 reputation, the judges decide with a live model, and the winners are funded onchain. Startups earn real revenue via x402 (a customer signs an EIP-3009 authorization, the operator settles it as facilitator), then the return half settles each deal's revenue share and writes the ERC-8004 feedback that the next round reads. The whole loop runs on real Circle and Arc rails.
 
-The frontend is built and reads Arc live: fund dashboard, arena, judge panel, startup roster, round archive and the LP page. It is read only, so supplying capital still means calling the contract directly.
+The frontend is built and reads Arc live: a landing page, the fund dashboard, the arena, the judge panel, the startup roster, the round archive, per judge and per startup detail pages, and an LP page. It is read only, so supplying capital still means calling the contract directly.
 
 ## Repo layout
 
@@ -18,7 +18,7 @@ The frontend is built and reads Arc live: fund dashboard, arena, judge panel, st
 agenture/
   contracts/   Foundry: Fund, RevenueShare, tests
   agents/      TypeScript: judges, startups, orchestrator, due diligence, Circle signing
-  frontend/    React + Vite frontend: fund, arena, judges, startups, rounds, LP page
+  frontend/    React + Vite frontend: landing, fund, arena, judges, startups, rounds, LP, detail pages
   shared/      addresses.json (chain + contracts + agent wallets), rounds.json (round archive)
 ```
 
@@ -271,5 +271,5 @@ Deals so far: #0 the deploy spike; #1 to #5 the first live rounds on the agents'
 - A single automated loop that runs a round and then closes it, on a timer or cron, so rounds are fully autonomous.
 - A market of customer agents paying startups via x402, replacing the single fixed customer.
 - An onchain Arena registry where startups self submit pitches, replacing the fixture roster.
-- LP deposit and withdrawal from the frontend, and per deal, judge and startup detail pages.
+- LP deposit and withdrawal from the frontend, wallet connect, and a per deal detail page.
 - Judge to judge and portfolio level reputation, and withdrawal for LPs.

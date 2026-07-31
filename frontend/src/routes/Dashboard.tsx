@@ -1,3 +1,4 @@
+import { Link } from 'react-router-dom'
 import { useOverview } from '@/components/Shell'
 import { Card, CardHeader, StatTile, Pill, Meter, Eyebrow, Dot } from '@/components/ui'
 import { AreaChart, Donut, type DonutSeg } from '@/components/charts'
@@ -130,7 +131,9 @@ function PortfolioRow({ d, color }: { d: DealRow; color: string }) {
           <span className="tnum grid h-7 w-7 place-items-center rounded-md border border-line bg-surface-4 text-[10px] font-semibold text-subtle">
             {initials(d.startupName)}
           </span>
-          <span className="font-medium text-ink">{d.startupName}</span>
+          <Link to={`/startups/${d.startupName.toLowerCase()}`} className="font-medium text-ink transition-colors hover:text-primary">
+            {d.startupName}
+          </Link>
         </div>
       </td>
       <td className="px-3 py-3">

@@ -1,3 +1,4 @@
+import { Link } from 'react-router-dom'
 import { useOverview } from '@/components/Shell'
 import { Card, Chip, Meter, ReputationRing, AddressChip } from '@/components/ui'
 import { PageTitle, LoadingState } from '@/routes/Dashboard'
@@ -75,7 +76,12 @@ function StartupCard({ s, data }: { s: StartupRow; data: Overview }) {
             {s.name.slice(0, 2).toUpperCase()}
           </span>
           <div className="min-w-0">
-            <h2 className="truncate text-[19px] font-semibold leading-tight tracking-tight text-ink">{s.name}</h2>
+            <Link
+              to={`/startups/${s.name.toLowerCase()}`}
+              className="truncate text-[19px] font-semibold leading-tight tracking-tight text-ink transition-colors hover:text-primary"
+            >
+              {s.name}
+            </Link>
             <div className="mt-1 flex items-center gap-2">
               {deals.length > 0 ? <Chip tone="gain">Funded</Chip> : <Chip tone="neutral">Pitching</Chip>}
               {!s.reputation && <Chip tone="caution">Cold start</Chip>}
