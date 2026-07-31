@@ -12,6 +12,6 @@ export default defineConfig({
       '@shared': fileURLToPath(new URL('../shared', import.meta.url)),
     },
   },
-  // Let Vite read shared/addresses.json, which lives outside web/.
+  // Let Vite read shared/addresses.json, which lives outside frontend/.
   server: { fs: { allow: ['..'] } },
 })
