@@ -8,7 +8,8 @@
     "provision-circle": "tsx src/provision-circle.ts",
     "onboard-circle": "tsx src/onboard-circle.ts",
     "round": "tsx src/round.ts",
-    "close-loop": "tsx src/close-loop.ts"
+    "close-loop": "tsx src/close-loop.ts",
+    "recapitalize": "tsx src/recapitalize.ts"
   },
   "dependencies": {
     "@ai-sdk/openai-compatible": "^1.0.0",

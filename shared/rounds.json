@@ -173,6 +173,180 @@
           "txHash": null
         }
       ]
+    },
+    {
+      "id": 2,
+      "startedAt": "2026-07-31T19:08:32.004Z",
+      "endedAt": "2026-07-31T19:09:33.153Z",
+      "dryRun": false,
+      "cashBeforeUsdc": 25.6,
+      "cashAfterUsdc": 3.6,
+      "dossiers": [
+        {
+          "name": "MeshRelay",
+          "wallet": "0xa4d99d25a286d22b5750854f670ce03b84054aba",
+          "agentId": 851590,
+          "reputation": {
+            "count": 6,
+            "value": 83
+          },
+          "usdcBalance": 12.434748,
+          "pitch": {
+            "idea": "An x402 relayer that batches gasless USDC payments for other agents on Arc and takes a thin fee per settled payment.",
+            "monthlyRevenueUsdc": 1200,
+            "estimatedWorthUsdc": 40000,
+            "askUsdc": 3
+          }
+        },
+        {
+          "name": "PixelForge",
+          "wallet": "0x043ce85e81adfb6adaead53351cd3db20891e964",
+          "agentId": 851661,
+          "reputation": {
+            "count": 4,
+            "value": 82
+          },
+          "usdcBalance": 10.695039,
+          "pitch": {
+            "idea": "A generative image agent that sells renders to other agents. Pre-revenue but claims a large addressable market.",
+            "monthlyRevenueUsdc": 0,
+            "estimatedWorthUsdc": 250000,
+            "askUsdc": 5
+          }
+        },
+        {
+          "name": "DataOracle",
+          "wallet": "0xa447673b7a01dbb90272fcb5e3d775a0e58d7bc0",
+          "agentId": 851662,
+          "reputation": null,
+          "usdcBalance": 0.7,
+          "pitch": {
+            "idea": "A price and event data feed for trading agents, charging per query over x402. Some early paying users, no onchain record yet.",
+            "monthlyRevenueUsdc": 300,
+            "estimatedWorthUsdc": 15000,
+            "askUsdc": 2
+          }
+        }
+      ],
+      "verdicts": [
+        {
+          "judge": "alpha",
+          "startup": "MeshRelay",
+          "invest": true,
+          "score": 90,
+          "rationale": "MeshRelay offers a unique solution by batching gasless USDC payments, which could significantly reduce transaction costs for agents using Arc. The verified reputation and live wallet balance indicate reliability. With a modest ask and potential for high growth, this investment aligns well within my mandate.",
+          "requestedUsdc": 3,
+          "revenueShareBps": 500,
+          "outcome": "committed",
+          "allocatedUsdc": 3,
+          "dealId": 10,
+          "txHash": "0x7c421018d398ed6869a1b3081106eaa0544f1c82d0f0ccedf0ccfd6e43a756d5"
+        },
+        {
+          "judge": "alpha",
+          "startup": "PixelForge",
+          "invest": true,
+          "score": 70,
+          "rationale": "PixelForge shows potential despite being pre-revenue, with a strong reputation and live wallet balance indicating active engagement. The market size claim seems ambitious but could be promising.",
+          "requestedUsdc": 5,
+          "revenueShareBps": 500,
+          "outcome": "committed",
+          "allocatedUsdc": 5,
+          "dealId": 11,
+          "txHash": "0xda554267eab1e35098dfc436b183b6f075c2897e2c8de8b12244a53c0c41629c"
+        },
+        {
+          "judge": "alpha",
+          "startup": "DataOracle",
+          "invest": true,
+          "score": 60,
+          "rationale": "DataOracle shows promise with early paying users and potential for growth in trading agent market. Cold start, but with visible traction and reasonable ask.",
+          "requestedUsdc": 1,
+          "revenueShareBps": 500,
+          "outcome": "committed",
+          "allocatedUsdc": 1,
+          "dealId": 12,
+          "txHash": "0x7456a602e4a524e7cf787a38428c1882e68c1235adae7bdc5e1738857e9a6096"
+        },
+        {
+          "judge": "nova",
+          "startup": "MeshRelay",
+          "invest": true,
+          "score": 90,
+          "rationale": "MeshRelay offers a unique solution by batching gasless USDC payments, which could significantly reduce transaction costs for other agents on Arc. The fee structure suggests scalability potential, and the verified reputation indicates reliability. Given the low ask and the potential for high impact, I am willing to take on some risk.",
+          "requestedUsdc": 3,
+          "revenueShareBps": 500,
+          "outcome": "committed",
+          "allocatedUsdc": 3,
+          "dealId": 13,
+          "txHash": "0xb59c4ca35cad5af2da956b6b3fc8c948e8de8fc0ffd1e80ac463bc94514b2906"
+        },
+        {
+          "judge": "nova",
+          "startup": "PixelForge",
+          "invest": true,
+          "score": 85,
+          "rationale": "PixelForge has a promising concept with a large addressable market despite being pre-revenue. The founder's reputation and live wallet balance indicate potential execution capability.",
+          "requestedUsdc": 5,
+          "revenueShareBps": 750,
+          "outcome": "committed",
+          "allocatedUsdc": 5,
+          "dealId": 14,
+          "txHash": "0xe72471e9f689c89529167f65a46a3f7193e8b1351e57586977957e7c3b2f855a"
+        },
+        {
+          "judge": "nova",
+          "startup": "DataOracle",
+          "invest": true,
+          "score": 60,
+          "rationale": "DataOracle shows potential with early paying users and a promising market opportunity. The cold start is mitigated by the low ask and manageable risk given the small investment.",
+          "requestedUsdc": 2,
+          "revenueShareBps": 500,
+          "outcome": "committed",
+          "allocatedUsdc": 2,
+          "dealId": 15,
+          "txHash": "0xa00ed61196cda6f0343329bbd3f4490c5f5a7b13140da5dbb12ec3e10ae7a51d"
+        },
+        {
+          "judge": "sable",
+          "startup": "PixelForge",
+          "invest": false,
+          "score": 0,
+          "rationale": "Pre-revenue status and lack of verified revenue make this investment too risky.",
+          "requestedUsdc": 0,
+          "revenueShareBps": 0,
+          "outcome": "passed",
+          "allocatedUsdc": 0,
+          "dealId": null,
+          "txHash": null
+        },
+        {
+          "judge": "sable",
+          "startup": "DataOracle",
+          "invest": false,
+          "score": 0,
+          "rationale": "No onchain reputation, cold start, and no verified revenue.",
+          "requestedUsdc": 0,
+          "revenueShareBps": 0,
+          "outcome": "passed",
+          "allocatedUsdc": 0,
+          "dealId": null,
+          "txHash": null
+        },
+        {
+          "judge": "sable",
+          "startup": "MeshRelay",
+          "invest": true,
+          "score": 90,
+          "rationale": "MeshRelay has demonstrated consistent revenue growth and a strong onchain reputation. The low ask aligns well with my investment criteria.",
+          "requestedUsdc": 3,
+          "revenueShareBps": 500,
+          "outcome": "committed",
+          "allocatedUsdc": 3,
+          "dealId": 16,
+          "txHash": "0x0a4f3b75984cc097693fa5e209da2dfee262be1d510505cfee1ad50c8f43c5ca"
+        }
+      ]
     }
   ]
 }

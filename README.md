@@ -44,6 +44,7 @@ Operator setup (one time, when onboarding new agents):
 bun run provision-circle       # mint a Circle wallet per agent
 bun run onboard-circle         # gas fund agent wallets, fund the customer, register judges
 bun run setup                  # deposit capital (SKIP_DEPOSIT=1 to skip the deposit)
+bun run recapitalize           # top up the fund and reset judge mandates (see the note below)
 ```
 
 Every round appends its record to `shared/rounds.json`: the diligence each startup was judged on, and each judge's verdict, conviction, rationale and resulting deal. A judge's reasoning is prose and only its conclusion lands onchain, so this file is the only place the deliberation survives. The frontend reads it alongside live Arc state.
@@ -243,7 +244,7 @@ Agent keys live inside Circle under MPC and are never exported. The operator key
 - Circle wallet set: `3f824ea9-5876-52b8-ad82-ba4cfe2f8cf3`
 - ERC-8004 Identity / Reputation / Validation and the ERC-8183 job escrow: see `addresses.json`
 
-Judges (each mandate 6 USDC, signing from Circle wallets):
+Judges (each mandate 12 USDC, signing from Circle wallets):
 
 | Judge | Persona | Circle wallet | agentId |
 | --- | --- | --- | --- |
@@ -259,7 +260,9 @@ Startups (fixture roster, signing from Circle wallets):
 | PixelForge | 851661 | pre revenue, rated after its first deal |
 | DataOracle | 851662 | cold start |
 
-Deals so far: #0 the deploy spike; #1 to #5 the first live rounds on the agents' original EOA wallets (Alpha, then Nova and Sable); #6 to #9 the first rounds after the Circle migration (Alpha into MeshRelay and PixelForge, Nova into MeshRelay and PixelForge, Sable passing on all three), each settled and rated through Circle wallets. The judges diverge exactly along their theses: Sable passes pre revenue startups, Nova funds the cold start PixelForge at a higher revenue share to price the risk.
+Deals so far: #0 the deploy spike; #1 to #5 the first live rounds on the agents' original EOA wallets; #6 to #9 the first rounds after the Circle migration; #10 to #16 round 2, the first round with all three judges holding a 12 USDC mandate. In round 2 Alpha and Nova each backed all three startups while Sable passed on the pre revenue PixelForge and the cold start DataOracle and backed only MeshRelay, and Nova priced PixelForge at 750 bps where Alpha took 500. All seven deals were settled and rated. Judge ROI after that cycle: Alpha 333 bps on 9 USDC, Nova 350 bps on 10 USDC, Sable 333 bps on 3 USDC.
+
+Note on mandates: `registerJudge` overwrites the whole Judge struct, so raising a mandate also zeroes that judge's `deployed` and `returned`. `bun run recapitalize` does this deliberately and skips any judge already at the target, but the per judge history restarts at that point. Fund level totals and the Deal records are unaffected.
 
 ## What is real and what is stubbed
 
