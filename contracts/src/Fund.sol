@@ -11,15 +11,20 @@ interface IRevenueShare {
     function registerDeal(uint256 dealId, address startup, uint16 revenueShareBps) external;
 }
 
-/// The capital pool. Holds USDC, onboards judges with spending mandates, and lets each
-/// judge independently invest its own budget into startup agents. Revenue-share returns
-/// are routed back here by RevenueShare and attributed to the judge that made the deal.
+/// The LP vehicle and the book of record. The fund does not pay for deals: it *allocates*
+/// capital, moving real USDC out to a judge's own wallet. From that point a judge is an
+/// independent investor spending its own balance, and `invest` pulls from the judge, not
+/// from this contract.
+///
+/// The consequence worth knowing: a judge's spending limit is its USDC balance, enforced
+/// by the token itself. There is no mandate ceiling to configure, and therefore no way to
+/// reset a judge's counters by re-registering it.
 contract Fund {
     struct Judge {
         bool active;
         uint256 agentId; // ERC-8004 identity, for off-chain reputation attribution
-        uint256 mandate; // max USDC this judge may deploy
-        uint256 deployed; // USDC deployed so far
+        uint256 allocated; // cumulative USDC handed to this judge's wallet
+        uint256 deployed; // cumulative USDC it has invested
         uint256 returned; // revenue-share received back so far
     }
 
@@ -43,15 +48,18 @@ contract Fund {
     IRevenueShare public revenueShare;
 
     uint256 public totalCapital; // cumulative deposited by LPs/operator
+    uint256 public totalAllocated; // cumulative handed out to judge wallets
     uint256 public totalDeployed; // cumulative invested into deals
     uint256 public totalReturned; // cumulative revenue-share received back
     uint256 public totalOutstanding; // book value of active positions
 
+    address[] public judgeList;
     mapping(address => Judge) public judges;
     Deal[] public deals;
 
     event CapitalDeposited(address indexed from, uint256 amount);
-    event JudgeRegistered(address indexed judge, uint256 agentId, uint256 mandate);
+    event JudgeRegistered(address indexed judge, uint256 agentId);
+    event CapitalAllocated(address indexed judge, uint256 amount);
     event Invested(
         uint256 indexed dealId,
         address indexed judge,
@@ -82,23 +90,47 @@ contract Fund {
         emit CapitalDeposited(msg.sender, amount);
     }
 
-    function registerJudge(address judge, uint256 agentId, uint256 mandate) external onlyOperator {
-        judges[judge] = Judge({active: true, agentId: agentId, mandate: mandate, deployed: 0, returned: 0});
-        emit JudgeRegistered(judge, agentId, mandate);
+    /// Onboard a judge. Idempotent in the way that matters: re-registering an existing
+    /// judge updates its identity without touching allocated, deployed or returned, so a
+    /// judge's track record can never be wiped by an admin call.
+    function registerJudge(address judge, uint256 agentId) external onlyOperator {
+        Judge storage j = judges[judge];
+        if (!j.active) {
+            j.active = true;
+            judgeList.push(judge);
+        }
+        j.agentId = agentId;
+        emit JudgeRegistered(judge, agentId);
     }
 
-    /// A registered judge invests its own budget into a startup. Called by the judge's
-    /// own wallet, so the decision is authorized onchain by the judge itself.
+    /// Hand capital to a judge. This is a real transfer: the USDC leaves the fund and
+    /// lands in the judge's wallet, which is what makes the judge an independent investor
+    /// rather than a permission to spend a shared pot.
+    function allocateToJudge(address judge, uint256 amount) external onlyOperator {
+        Judge storage j = judges[judge];
+        require(j.active, "not a judge");
+        require(amount > 0, "zero amount");
+
+        j.allocated += amount;
+        totalAllocated += amount;
+
+        require(usdc.transfer(judge, amount), "allocation failed");
+        emit CapitalAllocated(judge, amount);
+    }
+
+    /// A judge invests its own capital into a startup. Called by the judge's own wallet,
+    /// so the decision is authorized onchain by the judge itself, and the USDC moves from
+    /// the judge's balance straight to the startup. The judge must approve this contract
+    /// to spend its USDC first.
     function invest(address startup, uint256 amount, uint16 revenueShareBps, string calldata pitchRef)
         external
         returns (uint256 dealId)
     {
         Judge storage j = judges[msg.sender];
         require(j.active, "not a judge");
+        require(startup != address(0), "zero startup");
         require(amount > 0, "zero amount");
         require(revenueShareBps <= 10000, "bps too high");
-        require(j.deployed + amount <= j.mandate, "over mandate");
-        require(amount <= usdc.balanceOf(address(this)), "insufficient capital");
         require(address(revenueShare) != address(0), "no revenueShare");
 
         dealId = deals.length;
@@ -119,12 +151,16 @@ contract Fund {
         totalOutstanding += amount;
 
         revenueShare.registerDeal(dealId, startup, revenueShareBps);
-        require(usdc.transfer(startup, amount), "capital transfer failed");
+        // Straight from the judge's wallet to the startup. The judge's own balance is the
+        // only spending limit there is.
+        require(usdc.transferFrom(msg.sender, startup, amount), "capital transfer failed");
 
         emit Invested(dealId, msg.sender, startup, amount, revenueShareBps);
     }
 
-    /// Called only by RevenueShare when a startup's revenue-share cut arrives back.
+    /// Called only by RevenueShare when a startup's revenue-share cut arrives back. The
+    /// cut lands in this contract, so returns accrue to the LPs and are attributed to the
+    /// judge that made the deal.
     function recordReturn(uint256 dealId, uint256 amount) external {
         require(msg.sender == address(revenueShare), "only revenueShare");
         Deal storage d = deals[dealId];
@@ -149,9 +185,24 @@ contract Fund {
         return usdc.balanceOf(address(this));
     }
 
-    /// Cash on hand plus the book value (cost basis) of live positions.
+    /// What a judge can actually spend right now: the USDC in its own wallet.
+    function judgeBudget(address judge) external view returns (uint256) {
+        return usdc.balanceOf(judge);
+    }
+
+    /// Cash in the fund, capital sitting in judges' wallets, and the book value of live
+    /// positions. Allocating to a judge moves USDC but does not change what the fund is
+    /// worth, so NAV has to count the judges' balances too.
     function nav() external view returns (uint256) {
-        return usdc.balanceOf(address(this)) + totalOutstanding;
+        uint256 total = usdc.balanceOf(address(this)) + totalOutstanding;
+        for (uint256 i = 0; i < judgeList.length; i++) {
+            total += usdc.balanceOf(judgeList[i]);
+        }
+        return total;
+    }
+
+    function judgeCount() external view returns (uint256) {
+        return judgeList.length;
     }
 
     function dealCount() external view returns (uint256) {

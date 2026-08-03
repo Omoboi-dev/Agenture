@@ -60,8 +60,35 @@ contract FundTest is Test {
         vm.startPrank(operator);
         usdc.approve(address(fund), 1000 * U);
         fund.depositCapital(1000 * U);
-        fund.registerJudge(judgeA, 851590, 600 * U);
+        fund.registerJudge(judgeA, 851590);
+        fund.allocateToJudge(judgeA, 600 * U);
         vm.stopPrank();
+
+        // A judge spends its own balance, so it approves the fund to move its USDC.
+        vm.prank(judgeA);
+        usdc.approve(address(fund), type(uint256).max);
+    }
+
+    function test_allocate_movesCapitalToJudgeWallet() public {
+        assertEq(usdc.balanceOf(judgeA), 600 * U, "judge holds its own capital");
+        assertEq(fund.cash(), 400 * U, "fund cash reduced by the allocation");
+        assertEq(fund.totalAllocated(), 600 * U, "allocation tracked");
+        // Allocating moves USDC without changing what the fund is worth.
+        assertEq(fund.nav(), 1000 * U, "nav unchanged by allocation");
+        assertEq(fund.judgeBudget(judgeA), 600 * U, "budget is the wallet balance");
+    }
+
+    function test_registerJudge_doesNotWipeRecord() public {
+        vm.prank(judgeA);
+        fund.invest(startup, 200 * U, 1000, "x");
+
+        vm.prank(operator);
+        fund.registerJudge(judgeA, 999);
+
+        Fund.Judge memory j = fund.getJudge(judgeA);
+        assertEq(j.agentId, 999, "identity updated");
+        assertEq(j.deployed, 200 * U, "deployed survives re-registration");
+        assertEq(j.allocated, 600 * U, "allocation survives re-registration");
     }
 
     function test_invest_movesCapitalAndTracksJudge() public {
@@ -69,7 +96,9 @@ contract FundTest is Test {
         uint256 dealId = fund.invest(startup, 200 * U, 1000, "ipfs://pitch"); // 10% share
 
         assertEq(usdc.balanceOf(startup), 200 * U, "startup funded");
-        assertEq(fund.cash(), 800 * U, "fund cash reduced");
+        // The capital came out of the judge's wallet, not the fund's.
+        assertEq(usdc.balanceOf(judgeA), 400 * U, "judge spent its own balance");
+        assertEq(fund.cash(), 400 * U, "fund cash untouched by the investment");
         assertEq(fund.totalOutstanding(), 200 * U, "outstanding tracked");
         assertEq(fund.nav(), 1000 * U, "nav unchanged right after invest");
 
@@ -93,7 +122,7 @@ contract FundTest is Test {
         rs.settle(dealId, 50 * U);
 
         uint256 cut = (50 * U * 1000) / 10000; // 5 USDC
-        assertEq(fund.cash(), 800 * U + cut, "cut returned to fund");
+        assertEq(fund.cash(), 400 * U + cut, "cut returned to fund");
         assertEq(fund.totalReturned(), cut, "totalReturned");
 
         Fund.Judge memory j = fund.getJudge(judgeA);
@@ -108,10 +137,24 @@ contract FundTest is Test {
         fund.invest(startup, U, 1000, "x");
     }
 
-    function test_revert_overMandate() public {
+    /// There is no mandate ceiling any more: a judge is stopped by its own balance, which
+    /// the token enforces.
+    function test_revert_beyondOwnBalance() public {
         vm.prank(judgeA);
-        vm.expectRevert(bytes("over mandate"));
+        vm.expectRevert();
         fund.invest(startup, 601 * U, 1000, "x");
+    }
+
+    function test_revert_allocateToUnregisteredJudge() public {
+        vm.prank(operator);
+        vm.expectRevert(bytes("not a judge"));
+        fund.allocateToJudge(stranger, U);
+    }
+
+    function test_revert_allocate_onlyOperator() public {
+        vm.prank(stranger);
+        vm.expectRevert(bytes("not operator"));
+        fund.allocateToJudge(judgeA, U);
     }
 
     function test_revert_recordReturn_onlyRevenueShare() public {
