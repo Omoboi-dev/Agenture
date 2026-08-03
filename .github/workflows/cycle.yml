@@ -1,0 +1,69 @@
+name: Agenture cycle
+
+# One autonomous turn of the fund: startups earn and settle their revenue share, then the
+# judges deploy what the fund can afford. The round archive it writes is committed back,
+# which is what keeps the deployed frontend's deliberation history current.
+#
+# GitHub's scheduled runs are best effort and drift under load, which is fine here: the
+# frontend reads Arc live, so a late cycle only means the Arena shows the previous round.
+# Use the manual trigger when you need one on demand.
+
+on:
+  schedule:
+    - cron: '0 */6 * * *'
+  workflow_dispatch:
+
+# Never let two cycles touch the same wallets at once.
+concurrency:
+  group: agenture-cycle
+  cancel-in-progress: false
+
+permissions:
+  contents: write
+
+jobs:
+  cycle:
+    runs-on: ubuntu-latest
+    timeout-minutes: 30
+
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: oven-sh/setup-bun@v2
+        with:
+          bun-version: latest
+
+      - name: Install dependencies
+        working-directory: agents
+        run: bun install --frozen-lockfile
+
+      - name: Run the cycle
+        working-directory: agents
+        env:
+          # A 500bps share of a small revenue barely moves the fund, so settle enough per
+          # cycle that capital actually returns and a round can open every cycle or two.
+          # The customer's balance is recycled from the startups, so a higher throughput
+          # circulates the same coins rather than consuming them.
+          CYCLE_REVENUE_USDC: '3'
+          CYCLE_SETTLE_MAX: '8'
+          CYCLE_CUSTOMER_FLOAT_USDC: '26'
+          DEPLOYER_PRIVATE_KEY: ${{ secrets.DEPLOYER_PRIVATE_KEY }}
+          CIRCLE_API_KEY: ${{ secrets.CIRCLE_API_KEY }}
+          ENTITY_SECRET: ${{ secrets.ENTITY_SECRET }}
+          LLM_BASE_URL: ${{ secrets.LLM_BASE_URL }}
+          LLM_API_KEY: ${{ secrets.LLM_API_KEY }}
+          LLM_MODEL: ${{ secrets.LLM_MODEL }}
+          ARC_RPC_URL: ${{ secrets.ARC_RPC_URL }}
+        run: bun run cycle
+
+      - name: Commit the round archive
+        run: |
+          if git diff --quiet -- shared/rounds.json; then
+            echo "No new round recorded this cycle."
+            exit 0
+          fi
+          git config user.name "agenture-bot"
+          git config user.email "agenture-bot@users.noreply.github.com"
+          git add shared/rounds.json
+          git commit -m "chore: record autonomous cycle $(date -u +%Y-%m-%dT%H:%MZ)"
+          git push
