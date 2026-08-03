@@ -33,7 +33,7 @@ cd agents
 bun install
 bun run typecheck              # type check everything
 
-DRY_RUN=1 bun run round        # preview the judges' decisions, no capital moves
+DRY_RUN=1 bun run round        # preview the judges' decisions; no capital moves, not recorded
 bun run round                  # a live round: judges invest from their Circle wallets
 bun run close-loop 6,7         # settle revenue and write feedback for the given deals
 bun run cycle                  # one autonomous turn: recycle, settle, then invest
@@ -159,6 +159,8 @@ The agents are TypeScript on viem, the Vercel AI SDK, and the Circle Developer C
 - **startups.ts**: the fixture roster of startup agents, each with a Circle wallet address, walletId, an optional ERC-8004 agentId, and a pitch (idea, self reported revenue, estimated worth, ask).
 - **diligence.ts**: gathers the real onchain picture for a startup: its ERC-8004 reputation aggregated over the fund's trusted raters (current judges plus historical raters kept for continuity), and its live USDC wallet balance. This is what the judge reasons over, independent of what the pitch claims.
 - **judge.ts**: the brain. It builds a persona system prompt and a pitch plus diligence user prompt, asks the model, and coerces the result into a decision (invest, amount, revenue share bps, a conviction score, and a rationale), clamped to what the judge actually holds in its wallet. A parse failure becomes a safe pass.
+
+  Two details earn their keep. A reputation score is handed to the model with its meaning spelled out, because a bare "average score 48" gets read as good news otherwise, and a poor score is worse evidence than no score at all: it means the agent was tested and found wanting. And conviction is not asked for directly. The judge rates four things separately (idea /30, evidence /30, price /20, risk /20) and the score is their sum, because asked for one number a small model returns 85 for almost everything, which makes ranking useless.
 - **fund.ts / feedback.ts / revenue.ts / identity.ts**: onchain action wrappers. Agent actions (invest, settle, give feedback) sign through Circle; operator actions (register identity, facilitate x402) use viem.
 - **x402.ts**: the earning rail. A customer agent's Circle wallet signs an EIP-3009 `transferWithAuthorization` off-chain (gasless), and the operator submits it onchain as the x402 facilitator, so a startup earns real USDC agent to agent.
 - **Entry points**: `round.ts` (the investment half), `close-loop.ts` (the return half), `setup.ts` and `onboard-circle.ts` (operator onboarding), `provision-circle.ts` (mint the agent wallets).
