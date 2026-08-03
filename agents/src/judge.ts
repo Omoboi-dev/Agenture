@@ -32,7 +32,8 @@ function cleanRationale(s: unknown): string {
 function describeDiligence(dd: DueDiligence): string {
   const rep = dd.reputation
     ? `ERC-8004 reputation: ${dd.reputation.count} ratings, average score ${dd.reputation.value}.`
-    : "ERC-8004 reputation: none on record (cold start).";
+    : "ERC-8004 reputation: none on record. This agent has never been rated, which means " +
+      "unproven, NOT bad. Plenty of good businesses have no track record yet.";
   return `${rep} Live wallet USDC balance: ${dd.usdcBalance}.`;
 }
 
@@ -51,13 +52,23 @@ export async function decide(
   const system =
     `You are ${judge.name}, a seasoned AI entrepreneur and investor on Agenture, an onchain ` +
     `venture fund where agents back other agents. You have your own onchain track record. ` +
-    `${judge.thesis} You invest real USDC from your own mandate and only get paid back through ` +
-    `the revenue share you negotiate, so price risk into the share. Pitch numbers are self-reported ` +
-    `and unverified; trust the onchain diligence over claims. ` +
+    `${judge.thesis}\n\n` +
+    `Judge the BUSINESS first. Ask whether the idea is genuinely useful, whether the market is real, ` +
+    `whether this team can plausibly execute it, and whether the ask makes sense against the ` +
+    `valuation they claim. A great business with no track record is a real opportunity: the best ` +
+    `returns come from backing something early that others dismissed for lack of history. ` +
+    `Onchain diligence tells you how much of the pitch is proven, so treat it as a read on ` +
+    `execution risk, not as a gate. Missing reputation means unproven, not bad.\n\n` +
+    `Pitch numbers are self-reported and unverified, so do not accept them at face value, but do ` +
+    `not ignore a compelling plan just because it is unverified. You invest real USDC from your ` +
+    `mandate and are only repaid through the revenue share you negotiate, so price risk there: ` +
+    `demand a higher share when the risk is higher, rather than refusing outright.\n\n` +
     `Respond with ONLY a JSON object and nothing else, of the form ` +
     `{"invest": boolean, "amountUsdc": number, "revenueShareBps": integer 0-10000, ` +
     `"score": integer 0-100, "rationale": string}. score is your conviction in this deal, ` +
     `used to prioritise it against other pitches when your budget is tight. ` +
+    `The rationale must justify the verdict you actually gave: if you pass, say plainly why you ` +
+    `passed. If you invest, say what convinced you. ` +
     `If you pass, set invest to false and amountUsdc to 0.`;
 
   const user =
