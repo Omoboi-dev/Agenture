@@ -18,6 +18,8 @@ export type Verdict = {
   startup: string
   invest: boolean
   score: number
+  /** How the conviction was built up: idea /30, evidence /30, price /20, risk /20. */
+  breakdown?: { idea: number; evidence: number; price: number; risk: number } | null
   rationale: string
   requestedUsdc: number
   revenueShareBps: number

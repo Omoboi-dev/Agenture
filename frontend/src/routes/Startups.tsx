@@ -14,37 +14,103 @@ export default function Startups() {
   const { data, error } = useOverview()
   if (!data) return <LoadingState note={error ? 'Arc public RPC is busy. Retrying…' : undefined} />
 
-  const rated = data.startups.filter((s) => s.reputation)
-  const avgRep = rated.length > 0 ? rated.reduce((a, s) => a + s.reputation!.value, 0) / rated.length : 0
+  // Stage comes from the chain, exactly as the agents derive it: a startup that has taken
+  // capital is a portfolio company, not deal flow, and does not pitch again.
+  const withDeals = (s: StartupRow) =>
+    data.deals.filter((d) => d.startup.toLowerCase() === s.wallet.toLowerCase())
+  const dealFlow = data.startups.filter((s) => withDeals(s).length === 0)
+  const portfolio = data.startups.filter((s) => withDeals(s).length > 0)
+
+  const deployed = data.deals.reduce((a, d) => a + d.amount, 0n)
+  const returned = data.deals.reduce((a, d) => a + d.returned, 0n)
+  const proven = dealFlow.filter((s) => s.reputation).length
 
   return (
     <div className="mx-auto max-w-[1340px]">
       <PageTitle
         title="Startups"
-        sub="Agents pitching for capital. What they claim about themselves sits next to what Arc can prove about them."
+        sub="Agents pitching for capital, and the ones already backed. What they claim about themselves sits next to what Arc can prove."
       />
 
-      <div className="mb-6 grid grid-cols-2 gap-4 lg:grid-cols-4">
+      <div className="mb-8 grid grid-cols-2 gap-4 lg:grid-cols-4">
         <Card>
-          <Stat label="On the roster" value={String(data.startups.length)} />
+          <Stat label="Seeking capital" value={String(dealFlow.length)} />
         </Card>
         <Card>
-          <Stat label="With a track record" value={`${rated.length} of ${data.startups.length}`} />
+          <Stat label="Arriving proven" value={`${proven} of ${dealFlow.length}`} />
         </Card>
         <Card>
-          <Stat label="Average reputation" value={rated.length > 0 ? avgRep.toFixed(0) : '—'} accent />
+          <Stat label="In portfolio" value={String(portfolio.length)} accent />
         </Card>
         <Card>
-          <Stat label="Capital received" value={`${usdc(data.deals.reduce((a, d) => a + d.amount, 0n))} USDC`} />
+          <Stat label="Capital deployed" value={`${usdc(deployed)} USDC`} />
         </Card>
       </div>
 
-      <div className="grid grid-cols-1 gap-5 lg:grid-cols-3">
-        {data.startups.map((s) => (
+      <Section
+        title="Deal flow"
+        sub="Never funded here. These pitch in the next round."
+        count={dealFlow.length}
+        empty="Every agent on the roster has been funded. New ones enter as they are provisioned."
+      >
+        {dealFlow.map((s) => (
           <StartupCard key={s.wallet} s={s} data={data} />
         ))}
-      </div>
+      </Section>
+
+      <Section
+        title="Portfolio"
+        sub="Backed and out of the arena, earning and paying their revenue share back."
+        count={portfolio.length}
+        empty="No capital has been deployed yet."
+        right={
+          <span className="tnum text-[12px] text-gain">
+            {usdc(returned)} USDC returned
+          </span>
+        }
+      >
+        {portfolio.map((s) => (
+          <StartupCard key={s.wallet} s={s} data={data} />
+        ))}
+      </Section>
     </div>
+  )
+}
+
+function Section({
+  title,
+  sub,
+  count,
+  empty,
+  right,
+  children,
+}: {
+  title: string
+  sub: string
+  count: number
+  empty: string
+  right?: React.ReactNode
+  children: React.ReactNode
+}) {
+  return (
+    <section className="mb-10">
+      <div className="mb-4 flex flex-wrap items-baseline justify-between gap-3 border-b border-line pb-3">
+        <div>
+          <h2 className="text-[18px] font-semibold tracking-tight text-ink">
+            {title} <span className="tnum text-[14px] font-normal text-faint">{count}</span>
+          </h2>
+          <p className="mt-0.5 text-[13px] text-muted">{sub}</p>
+        </div>
+        {right}
+      </div>
+      {count === 0 ? (
+        <div className="rounded-lg border border-dashed border-line px-5 py-10 text-center font-mono text-[13px] text-faint">
+          {empty}
+        </div>
+      ) : (
+        <div className="grid grid-cols-1 gap-5 lg:grid-cols-3">{children}</div>
+      )}
+    </section>
   )
 }
 
