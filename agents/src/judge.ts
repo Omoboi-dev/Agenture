@@ -10,8 +10,11 @@ export type Decision = {
   invest: boolean;
   amountUsdc: number;
   revenueShareBps: number;
-  score: number; // 0-100 conviction, used to rank pitches when mandate is scarce
+  score: number; // 0-100 conviction, used to rank pitches when capital is scarce
   rationale: string;
+  // The four components the score is built from, kept for the record so a conviction can
+  // be read rather than just trusted.
+  breakdown?: { idea: number; evidence: number; price: number; risk: number };
 };
 
 function clamp(n: number, lo: number, hi: number): number {
@@ -29,9 +32,22 @@ function cleanRationale(s: unknown): string {
     .trim();
 }
 
+// A raw "average score 48" tells the model nothing, and it will happily read it as good
+// news. Spell out what the number is worth.
+function readScore(value: number): string {
+  if (value >= 85) return "excellent: its clients rate it among the best they deal with";
+  if (value >= 70) return "solid: its clients are satisfied";
+  if (value >= 55) return "mediocre: its clients are lukewarm, which is a yellow flag";
+  if (value >= 40) return "POOR: its own paying clients rate it badly, which is a serious red flag";
+  return "VERY POOR: its clients consider it close to unusable";
+}
+
 function describeDiligence(dd: DueDiligence): string {
   const rep = dd.reputation
-    ? `ERC-8004 reputation: ${dd.reputation.count} ratings, average score ${dd.reputation.value}.`
+    ? `ERC-8004 reputation: ${dd.reputation.count} rating(s) averaging ${dd.reputation.value} out of 100. ` +
+      `A score of ${dd.reputation.value} is ${readScore(dd.reputation.value)}. ` +
+      `This comes from clients that actually paid this agent, so it is evidence about the ` +
+      `service as delivered, not a claim.`
     : "ERC-8004 reputation: none on record. This agent has never been rated, which means " +
       "unproven, NOT bad. Plenty of good businesses have no track record yet.";
   return `${rep} Live wallet USDC balance: ${dd.usdcBalance}.`;
@@ -63,12 +79,24 @@ export async function decide(
     `not ignore a compelling plan just because it is unverified. You invest real USDC from your ` +
     `mandate and are only repaid through the revenue share you negotiate, so price risk there: ` +
     `demand a higher share when the risk is higher, rather than refusing outright.\n\n` +
+    `A bad reputation is worse than no reputation. An agent whose paying clients rate it poorly ` +
+    `has been tested and found wanting, which is stronger evidence against it than silence. ` +
+    `Be especially wary of a large claimed valuation sitting on top of tiny revenue and a weak ` +
+    `score: that is the classic overvalued pitch.\n\n` +
     `Respond with ONLY a JSON object and nothing else, of the form ` +
     `{"invest": boolean, "amountUsdc": number, "revenueShareBps": integer 0-10000, ` +
-    `"score": integer 0-100, "rationale": string}. score is your conviction in this deal, ` +
-    `used to prioritise it against other pitches when your budget is tight. ` +
+    `"idea": integer, "evidence": integer, "price": integer, "risk": integer, ` +
+    `"rationale": string}.\n\n` +
+    `Do not hand back a single overall score. Rate these four things separately and honestly, ` +
+    `and give each its own number, because a pitch that is strong on one is often weak on another:\n` +
+    `  "idea": 0-30. How useful and defensible is the business itself?\n` +
+    `  "evidence": 0-30. How much of the story is actually proven onchain? A poor reputation ` +
+    `scores lower here than no reputation at all.\n` +
+    `  "price": 0-20. Is the ask sensible against the claimed valuation and revenue?\n` +
+    `  "risk": 0-20. How likely is it to survive and keep paying the revenue share?\n` +
+    `Use the full width of each range. Award a maximum only for something genuinely exceptional.\n\n` +
     `The rationale must justify the verdict you actually gave: if you pass, say plainly why you ` +
-    `passed. If you invest, say what convinced you. ` +
+    `passed, naming the specific weakness. If you invest, say what convinced you. ` +
     `If you pass, set invest to false and amountUsdc to 0.`;
 
   const user =
@@ -89,13 +117,30 @@ export async function decide(
   const invest = Boolean(raw.invest);
   const amountUsdc = invest ? clamp(Number(raw.amountUsdc), 0, budget) : 0;
   const revenueShareBps = Math.round(clamp(Number(raw.revenueShareBps), 0, 10000));
-  const score = Math.round(clamp(Number(raw.score), 0, 100));
   const rationale = cleanRationale(raw.rationale);
+
+  // Conviction is the sum of the four components rather than a number the model picks,
+  // which is what stops every pitch coming back at 85.
+  const part = (v: unknown, max: number) => Math.round(clamp(Number(v), 0, max));
+  const breakdown = {
+    idea: part((raw as Record<string, unknown>).idea, 30),
+    evidence: part((raw as Record<string, unknown>).evidence, 30),
+    price: part((raw as Record<string, unknown>).price, 20),
+    risk: part((raw as Record<string, unknown>).risk, 20),
+  };
+  const score = breakdown.idea + breakdown.evidence + breakdown.price + breakdown.risk;
 
   // An "invest" with nothing to deploy is really a pass.
   if (invest && amountUsdc <= 0) {
-    return { invest: false, amountUsdc: 0, revenueShareBps, score, rationale: rationale || "no budget to deploy; passed" };
+    return {
+      invest: false,
+      amountUsdc: 0,
+      revenueShareBps,
+      score,
+      rationale: rationale || "no budget to deploy; passed",
+      breakdown,
+    };
   }
 
-  return { invest, amountUsdc, revenueShareBps, score, rationale };
+  return { invest, amountUsdc, revenueShareBps, score, rationale, breakdown };
 }

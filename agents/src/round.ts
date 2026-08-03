@@ -98,6 +98,7 @@ export async function runRound(): Promise<number[]> {
         startup: startup.name,
         invest: decision.invest,
         score: decision.score,
+        breakdown: decision.breakdown ?? null,
         rationale: decision.rationale,
         requestedUsdc: decision.amountUsdc,
         revenueShareBps: decision.revenueShareBps,
@@ -199,6 +200,14 @@ export async function runRound(): Promise<number[]> {
     pitch: startup.pitch,
   }));
 
+  // A dry run is a preview, not history. Recording it would put rounds that never moved
+  // capital into the public archive the frontend reads.
+  if (DRY_RUN) {
+    console.log(`Dry run complete. Projected fund cash after these deals: ${usdc(cashBase)}`);
+    console.log("Not recorded: dry runs stay out of the round archive.");
+    return [];
+  }
+
   appendRound({
     id: roundId,
     startedAt,
@@ -210,11 +219,7 @@ export async function runRound(): Promise<number[]> {
     verdicts,
   });
 
-  console.log(
-    DRY_RUN
-      ? `Dry run complete. Projected fund cash after these deals: ${usdc(cashBase)}`
-      : `Round complete. Fund cash now: ${usdc(cashBase)}`,
-  );
+  console.log(`Round complete. Fund cash now: ${usdc(cashBase)}`);
   console.log(`Round ${roundId} recorded in shared/rounds.json (${verdicts.length} verdicts).`);
 
   return verdicts.filter((v) => v.dealId !== null).map((v) => v.dealId as number);

@@ -31,6 +31,7 @@ export type Verdict = {
   startup: string;
   invest: boolean;
   score: number;
+  breakdown: { idea: number; evidence: number; price: number; risk: number } | null;
   rationale: string;
   requestedUsdc: number;
   revenueShareBps: number;
