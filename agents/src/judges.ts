@@ -46,7 +46,6 @@ export type Judge = JudgePersona & {
   wallet: Address; // the judge's Circle wallet address (what it signs from)
   walletId: string; // Circle Developer Controlled Wallet id
   agentId: bigint;
-  mandate: bigint; // base units (6dp)
 };
 
 // Merge persona + on-chain config into the judges the orchestrator will run. Only
@@ -61,7 +60,6 @@ export function loadJudges(): Judge[] {
       wallet: entry.wallet as Address,
       walletId: entry.walletId,
       agentId: BigInt(entry.agentId),
-      mandate: BigInt(entry.mandate),
     });
   }
   return out;

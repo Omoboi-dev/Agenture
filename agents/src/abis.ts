@@ -23,6 +23,16 @@ export const reputationAbi = [
 export const erc20Abi = [
   {
     type: "function",
+    name: "allowance",
+    stateMutability: "view",
+    inputs: [
+      { name: "owner", type: "address" },
+      { name: "spender", type: "address" },
+    ],
+    outputs: [{ name: "", type: "uint256" }],
+  },
+  {
+    type: "function",
     name: "balanceOf",
     stateMutability: "view",
     inputs: [{ name: "account", type: "address" }],
@@ -122,7 +132,7 @@ export const fundAbi = [
         components: [
           { name: "active", type: "bool" },
           { name: "agentId", type: "uint256" },
-          { name: "mandate", type: "uint256" },
+          { name: "allocated", type: "uint256" },
           { name: "deployed", type: "uint256" },
           { name: "returned", type: "uint256" },
         ],
@@ -173,9 +183,32 @@ export const fundAbi = [
     inputs: [
       { name: "judge", type: "address" },
       { name: "agentId", type: "uint256" },
-      { name: "mandate", type: "uint256" },
     ],
     outputs: [],
+  },
+  {
+    type: "function",
+    name: "allocateToJudge",
+    stateMutability: "nonpayable",
+    inputs: [
+      { name: "judge", type: "address" },
+      { name: "amount", type: "uint256" },
+    ],
+    outputs: [],
+  },
+  {
+    type: "function",
+    name: "judgeBudget",
+    stateMutability: "view",
+    inputs: [{ name: "judge", type: "address" }],
+    outputs: [{ name: "", type: "uint256" }],
+  },
+  {
+    type: "function",
+    name: "totalAllocated",
+    stateMutability: "view",
+    inputs: [],
+    outputs: [{ name: "", type: "uint256" }],
   },
   {
     type: "event",

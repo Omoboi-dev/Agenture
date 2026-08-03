@@ -10,10 +10,23 @@ const FUND = addresses.agenture.fund as Address;
 export type JudgeState = {
   active: boolean;
   agentId: bigint;
-  mandate: bigint;
+  allocated: bigint; // cumulative USDC handed to this judge's wallet
   deployed: bigint;
   returned: bigint;
 };
+
+// What a judge can actually spend: the USDC sitting in its own wallet. There is no
+// mandate ceiling any more, the token balance is the limit.
+export async function judgeBudget(judge: Address): Promise<bigint> {
+  return (await withRpcRetry(() =>
+    publicClient.readContract({
+      address: FUND,
+      abi: fundAbi,
+      functionName: "judgeBudget",
+      args: [judge],
+    }),
+  )) as bigint;
+}
 
 export async function getJudgeState(judge: Address): Promise<JudgeState> {
   return (await withRpcRetry(() =>

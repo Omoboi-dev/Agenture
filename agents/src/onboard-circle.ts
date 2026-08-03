@@ -10,7 +10,7 @@ import { startups } from "./startups.js";
 
 // Operator-only. Gets the migrated agents ready: gas-funds every Circle wallet and
 // registers the judges in the Fund at their new Circle addresses (existing agentIds and
-// mandates). Idempotent: skips wallets already funded and judges already registered.
+// identities). Idempotent: skips wallets already funded and judges already registered.
 const USDC = addresses.usdc as Address;
 const FUND = addresses.agenture.fund as Address;
 
@@ -78,11 +78,11 @@ async function main() {
         address: FUND,
         abi: fundAbi,
         functionName: "registerJudge",
-        args: [j.wallet, j.agentId, j.mandate],
+        args: [j.wallet, j.agentId],
       }),
     );
     await waitReceipt(h);
-    console.log(`judge ${j.name}: registered at ${j.wallet} (mandate ${formatUnits(j.mandate, 6)} USDC).`);
+    console.log(`judge ${j.name}: registered at ${j.wallet}. Allocate its capital with: bun run allocate`);
     await sleep(1500);
   }
 
