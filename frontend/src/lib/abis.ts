@@ -1,5 +1,19 @@
 // Read-only ABIs the dashboard needs.
 export const fundAbi = [
+  {
+    type: 'function',
+    name: 'judgeBudget',
+    stateMutability: 'view',
+    inputs: [{ name: 'judge', type: 'address' }],
+    outputs: [{ name: '', type: 'uint256' }],
+  },
+  {
+    type: 'function',
+    name: 'totalAllocated',
+    stateMutability: 'view',
+    inputs: [],
+    outputs: [{ name: '', type: 'uint256' }],
+  },
   { type: 'function', name: 'cash', stateMutability: 'view', inputs: [], outputs: [{ type: 'uint256' }] },
   { type: 'function', name: 'nav', stateMutability: 'view', inputs: [], outputs: [{ type: 'uint256' }] },
   { type: 'function', name: 'totalCapital', stateMutability: 'view', inputs: [], outputs: [{ type: 'uint256' }] },
@@ -38,7 +52,7 @@ export const fundAbi = [
         components: [
           { name: 'active', type: 'bool' },
           { name: 'agentId', type: 'uint256' },
-          { name: 'mandate', type: 'uint256' },
+          { name: 'allocated', type: 'uint256' },
           { name: 'deployed', type: 'uint256' },
           { name: 'returned', type: 'uint256' },
         ],

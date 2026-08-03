@@ -1,3 +1,5 @@
+import roster from '@shared/startups.json'
+
 // Display metadata that mirrors the agents' config (personas + pitches). Onchain facts
 // (mandates, deals, reputation, balances) are read live; this is the human-facing copy.
 
@@ -32,41 +34,14 @@ export type StartupMeta = {
   pitch: { idea: string; monthlyRevenueUsdc: number; estimatedWorthUsdc: number; askUsdc: number }
 }
 
-export const startups: StartupMeta[] = [
-  {
-    name: 'MeshRelay',
-    wallet: '0xa4d99d25a286d22b5750854f670ce03b84054aba',
-    agentId: 851590,
-    pitch: {
-      idea: 'An x402 relayer that batches gasless USDC payments for other agents on Arc and takes a thin fee per settled payment.',
-      monthlyRevenueUsdc: 1200,
-      estimatedWorthUsdc: 40000,
-      askUsdc: 3,
-    },
-  },
-  {
-    name: 'PixelForge',
-    wallet: '0x043ce85e81adfb6adaead53351cd3db20891e964',
-    agentId: 851661,
-    pitch: {
-      idea: 'A generative image agent that sells renders to other agents. Pre-revenue but claims a large addressable market.',
-      monthlyRevenueUsdc: 0,
-      estimatedWorthUsdc: 250000,
-      askUsdc: 5,
-    },
-  },
-  {
-    name: 'DataOracle',
-    wallet: '0xa447673b7a01dbb90272fcb5e3d775a0e58d7bc0',
-    agentId: 851662,
-    pitch: {
-      idea: 'A price and event data feed for trading agents, charging per query over x402. Some early paying users, no onchain record yet.',
-      monthlyRevenueUsdc: 300,
-      estimatedWorthUsdc: 15000,
-      askUsdc: 2,
-    },
-  },
-]
+// The roster is shared with the agents: one source of truth, so the frontend can never
+// show a different set of agents from the one the judges actually heard.
+export const startups: StartupMeta[] = roster.startups.map((s) => ({
+  name: s.name,
+  wallet: s.wallet,
+  agentId: s.agentId,
+  pitch: s.pitch,
+}))
 
 export function startupByWallet(wallet: string): StartupMeta | undefined {
   const w = wallet.toLowerCase()
@@ -76,6 +51,7 @@ export function startupByWallet(wallet: string): StartupMeta | undefined {
 // The raters whose ERC-8004 feedback the fund trusts: operator + judges + historical
 // pre-migration wallets. Mirrors the agents' diligence set.
 export const historicalRaters = [
+  '0xd4d1bae70e727c9f66c3ed0efbf7bf57b46fd92f', // the customer agent, which pays for services
   '0x7F2733B91b12bcF2cfE99E2aa2617286b93cA7de',
   '0xf2fD1775118E21Ea5B9507235d3556C97181a9F7',
   '0x62050AB71Cd055cD48ed4fc2aD940606F7d63467',

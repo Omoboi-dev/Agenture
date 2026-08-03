@@ -58,7 +58,7 @@ function JudgeCard({ j, data }: { j: JudgeRow; data: Overview }) {
   const color = judgeColor(j.name)
   const record = trackRecord(j.name)
   const deals = data.deals.filter((d) => d.judgeName === j.name)
-  const utilization = j.mandate > 0n ? Number((j.deployed * 100n) / j.mandate) : 0
+  const utilization = j.allocated > 0n ? Number((j.deployed * 100n) / j.allocated) : 0
   const profitable = j.roiBps > 0
 
   return (
@@ -88,9 +88,9 @@ function JudgeCard({ j, data }: { j: JudgeRow; data: Overview }) {
 
       <div className="px-5 pb-4">
         <div className="mb-1.5 flex items-center justify-between">
-          <span className="eyebrow">Mandate deployed</span>
+          <span className="eyebrow">Capital deployed</span>
           <span className="tnum text-[12px] text-subtle">
-            {usdc(j.deployed)} / {usdc(j.mandate)}
+            {usdc(j.deployed)} / {usdc(j.allocated)}
           </span>
         </div>
         <Meter pct={utilization} tone="primary" />
@@ -99,7 +99,7 @@ function JudgeCard({ j, data }: { j: JudgeRow; data: Overview }) {
       <div className="grid grid-cols-2 gap-px border-t border-line bg-line">
         <Metric label="Deals made" value={String(deals.length)} />
         <Metric label="Realized ROI" value={bpsToPct(j.roiBps)} tone={profitable ? 'gain' : 'muted'} />
-        <Metric label="Returned" value={`${usdc(j.returned)} USDC`} />
+        <Metric label="Wallet holds" value={`${usdc(j.budget)} USDC`} />
         <Metric
           label="Avg conviction"
           value={record.reviewed > 0 ? record.avgConviction.toFixed(0) : '—'}

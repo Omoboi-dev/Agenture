@@ -27,5 +27,5 @@
     "erasableSyntaxOnly": true,
     "noFallthroughCasesInSwitch": true
   },
-  "include": ["src", "../shared/addresses.json", "../shared/rounds.json"]
+  "include": ["src", "../shared/addresses.json", "../shared/rounds.json", "../shared/startups.json"]
 }

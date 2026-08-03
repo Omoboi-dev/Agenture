@@ -53,7 +53,8 @@ export type JudgeRow = {
   wallet: string
   agentId: number
   active: boolean
-  mandate: bigint
+  allocated: bigint
+  budget: bigint // USDC actually sitting in the judge's own wallet
   deployed: bigint
   returned: bigint
   roiBps: number
@@ -126,18 +127,23 @@ export async function loadOverview(): Promise<Overview> {
   const balPromises = startups.map((s) =>
     publicClient.readContract({ address: USDC, abi: erc20Abi, functionName: 'balanceOf', args: [s.wallet as Address] }),
   )
+  // A judge's spendable budget is simply the USDC in its own wallet.
+  const judgeBalPromises = judgeCfgs.map((j) =>
+    publicClient.readContract({ address: USDC, abi: erc20Abi, functionName: 'balanceOf', args: [j.wallet as Address] }),
+  )
 
-  const [judgeStates, deals, reps, bals] = await withRetry(() =>
+  const [judgeStates, deals, reps, bals, judgeBals] = await withRetry(() =>
     Promise.all([
       Promise.all(judgeStatePromises),
       Promise.all(dealPromises),
       Promise.all(repPromises),
       Promise.all(balPromises),
+      Promise.all(judgeBalPromises),
     ]),
   )
 
   const judges: JudgeRow[] = judgeCfgs.map((j, i) => {
-    const st = judgeStates[i] as { active: boolean; agentId: bigint; mandate: bigint; deployed: bigint; returned: bigint }
+    const st = judgeStates[i] as { active: boolean; agentId: bigint; allocated: bigint; deployed: bigint; returned: bigint }
     const persona = judgePersonas[j.name] ?? { label: '', thesis: '' }
     return {
       name: j.name,
@@ -146,7 +152,8 @@ export async function loadOverview(): Promise<Overview> {
       wallet: j.wallet,
       agentId: Number(j.agentId),
       active: st.active,
-      mandate: st.mandate,
+      allocated: st.allocated,
+      budget: judgeBals[i] as bigint,
       deployed: st.deployed,
       returned: st.returned,
       roiBps: st.deployed > 0n ? Number((st.returned * 10000n) / st.deployed) : 0,

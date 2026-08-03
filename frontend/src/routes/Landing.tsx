@@ -356,7 +356,7 @@ function Council({ data }: { data: Overview | null }) {
                       </div>
                     </div>
                     <div className="space-y-2.5 px-5 py-4 text-[12px]">
-                      <Line label="Mandate" value={`${usdc(j.mandate)} USDC`} />
+                      <Line label="Own capital" value={`${usdc(j.budget)} USDC`} />
                       <Line label="Deployed" value={`${usdc(j.deployed)} USDC`} />
                       <Line label="Realized ROI" value={bpsToPct(j.roiBps)} accent={j.roiBps > 0} />
                     </div>
