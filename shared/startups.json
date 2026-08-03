@@ -1,0 +1,148 @@
+{
+  "startups": [
+    {
+      "name": "MeshRelay",
+      "wallet": "0xa4d99d25a286d22b5750854f670ce03b84054aba",
+      "walletId": "0360c94d-a70d-5218-ab29-f31c989a9a80",
+      "agentId": 851590,
+      "pitch": {
+        "idea": "An x402 relayer that batches gasless USDC payments for other agents on Arc and takes a thin fee per settled payment.",
+        "monthlyRevenueUsdc": 1200,
+        "estimatedWorthUsdc": 40000,
+        "askUsdc": 3
+      }
+    },
+    {
+      "name": "PixelForge",
+      "wallet": "0x043ce85e81adfb6adaead53351cd3db20891e964",
+      "walletId": "e7a3de7c-49b4-5de1-9fc8-0475d0d27a7a",
+      "agentId": 851661,
+      "pitch": {
+        "idea": "A generative image agent that sells renders to other agents. Pre-revenue but claims a large addressable market.",
+        "monthlyRevenueUsdc": 0,
+        "estimatedWorthUsdc": 250000,
+        "askUsdc": 5
+      }
+    },
+    {
+      "name": "DataOracle",
+      "wallet": "0xa447673b7a01dbb90272fcb5e3d775a0e58d7bc0",
+      "walletId": "9244cac6-a947-5eef-b420-239e0392356e",
+      "agentId": 851662,
+      "pitch": {
+        "idea": "A price and event data feed for trading agents, charging per query over x402. Some early paying users, no onchain record yet.",
+        "monthlyRevenueUsdc": 300,
+        "estimatedWorthUsdc": 15000,
+        "askUsdc": 2
+      }
+    },
+    {
+      "name": "DataIndexer",
+      "wallet": "0x2cd44a3c70281e945b1c5dcce92a8fa1c8dd0bc0",
+      "walletId": "2a6ac0bd-f09f-55f1-ae0c-7e45a98c2014",
+      "agentId": 859359,
+      "pitch": {
+        "idea": "Indexes Ethereum transaction logs and provides real-time updates to analytics agents via WebSocket, charging $0.005 USDC per log entry.",
+        "monthlyRevenueUsdc": 1621,
+        "estimatedWorthUsdc": 27557,
+        "askUsdc": 2
+      }
+    },
+    {
+      "name": "CryptoPayBridge",
+      "wallet": "0x3a937cf00fa5eae3a97912778bb7879106e7c65c",
+      "walletId": "84faf4bf-3c20-55bf-beac-fc381c47f131",
+      "agentId": 859360,
+      "pitch": {
+        "idea": "CryptoPayBridge automates cross-chain payments between autonomous agents, charging 0.005 USDC per transaction.",
+        "monthlyRevenueUsdc": 202,
+        "estimatedWorthUsdc": 8282,
+        "askUsdc": 3
+      }
+    },
+    {
+      "name": "MediaMiner",
+      "wallet": "0x698a6c1c22a6ee3770875e12a7af09926b89bc70",
+      "walletId": "cc590cff-425c-5edb-b7a2-a05ff745f677",
+      "agentId": 859361,
+      "pitch": {
+        "idea": "MediaMiner autonomously generates high-quality content summaries for indexing agents, charging 0.005 USDC per summary.",
+        "monthlyRevenueUsdc": 0,
+        "estimatedWorthUsdc": 126000,
+        "askUsdc": 5
+      }
+    },
+    {
+      "name": "SecureGuard",
+      "wallet": "0x1d26b5e75c3e4e3d99a252eb15af343c485931ab",
+      "walletId": "55a63b81-9c26-57b4-a797-90a15709c8bc",
+      "agentId": 859362,
+      "pitch": {
+        "idea": "SecureGuard autonomously monitors all transactions across the blockchain network, ensuring compliance with regulatory standards and detecting potential fraud. It charges $0.05 per transaction analyzed.",
+        "monthlyRevenueUsdc": 16,
+        "estimatedWorthUsdc": 2292000,
+        "askUsdc": 6
+      }
+    },
+    {
+      "name": "CargoScheduler",
+      "wallet": "0x0bc8f373678924d165b88ba599db45ae5e2db7aa",
+      "walletId": "47c91f34-7c28-51d2-859c-562e1b85a885",
+      "agentId": 859363,
+      "pitch": {
+        "idea": "Schedules deliveries for logistics agents, charging $0.05 USD per shipment.",
+        "monthlyRevenueUsdc": 102,
+        "estimatedWorthUsdc": 5000,
+        "askUsdc": 2
+      }
+    },
+    {
+      "name": "TrustGuard",
+      "wallet": "0x8f055dafdb3eb92f9e9c44da16adab8c5b9c6188",
+      "walletId": "baf54d3e-13c1-543d-ac21-ab3bb325fa9e",
+      "agentId": 859364,
+      "pitch": {
+        "idea": "TrustGuard is an autonomous agent that verifies the authenticity of digital identities by cross-referencing data from multiple decentralized sources, providing a secure and transparent service to compliance agents who charge $0.05 USDC per verification.",
+        "monthlyRevenueUsdc": 0,
+        "estimatedWorthUsdc": 188000,
+        "askUsdc": 4
+      }
+    },
+    {
+      "name": "MarketMaker",
+      "wallet": "0x8ad30402ab31883b0b98d778192a6230ef48c637",
+      "walletId": "38834eb5-3faa-5896-a996-80781083858c",
+      "agentId": 859365,
+      "pitch": {
+        "idea": "Indexes ERC-721 token transfers and provides real-time liquidity updates to arbitrage agents via WebSocket, charging 0.005 USDC per transaction.",
+        "monthlyRevenueUsdc": 1069,
+        "estimatedWorthUsdc": 32070,
+        "askUsdc": 4
+      }
+    },
+    {
+      "name": "StorageVault",
+      "wallet": "0xa43a9c0d6fa110102a0fea0919abdde8940c06ac",
+      "walletId": "3c5795c3-85f5-522f-a4d2-773fbab4d99f",
+      "agentId": 859366,
+      "pitch": {
+        "idea": "Stores and retrieves decentralized data efficiently, charging 0.005 USDC per gigabyte.",
+        "monthlyRevenueUsdc": 151,
+        "estimatedWorthUsdc": 8456,
+        "askUsdc": 4
+      }
+    },
+    {
+      "name": "BenchmarkBot",
+      "wallet": "0x97bf749103148c9f4fdd620b1b0d2cdd059f45a2",
+      "walletId": "2aeb9fa8-bf1a-5a2b-bcd0-f2d2588fc999",
+      "agentId": 859367,
+      "pitch": {
+        "idea": "BenchmarkBot autonomously benchmarks smart contracts against a predefined set of criteria and provides detailed reports to compliance agents, charging $0.05 USD per contract analyzed.",
+        "monthlyRevenueUsdc": 0,
+        "estimatedWorthUsdc": 160000,
+        "askUsdc": 4
+      }
+    }
+  ]
+}

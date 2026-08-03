@@ -1,0 +1,85 @@
+{
+  "drafts": [
+    {
+      "name": "DataIndexer",
+      "idea": "Indexes Ethereum transaction logs and provides real-time updates to analytics agents via WebSocket, charging $0.005 USDC per log entry.",
+      "profile": "proven",
+      "monthlyRevenueUsdc": 1621,
+      "estimatedWorthUsdc": 27557,
+      "askUsdc": 2,
+      "arrivesWithTraction": true
+    },
+    {
+      "name": "CryptoPayBridge",
+      "idea": "CryptoPayBridge automates cross-chain payments between autonomous agents, charging 0.005 USDC per transaction.",
+      "profile": "earlyTraction",
+      "monthlyRevenueUsdc": 202,
+      "estimatedWorthUsdc": 8282,
+      "askUsdc": 3,
+      "arrivesWithTraction": true
+    },
+    {
+      "name": "MediaMiner",
+      "idea": "MediaMiner autonomously generates high-quality content summaries for indexing agents, charging 0.005 USDC per summary.",
+      "profile": "preRevenue",
+      "monthlyRevenueUsdc": 0,
+      "estimatedWorthUsdc": 126000,
+      "askUsdc": 5,
+      "arrivesWithTraction": false
+    },
+    {
+      "name": "SecureGuard",
+      "idea": "SecureGuard autonomously monitors all transactions across the blockchain network, ensuring compliance with regulatory standards and detecting potential fraud. It charges $0.05 per transaction analyzed.",
+      "profile": "overvalued",
+      "monthlyRevenueUsdc": 16,
+      "estimatedWorthUsdc": 2292000,
+      "askUsdc": 6,
+      "arrivesWithTraction": true
+    },
+    {
+      "name": "CargoScheduler",
+      "idea": "Schedules deliveries for logistics agents, charging $0.05 USD per shipment.",
+      "profile": "modest",
+      "monthlyRevenueUsdc": 102,
+      "estimatedWorthUsdc": 5000,
+      "askUsdc": 2,
+      "arrivesWithTraction": true
+    },
+    {
+      "name": "TrustGuard",
+      "idea": "TrustGuard is an autonomous agent that verifies the authenticity of digital identities by cross-referencing data from multiple decentralized sources, providing a secure and transparent service to compliance agents who charge $0.05 USDC per verification.",
+      "profile": "preRevenue",
+      "monthlyRevenueUsdc": 0,
+      "estimatedWorthUsdc": 188000,
+      "askUsdc": 4,
+      "arrivesWithTraction": false
+    },
+    {
+      "name": "MarketMaker",
+      "idea": "Indexes ERC-721 token transfers and provides real-time liquidity updates to arbitrage agents via WebSocket, charging 0.005 USDC per transaction.",
+      "profile": "proven",
+      "monthlyRevenueUsdc": 1069,
+      "estimatedWorthUsdc": 32070,
+      "askUsdc": 4,
+      "arrivesWithTraction": true
+    },
+    {
+      "name": "StorageVault",
+      "idea": "Stores and retrieves decentralized data efficiently, charging 0.005 USDC per gigabyte.",
+      "profile": "earlyTraction",
+      "monthlyRevenueUsdc": 151,
+      "estimatedWorthUsdc": 8456,
+      "askUsdc": 4,
+      "arrivesWithTraction": true
+    },
+    {
+      "name": "BenchmarkBot",
+      "idea": "BenchmarkBot autonomously benchmarks smart contracts against a predefined set of criteria and provides detailed reports to compliance agents, charging $0.05 USD per contract analyzed.",
+      "profile": "preRevenue",
+      "monthlyRevenueUsdc": 0,
+      "estimatedWorthUsdc": 160000,
+      "askUsdc": 4,
+      "arrivesWithTraction": false
+    }
+  ]
+}

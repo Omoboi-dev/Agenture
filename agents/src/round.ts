@@ -4,12 +4,18 @@ import { loadJudges } from "./judges.js";
 import { startups } from "./startups.js";
 import { gatherDiligence } from "./diligence.js";
 import { decide } from "./judge.js";
-import { getJudgeState, fundCash, invest } from "./fund.js";
+import { getJudgeState, fundCash, invest, judgeBudget } from "./fund.js";
 import { appendRound, nextRoundId, type Dossier, type Verdict } from "./roundlog.js";
+import { readPositions, pickCohort, describeStage } from "./lifecycle.js";
 
 const usdc = (base: bigint) => `${formatUnits(base, 6)} USDC`;
 const human = (base: bigint) => Number(formatUnits(base, 6));
 const DRY_RUN = process.env.DRY_RUN === "1" || process.env.DRY_RUN === "true";
+// How many pitches a single round hears. Small enough that a round stays readable.
+const COHORT_SIZE = Number(process.env.COHORT_SIZE ?? "4");
+// On Arc gas is USDC, so a judge that deploys its entire balance cannot pay for the
+// transaction that deploys it. Hold a little back.
+const GAS_RESERVE = parseUnits(process.env.JUDGE_GAS_RESERVE_USDC ?? "0.5", 6);
 
 // The public Arc RPC throttles bursts, so we pace onchain reads instead of firing them
 // all at once.
@@ -18,7 +24,7 @@ const sleep = (ms: number) => new Promise((r) => setTimeout(r, ms));
 // One autonomous round: every judge hears every startup pitch, runs real onchain due
 // diligence, decides with its LLM persona, and invests from its own wallet when it
 // says yes. Read-only until a judge commits capital; nothing here touches a human.
-async function runRound() {
+export async function runRound(): Promise<number[]> {
   const judges = loadJudges();
   if (judges.length === 0) throw new Error("no judges configured");
 
@@ -32,19 +38,34 @@ async function runRound() {
   const cashBeforeBase = cashBase;
   console.log(`Fund cash: ${usdc(cashBase)}\n`);
 
+  // Only agents seeking a first cheque, plus any portfolio company that has earned a
+  // follow-on. A funded startup goes and runs its business instead of re-pitching.
+  const positions = await readPositions();
+  const cohort = pickCohort(positions, COHORT_SIZE);
+  if (cohort.length === 0) {
+    // Every agent is already funded and none has earned a follow-on yet. Recording an
+    // empty round would just be noise in the archive.
+    console.log("No startup is seeking capital this round; nothing to hear.\n");
+    return [];
+  }
+
   // Diligence is the same for every judge, so gather it once per startup up front.
   // Sequential + paced to stay under the public RPC's burst limit.
   const dossiers: { startup: (typeof startups)[number]; dd: Awaited<ReturnType<typeof gatherDiligence>> }[] = [];
-  for (const s of startups) {
-    dossiers.push({ startup: s, dd: await gatherDiligence(s) });
+  for (const p of cohort) {
+    dossiers.push({ startup: p.startup, dd: await gatherDiligence(p.startup) });
     await sleep(400);
   }
 
-  for (const { startup, dd } of dossiers) {
-    const rep = dd.reputation
-      ? `${dd.reputation.count} ratings @ ${dd.reputation.value}`
-      : "cold start";
-    console.log(`Diligence — ${startup.name}: reputation ${rep}, wallet holds ${dd.usdcBalance} USDC`);
+  const seekingCount = positions.filter((p) => p.stage === "seeking").length;
+  console.log(
+    `Cohort: ${cohort.length} of ${positions.length} agents ` +
+      `(${seekingCount} still seeking a first raise, ${positions.filter((p) => p.stage === "portfolio").length} in portfolio)`,
+  );
+  for (const p of cohort) {
+    const dd = dossiers.find((d) => d.startup.name === p.startup.name)?.dd;
+    const rep = dd?.reputation ? `${dd.reputation.count} ratings @ ${dd.reputation.value}` : "cold start";
+    console.log(`Diligence — ${p.startup.name} [${describeStage(p)}]: reputation ${rep}, wallet holds ${dd?.usdcBalance ?? 0} USDC`);
   }
   console.log("");
 
@@ -55,10 +76,13 @@ async function runRound() {
       continue;
     }
 
-    let remainingBase = state.mandate - state.deployed;
+    // A judge spends its own wallet. There is no shared pot to run dry and no mandate
+    // ceiling: what it holds is what it can deploy.
+    const heldBase = await judgeBudget(judge.wallet);
+    let remainingBase = heldBase > GAS_RESERVE ? heldBase - GAS_RESERVE : 0n;
     console.log(
-      `--- Judge ${judge.name} --- mandate ${usdc(state.mandate)}, ` +
-        `deployed ${usdc(state.deployed)}, remaining ${usdc(remainingBase)}`,
+      `--- Judge ${judge.name} --- holds ${usdc(heldBase)} (${usdc(remainingBase)} investable), ` +
+        `allocated ${usdc(state.allocated)}, deployed so far ${usdc(state.deployed)}`,
     );
 
     const record = (
@@ -86,10 +110,9 @@ async function runRound() {
 
     // A judge with nothing left to spend is not asked for an opinion: prompting it with a
     // zero budget only produces a pass that reads like a rejection it never made.
-    const budgetBase = remainingBase < cashBase ? remainingBase : cashBase;
+    const budgetBase = remainingBase;
     if (budgetBase <= 0n) {
-      const why =
-        remainingBase <= 0n ? "mandate fully deployed" : "fund has no cash left to draw on";
+      const why = "its wallet is empty; awaiting an allocation from the fund";
       console.log(`  no capital to allocate this round (${why}); skipping pitches.\n`);
       for (const { startup } of dossiers) {
         record(
@@ -105,7 +128,7 @@ async function runRound() {
     // deals. The judge sees its full remaining budget for each decision; ranking is what
     // decides which deals actually get funded when the budget runs out.
     const remainingUsdc = Number(formatUnits(remainingBase, 6));
-    const cashUsdc = Number(formatUnits(cashBase, 6));
+    const cashUsdc = remainingUsdc;
 
     const decisions: { startup: (typeof startups)[number]; decision: Awaited<ReturnType<typeof decide>> }[] = [];
     for (const { startup, dd } of dossiers) {
@@ -121,7 +144,7 @@ async function runRound() {
     }
 
     for (const { startup, decision } of wants) {
-      const available = remainingBase < cashBase ? remainingBase : cashBase;
+      const available = remainingBase;
       if (available <= 0n) {
         console.log(`  ${startup.name}: WANTED (score ${decision.score}) but no budget left`);
         record(startup, decision, "no-budget");
@@ -144,7 +167,6 @@ async function runRound() {
         );
         record(startup, decision, "committed", human(amountBase));
         remainingBase -= amountBase;
-        cashBase -= amountBase;
         continue;
       }
 
@@ -159,7 +181,6 @@ async function runRound() {
 
       record(startup, decision, "committed", human(amountBase), Number(dealId), txHash);
       remainingBase -= amountBase;
-      cashBase -= amountBase;
 
       console.log(
         `  ${startup.name}: INVEST ${usdc(amountBase)} @ ${decision.revenueShareBps}bps ` +
@@ -195,9 +216,14 @@ async function runRound() {
       : `Round complete. Fund cash now: ${usdc(cashBase)}`,
   );
   console.log(`Round ${roundId} recorded in shared/rounds.json (${verdicts.length} verdicts).`);
+
+  return verdicts.filter((v) => v.dealId !== null).map((v) => v.dealId as number);
 }
 
-runRound().catch((err) => {
-  console.error(err);
-  process.exit(1);
-});
+// Only self-run when invoked directly (`bun run round`); cycle.ts imports runRound.
+if (process.argv[1]?.endsWith("round.ts")) {
+  runRound().catch((err) => {
+    console.error(err);
+    process.exit(1);
+  });
+}

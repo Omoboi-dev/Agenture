@@ -43,6 +43,10 @@ const KNOWN_CLIENTS: Address[] = Array.from(
     [
       addresses.agenture.operator,
       ...addresses.agenture.judges.map((j) => j.wallet),
+      // The customer agent buys these services, so its rating is an independent signal
+      // about an agent the fund has never backed. This is what lets a newcomer arrive
+      // with a track record instead of every new pitch being a cold start.
+      addresses.agenture.customer.wallet,
       ...HISTORICAL_RATERS,
     ].map((a) => a.toLowerCase()),
   ),

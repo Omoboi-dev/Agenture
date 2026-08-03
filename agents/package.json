@@ -4,12 +4,15 @@
   "type": "module",
   "scripts": {
     "typecheck": "tsc --noEmit",
-    "setup": "tsx src/setup.ts",
     "provision-circle": "tsx src/provision-circle.ts",
     "onboard-circle": "tsx src/onboard-circle.ts",
     "round": "tsx src/round.ts",
     "close-loop": "tsx src/close-loop.ts",
-    "recapitalize": "tsx src/recapitalize.ts"
+    "cycle": "tsx src/cycle.ts",
+    "allocate": "tsx src/allocate.ts",
+    "generate-startups": "tsx src/generate-startups.ts",
+    "provision-startups": "tsx src/provision-startups.ts",
+    "seed-traction": "tsx src/seed-traction.ts"
   },
   "dependencies": {
     "@ai-sdk/openai-compatible": "^1.0.0",
