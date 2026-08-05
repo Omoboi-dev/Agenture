@@ -54,6 +54,12 @@ jobs:
           LLM_API_KEY: ${{ secrets.LLM_API_KEY }}
           LLM_MODEL: ${{ secrets.LLM_MODEL }}
           ARC_RPC_URL: ${{ secrets.ARC_RPC_URL }}
+          # Optional. If the primary model provider is down, a failed call becomes a
+          # safe pass, so the cycle would quietly record a round where every judge
+          # rejects everything. Set these to a different provider to avoid that.
+          LLM_FALLBACK_BASE_URL: ${{ secrets.LLM_FALLBACK_BASE_URL }}
+          LLM_FALLBACK_API_KEY: ${{ secrets.LLM_FALLBACK_API_KEY }}
+          LLM_FALLBACK_MODEL: ${{ secrets.LLM_FALLBACK_MODEL }}
         run: bun run cycle
 
       - name: Commit the round archive
