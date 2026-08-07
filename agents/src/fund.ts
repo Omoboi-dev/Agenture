@@ -10,10 +10,24 @@ const FUND = addresses.agenture.fund as Address;
 export type JudgeState = {
   active: boolean;
   agentId: bigint;
-  allocated: bigint; // cumulative USDC handed to this judge's wallet
+  committed: bigint; // capital the fund has promised, grows with the judge's returns
+  called: bigint; // how much of that the judge has drawn into its own wallet
   deployed: bigint;
   returned: bigint;
 };
+
+// Commitment a judge has not drawn yet: what it could call for right now.
+export async function undrawn(judge: Address): Promise<bigint> {
+  return (await withRpcRetry(() =>
+    publicClient.readContract({ address: FUND, abi: fundAbi, functionName: "undrawn", args: [judge] }),
+  )) as bigint;
+}
+
+// A capital call, signed by the judge itself. This is the judge deciding it needs money
+// and taking it against its commitment, rather than the operator pushing capital at it.
+export async function callCapital(judgeWalletId: string, amount: bigint): Promise<string> {
+  return circleExecute(judgeWalletId, FUND, "callCapital(uint256)", [amount.toString()]);
+}
 
 // What a judge can actually spend: the USDC sitting in its own wallet. There is no
 // mandate ceiling any more, the token balance is the limit.

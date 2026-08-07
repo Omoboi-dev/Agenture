@@ -4,17 +4,19 @@ import { formatUnits, parseUnits, maxUint256 } from "viem";
 import { publicClient, walletFromKey, withRpcRetry, waitReceipt } from "./chain.js";
 import { addresses } from "./config.js";
 import { erc20Abi, fundAbi } from "./abis.js";
-import { fundCash, getJudgeState, judgeBudget } from "./fund.js";
+import { fundCash, getJudgeState, judgeBudget, undrawn } from "./fund.js";
 import { loadJudges } from "./judges.js";
 import { circleExecute } from "./circle.js";
 
 // Operator capital management, safe to re-run.
 //
-//   deposit -> register -> allocate -> approve
+//   deposit -> register -> commit -> approve
 //
-// Allocating is a real USDC transfer out to a judge's own wallet, so after this a judge
-// is an independent investor spending its own balance. Each judge then approves the Fund
-// once, because `invest` pulls from the judge rather than from the pool.
+// Committing moves nothing. It records what the fund has promised a judge, and the judge
+// draws that down itself with a capital call when it decides it needs the money. The
+// operator's job ends here: after this, capital reaches a judge only because the judge
+// asked for it. Each judge also approves the Fund once, because `invest` pulls from the
+// judge's wallet rather than from the pool.
 
 const USDC = addresses.usdc as Address;
 const FUND = addresses.agenture.fund as Address;
@@ -37,7 +39,7 @@ async function balanceOf(addr: Address): Promise<bigint> {
 
 async function main() {
   const deposit = U(process.env.DEPOSIT_USDC ?? "0");
-  const perJudge = U(process.env.ALLOCATE_USDC ?? "0");
+  const perJudge = U(process.env.COMMIT_USDC ?? process.env.ALLOCATE_USDC ?? "0");
   const op = walletFromKey(envKey("DEPLOYER_PRIVATE_KEY"));
   const operator = addresses.agenture.operator as Address;
   const judges = loadJudges();
@@ -62,8 +64,8 @@ async function main() {
     await sleep(1500);
   }
 
-  // 2. Register each judge. Re-registering is safe now: it refreshes the identity and
-  // leaves allocated/deployed/returned untouched.
+  // 2. Register each judge. Re-registering is safe: it refreshes the identity and leaves
+  // committed/called/deployed/returned untouched.
   for (const j of judges) {
     const state = await getJudgeState(j.wallet);
     if (state.active && state.agentId === j.agentId) {
@@ -84,24 +86,20 @@ async function main() {
   }
   console.log("");
 
-  // 3. Hand capital to each judge's wallet.
+  // 3. Commit capital to each judge. Nothing moves: the judge draws this down itself,
+  // when it decides it needs to, by calling capital during a round.
   if (perJudge > 0n) {
     for (const j of judges) {
-      const cash = await fundCash();
-      if (cash < perJudge) {
-        console.log(`${j.key}: fund only holds ${fmt(cash)} USDC, skipping allocation.`);
-        continue;
-      }
       const h = await withRpcRetry(() =>
         op.writeContract({
           address: FUND,
           abi: fundAbi,
-          functionName: "allocateToJudge",
+          functionName: "commitCapital",
           args: [j.wallet, perJudge],
         }),
       );
       await waitReceipt(h);
-      console.log(`${j.key}: allocated ${fmt(perJudge)} USDC, now holds ${fmt(await judgeBudget(j.wallet))}.`);
+      console.log(`${j.key}: committed ${fmt(perJudge)} USDC, ${fmt(await undrawn(j.wallet))} undrawn.`);
       await sleep(2000);
     }
     console.log("");
@@ -130,8 +128,12 @@ async function main() {
 
   console.log(`\nFund cash now ${fmt(await fundCash())} USDC.`);
   for (const j of judges) {
-    console.log(`  ${j.key.padEnd(6)} holds ${fmt(await judgeBudget(j.wallet))} USDC`);
+    console.log(
+      `  ${j.key.padEnd(6)} holds ${fmt(await judgeBudget(j.wallet))} USDC, ` +
+        `${fmt(await undrawn(j.wallet))} committed but undrawn`,
+    );
   }
+  console.log("\nJudges draw this themselves at the start of a round. Nothing else to send.");
 }
 
 main().catch((err) => {

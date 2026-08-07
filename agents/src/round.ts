@@ -4,7 +4,7 @@ import { loadJudges } from "./judges.js";
 import { startups } from "./startups.js";
 import { gatherDiligence } from "./diligence.js";
 import { decide } from "./judge.js";
-import { getJudgeState, fundCash, invest, judgeBudget } from "./fund.js";
+import { getJudgeState, fundCash, invest, judgeBudget, undrawn, callCapital } from "./fund.js";
 import { appendRound, nextRoundId, type Dossier, type Verdict } from "./roundlog.js";
 import { readPositions, pickCohort, describeStage } from "./lifecycle.js";
 
@@ -13,6 +13,10 @@ const human = (base: bigint) => Number(formatUnits(base, 6));
 const DRY_RUN = process.env.DRY_RUN === "1" || process.env.DRY_RUN === "true";
 // How many pitches a single round hears. Small enough that a round stays readable.
 const COHORT_SIZE = Number(process.env.COHORT_SIZE ?? "4");
+// A judge tops itself up when its wallet drops under this, drawing up to the target from
+// whatever commitment it has left.
+const CALL_WHEN_BELOW = parseUnits(process.env.CALL_WHEN_BELOW_USDC ?? "10", 6);
+const CALL_TARGET = parseUnits(process.env.CALL_TARGET_USDC ?? "25", 6);
 // On Arc gas is USDC, so a judge that deploys its entire balance cannot pay for the
 // transaction that deploys it. Hold a little back.
 const GAS_RESERVE = parseUnits(process.env.JUDGE_GAS_RESERVE_USDC ?? "0.5", 6);
@@ -34,9 +38,8 @@ export async function runRound(): Promise<number[]> {
 
   console.log(`=== Agenture round ${roundId}${DRY_RUN ? " (dry run, no capital moves)" : ""} ===\n`);
 
-  let cashBase = await fundCash();
-  const cashBeforeBase = cashBase;
-  console.log(`Fund cash: ${usdc(cashBase)}\n`);
+  const cashBeforeBase = await fundCash();
+  console.log(`Fund cash: ${usdc(cashBeforeBase)}\n`);
 
   // Only agents seeking a first cheque, plus any portfolio company that has earned a
   // follow-on. A funded startup goes and runs its business instead of re-pitching.
@@ -76,13 +79,29 @@ export async function runRound(): Promise<number[]> {
       continue;
     }
 
-    // A judge spends its own wallet. There is no shared pot to run dry and no mandate
-    // ceiling: what it holds is what it can deploy.
-    const heldBase = await judgeBudget(judge.wallet);
+    // A judge spends its own wallet. Before it hears anything it checks whether it is
+    // carrying enough to act, and issues a capital call against its commitment if not.
+    // The judge signs this itself: nobody hands it money.
+    let heldBase = await judgeBudget(judge.wallet);
+    const callable = await undrawn(judge.wallet);
+    if (heldBase < CALL_WHEN_BELOW && callable > 0n && !DRY_RUN) {
+      const wanted = callable < CALL_TARGET ? callable : CALL_TARGET;
+      try {
+        const hash = await callCapital(judge.walletId, wanted);
+        console.log(
+          `--- Judge ${judge.name} --- called ${usdc(wanted)} of capital ` +
+            `(held ${usdc(heldBase)}, ${usdc(callable)} committed) tx ${hash}`,
+        );
+        heldBase = await judgeBudget(judge.wallet);
+      } catch (e) {
+        console.log(`  capital call failed: ${String((e as Error).message).split("\n")[0]}`);
+      }
+    }
+
     let remainingBase = heldBase > GAS_RESERVE ? heldBase - GAS_RESERVE : 0n;
     console.log(
       `--- Judge ${judge.name} --- holds ${usdc(heldBase)} (${usdc(remainingBase)} investable), ` +
-        `allocated ${usdc(state.allocated)}, deployed so far ${usdc(state.deployed)}`,
+        `${usdc(await undrawn(judge.wallet))} still callable, deployed so far ${usdc(state.deployed)}`,
     );
 
     const record = (
@@ -113,8 +132,11 @@ export async function runRound(): Promise<number[]> {
     // zero budget only produces a pass that reads like a rejection it never made.
     const budgetBase = remainingBase;
     if (budgetBase <= 0n) {
-      const why = "its wallet is empty; awaiting an allocation from the fund";
-      console.log(`  no capital to allocate this round (${why}); skipping pitches.\n`);
+      const why =
+        callable > 0n
+          ? "its wallet is empty and its capital call did not go through"
+          : "its wallet is empty and it has no commitment left to call on";
+      console.log(`  nothing to invest this round (${why}); skipping pitches.\n`);
       for (const { startup } of dossiers) {
         record(
           startup,
@@ -203,10 +225,14 @@ export async function runRound(): Promise<number[]> {
   // A dry run is a preview, not history. Recording it would put rounds that never moved
   // capital into the public archive the frontend reads.
   if (DRY_RUN) {
-    console.log(`Dry run complete. Projected fund cash after these deals: ${usdc(cashBase)}`);
+    console.log("Dry run complete. No capital moved.");
     console.log("Not recorded: dry runs stay out of the round archive.");
     return [];
   }
+
+  // Judges spend their own wallets, so investing leaves fund cash untouched. What does
+  // move it is a capital call, so this has to be read back rather than tracked.
+  const cashAfterBase = await fundCash();
 
   appendRound({
     id: roundId,
@@ -214,12 +240,12 @@ export async function runRound(): Promise<number[]> {
     endedAt: new Date().toISOString(),
     dryRun: DRY_RUN,
     cashBeforeUsdc: human(cashBeforeBase),
-    cashAfterUsdc: human(cashBase),
+    cashAfterUsdc: human(cashAfterBase),
     dossiers: dossierLogs,
     verdicts,
   });
 
-  console.log(`Round complete. Fund cash now: ${usdc(cashBase)}`);
+  console.log(`Round complete. Fund cash now: ${usdc(cashAfterBase)}`);
   console.log(`Round ${roundId} recorded in shared/rounds.json (${verdicts.length} verdicts).`);
 
   return verdicts.filter((v) => v.dealId !== null).map((v) => v.dealId as number);

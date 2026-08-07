@@ -132,7 +132,8 @@ export const fundAbi = [
         components: [
           { name: "active", type: "bool" },
           { name: "agentId", type: "uint256" },
-          { name: "allocated", type: "uint256" },
+          { name: "committed", type: "uint256" },
+          { name: "called", type: "uint256" },
           { name: "deployed", type: "uint256" },
           { name: "returned", type: "uint256" },
         ],
@@ -188,13 +189,27 @@ export const fundAbi = [
   },
   {
     type: "function",
-    name: "allocateToJudge",
+    name: "commitCapital",
     stateMutability: "nonpayable",
     inputs: [
       { name: "judge", type: "address" },
       { name: "amount", type: "uint256" },
     ],
     outputs: [],
+  },
+  {
+    type: "function",
+    name: "callCapital",
+    stateMutability: "nonpayable",
+    inputs: [{ name: "amount", type: "uint256" }],
+    outputs: [],
+  },
+  {
+    type: "function",
+    name: "undrawn",
+    stateMutability: "view",
+    inputs: [{ name: "judge", type: "address" }],
+    outputs: [{ name: "", type: "uint256" }],
   },
   {
     type: "function",
@@ -205,7 +220,7 @@ export const fundAbi = [
   },
   {
     type: "function",
-    name: "totalAllocated",
+    name: "totalCommitted",
     stateMutability: "view",
     inputs: [],
     outputs: [{ name: "", type: "uint256" }],

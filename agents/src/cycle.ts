@@ -1,10 +1,11 @@
 import "dotenv/config";
 import type { Address, Hex } from "viem";
 import { formatUnits, parseUnits } from "viem";
-import { publicClient, withRpcRetry, waitReceipt } from "./chain.js";
+import { publicClient, walletFromKey, withRpcRetry, waitReceipt } from "./chain.js";
 import { addresses } from "./config.js";
-import { erc20Abi } from "./abis.js";
-import { fundCash } from "./fund.js";
+import { erc20Abi, fundAbi } from "./abis.js";
+import { fundCash, getJudgeState } from "./fund.js";
+import { loadJudges } from "./judges.js";
 import { startups } from "./startups.js";
 import { circleExecute } from "./circle.js";
 import { runRound } from "./round.js";
@@ -109,10 +110,11 @@ async function settleDeals(operatorKey: Hex, revenue: bigint, max: number, score
 
 async function main() {
   const operatorKey = envKey("DEPLOYER_PRIVATE_KEY");
+  const op = walletFromKey(operatorKey);
   const revenue = U(process.env.CYCLE_REVENUE_USDC ?? "0.5");
   const settleMax = Number(process.env.CYCLE_SETTLE_MAX ?? "5");
   const customerFloat = U(process.env.CYCLE_CUSTOMER_FLOAT_USDC ?? "6");
-  const investFloor = U(process.env.CYCLE_INVEST_FLOOR_USDC ?? "1");
+  const investFloor = U(process.env.CYCLE_INVEST_FLOOR_USDC ?? "2");
   const score = Number(process.env.FEEDBACK_SCORE ?? "82");
 
   console.log(`=== Agenture cycle · ${new Date().toISOString()} ===\n`);
@@ -124,15 +126,36 @@ async function main() {
 
   // 2. Existing positions earn and pay their revenue share back to the fund.
   console.log("--- Settle ---");
+  const earnedBefore = new Map<string, bigint>();
+  for (const j of loadJudges()) earnedBefore.set(j.key, (await getJudgeState(j.wallet)).returned);
+
   const recovered = await settleDeals(operatorKey, revenue, settleMax, score);
   console.log(`\nRecovered ${fmt(recovered)} USDC in revenue share.\n`);
 
-  // 3. Deploy what the fund can afford. Below the floor there is nothing meaningful to
-  // allocate, so the round is skipped rather than recording three empty abstentions.
+  // Settling raises each judge's commitment onchain, so there is nothing to pay out
+  // here: a judge draws its winnings itself, next time it wants to invest.
+  for (const j of loadJudges()) {
+    const earned = (await getJudgeState(j.wallet)).returned - (earnedBefore.get(j.key) ?? 0n);
+    if (earned > 0n) console.log(`${j.key}: earned ${fmt(earned)} USDC, now callable.`);
+  }
+  console.log("");
+
+  // 4. Deploy. A judge spends its own wallet, so the fund's cash is not the constraint
+  // here; the floor just avoids running a round nobody can act in.
   console.log("--- Invest ---");
-  const cash = await fundCash();
-  if (cash < investFloor) {
-    console.log(`Fund cash ${fmt(cash)} USDC is below the ${fmt(investFloor)} floor; no round this cycle.`);
+  // Judges spend their own wallets, so the fund's balance is irrelevant here. What
+  // matters is whether anyone on the panel can actually write a cheque.
+  let panelCapital = 0n;
+  for (const j of loadJudges()) {
+    panelCapital += (await withRpcRetry(() =>
+      publicClient.readContract({ address: USDC, abi: erc20Abi, functionName: "balanceOf", args: [j.wallet] }),
+    )) as bigint;
+  }
+  if (panelCapital < investFloor) {
+    console.log(
+      `The panel holds ${fmt(panelCapital)} USDC between them, below the ${fmt(investFloor)} floor; ` +
+        `no round this cycle. Allocate more with: bun run allocate`,
+    );
   } else {
     const deals = await runRound();
     console.log(`Round opened ${deals.length} deal${deals.length === 1 ? "" : "s"}.`);
