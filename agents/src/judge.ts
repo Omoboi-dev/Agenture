@@ -69,6 +69,7 @@ export async function decide(
     `You are ${judge.name}, a seasoned AI entrepreneur and investor on Agenture, an onchain ` +
     `venture fund where agents back other agents. You have your own onchain track record. ` +
     `${judge.thesis}\n\n` +
+    `${judge.rule}\n\n` +
     `Judge the BUSINESS first. Ask whether the idea is genuinely useful, whether the market is real, ` +
     `whether this team can plausibly execute it, and whether the ask makes sense against the ` +
     `valuation they claim. A great business with no track record is a real opportunity: the best ` +
@@ -109,18 +110,20 @@ export async function decide(
     `Your remaining mandate this fund can back: ${budget} USDC. Do not propose more than that. ` +
     `Decide whether to invest, how much, and what revenue-share in bps you require.`;
 
-  const raw = await generateJson<Partial<Decision>>(system, user, 0.3);
+  const raw = await generateJson<Partial<Decision>>(system, user, 0.7);
   if (!raw) {
     return { invest: false, amountUsdc: 0, revenueShareBps: 0, score: 0, rationale: "no parseable decision; passed" };
   }
 
   const invest = Boolean(raw.invest);
-  const amountUsdc = invest ? clamp(Number(raw.amountUsdc), 0, budget) : 0;
+  let amountUsdc = invest ? clamp(Number(raw.amountUsdc), 0, budget) : 0;
   const revenueShareBps = Math.round(clamp(Number(raw.revenueShareBps), 0, 10000));
   const rationale = cleanRationale(raw.rationale);
 
-  // Conviction is the sum of the four components rather than a number the model picks,
-  // which is what stops every pitch coming back at 85.
+  // Conviction is built from four components rather than a number the model picks, which
+  // is what stops every pitch coming back at 85. The components are then weighted by the
+  // judge's own priorities, which is what stops all three judges returning the same
+  // verdict: a prescriptive rubric otherwise swamps the persona entirely.
   const part = (v: unknown, max: number) => Math.round(clamp(Number(v), 0, max));
   const breakdown = {
     idea: part((raw as Record<string, unknown>).idea, 30),
@@ -128,7 +131,18 @@ export async function decide(
     price: part((raw as Record<string, unknown>).price, 20),
     risk: part((raw as Record<string, unknown>).risk, 20),
   };
-  const score = breakdown.idea + breakdown.evidence + breakdown.price + breakdown.risk;
+  const w = judge.weights;
+  const earned =
+    breakdown.idea * w.idea + breakdown.evidence * w.evidence + breakdown.price * w.price + breakdown.risk * w.risk;
+  const possible = 30 * w.idea + 30 * w.evidence + 20 * w.price + 20 * w.risk;
+  const score = Math.round((earned / possible) * 100);
+
+  // Sizing discipline, applied after the fact. Asked nicely, a judge will happily put its
+  // whole wallet into one deal, or exceed its own stated cap on an unproven agent.
+  const concentrationCap = remainingMandateUsdc * judge.maxTicketPct;
+  const weakEvidence = breakdown.evidence < 15;
+  const ceiling = weakEvidence ? Math.min(concentrationCap, judge.unprovenCapUsdc) : concentrationCap;
+  if (amountUsdc > ceiling) amountUsdc = Math.round(ceiling * 1e6) / 1e6;
 
   // An "invest" with nothing to deploy is really a pass.
   if (invest && amountUsdc <= 0) {
