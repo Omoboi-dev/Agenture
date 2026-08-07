@@ -61,21 +61,50 @@ contract FundTest is Test {
         usdc.approve(address(fund), 1000 * U);
         fund.depositCapital(1000 * U);
         fund.registerJudge(judgeA, 851590);
-        fund.allocateToJudge(judgeA, 600 * U);
+        fund.commitCapital(judgeA, 600 * U);
         vm.stopPrank();
+
+        // The judge draws its own capital. Nobody hands it anything.
+        vm.prank(judgeA);
+        fund.callCapital(600 * U);
 
         // A judge spends its own balance, so it approves the fund to move its USDC.
         vm.prank(judgeA);
         usdc.approve(address(fund), type(uint256).max);
     }
 
-    function test_allocate_movesCapitalToJudgeWallet() public {
-        assertEq(usdc.balanceOf(judgeA), 600 * U, "judge holds its own capital");
-        assertEq(fund.cash(), 400 * U, "fund cash reduced by the allocation");
-        assertEq(fund.totalAllocated(), 600 * U, "allocation tracked");
-        // Allocating moves USDC without changing what the fund is worth.
-        assertEq(fund.nav(), 1000 * U, "nav unchanged by allocation");
+    function test_capitalCall_drawsAgainstCommitment() public {
+        assertEq(usdc.balanceOf(judgeA), 600 * U, "judge drew its own capital");
+        assertEq(fund.cash(), 400 * U, "fund cash reduced by the call");
+        assertEq(fund.totalCalled(), 600 * U, "call tracked");
+        assertEq(fund.undrawn(judgeA), 0, "commitment fully drawn");
+        // A capital call moves USDC without changing what the fund is worth.
+        assertEq(fund.nav(), 1000 * U, "nav unchanged by the call");
         assertEq(fund.judgeBudget(judgeA), 600 * U, "budget is the wallet balance");
+    }
+
+    function test_commit_movesNothingUntilCalled() public {
+        vm.prank(operator);
+        fund.commitCapital(judgeA, 100 * U);
+        assertEq(fund.undrawn(judgeA), 100 * U, "commitment available");
+        assertEq(usdc.balanceOf(judgeA), 600 * U, "committing alone moves no USDC");
+
+        vm.prank(judgeA);
+        fund.callCapital(40 * U);
+        assertEq(usdc.balanceOf(judgeA), 640 * U, "judge drew part of it");
+        assertEq(fund.undrawn(judgeA), 60 * U, "rest stays undrawn");
+    }
+
+    function test_revert_callBeyondCommitment() public {
+        vm.prank(judgeA);
+        vm.expectRevert(bytes("exceeds commitment"));
+        fund.callCapital(U);
+    }
+
+    function test_revert_callCapital_notAJudge() public {
+        vm.prank(stranger);
+        vm.expectRevert(bytes("not a judge"));
+        fund.callCapital(U);
     }
 
     function test_registerJudge_doesNotWipeRecord() public {
@@ -88,7 +117,8 @@ contract FundTest is Test {
         Fund.Judge memory j = fund.getJudge(judgeA);
         assertEq(j.agentId, 999, "identity updated");
         assertEq(j.deployed, 200 * U, "deployed survives re-registration");
-        assertEq(j.allocated, 600 * U, "allocation survives re-registration");
+        assertEq(j.committed, 600 * U, "commitment survives re-registration");
+        assertEq(j.called, 600 * U, "drawdown survives re-registration");
     }
 
     function test_invest_movesCapitalAndTracksJudge() public {
@@ -127,6 +157,9 @@ contract FundTest is Test {
 
         Fund.Judge memory j = fund.getJudge(judgeA);
         assertEq(j.returned, cut, "judge credited");
+        // Winnings raise what the judge may draw next, rather than being paid out.
+        assertEq(j.committed, 600 * U + cut, "returns grow the commitment");
+        assertEq(fund.undrawn(judgeA), cut, "and become callable");
         assertEq(fund.judgeRoiBps(judgeA), (cut * 10000) / (200 * U), "roi");
         assertEq(fund.nav(), 1000 * U + cut, "nav grew by returns");
     }
@@ -145,16 +178,16 @@ contract FundTest is Test {
         fund.invest(startup, 601 * U, 1000, "x");
     }
 
-    function test_revert_allocateToUnregisteredJudge() public {
+    function test_revert_commitToUnregisteredJudge() public {
         vm.prank(operator);
         vm.expectRevert(bytes("not a judge"));
-        fund.allocateToJudge(stranger, U);
+        fund.commitCapital(stranger, U);
     }
 
-    function test_revert_allocate_onlyOperator() public {
+    function test_revert_commit_onlyOperator() public {
         vm.prank(stranger);
         vm.expectRevert(bytes("not operator"));
-        fund.allocateToJudge(judgeA, U);
+        fund.commitCapital(judgeA, U);
     }
 
     function test_revert_recordReturn_onlyRevenueShare() public {

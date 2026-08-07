@@ -11,21 +11,25 @@ interface IRevenueShare {
     function registerDeal(uint256 dealId, address startup, uint16 revenueShareBps) external;
 }
 
-/// The LP vehicle and the book of record. The fund does not pay for deals: it *allocates*
-/// capital, moving real USDC out to a judge's own wallet. From that point a judge is an
-/// independent investor spending its own balance, and `invest` pulls from the judge, not
-/// from this contract.
+/// The LP vehicle and the book of record. The fund does not push capital at judges and it
+/// does not pay for deals. It *commits* capital, and a judge draws that commitment down
+/// itself, when it decides it needs to, exactly as a general partner issues a capital call
+/// against what its limited partners have committed.
 ///
-/// The consequence worth knowing: a judge's spending limit is its USDC balance, enforced
-/// by the token itself. There is no mandate ceiling to configure, and therefore no way to
-/// reset a judge's counters by re-registering it.
+/// So the operator funds this contract once and then stops. Nobody hands a judge money:
+/// the judge calls `callCapital`, the USDC lands in its own wallet, and `invest` spends
+/// from that wallet rather than from here.
+///
+/// A judge's revenue share increases its commitment, so a judge that backs winners can
+/// draw more later. Earnings are not paid out to it; they become capital it may call.
 contract Fund {
     struct Judge {
         bool active;
         uint256 agentId; // ERC-8004 identity, for off-chain reputation attribution
-        uint256 allocated; // cumulative USDC handed to this judge's wallet
+        uint256 committed; // capital the fund has promised it, grows with its returns
+        uint256 called; // how much of that it has drawn into its own wallet
         uint256 deployed; // cumulative USDC it has invested
-        uint256 returned; // revenue-share received back so far
+        uint256 returned; // revenue-share its deals have paid back to the fund
     }
 
     enum DealStatus {
@@ -48,7 +52,8 @@ contract Fund {
     IRevenueShare public revenueShare;
 
     uint256 public totalCapital; // cumulative deposited by LPs/operator
-    uint256 public totalAllocated; // cumulative handed out to judge wallets
+    uint256 public totalCommitted; // cumulative promised to judges
+    uint256 public totalCalled; // cumulative drawn down by judges
     uint256 public totalDeployed; // cumulative invested into deals
     uint256 public totalReturned; // cumulative revenue-share received back
     uint256 public totalOutstanding; // book value of active positions
@@ -59,7 +64,8 @@ contract Fund {
 
     event CapitalDeposited(address indexed from, uint256 amount);
     event JudgeRegistered(address indexed judge, uint256 agentId);
-    event CapitalAllocated(address indexed judge, uint256 amount);
+    event CapitalCommitted(address indexed judge, uint256 amount, uint256 totalCommitment);
+    event CapitalCalled(address indexed judge, uint256 amount, uint256 undrawn);
     event Invested(
         uint256 indexed dealId,
         address indexed judge,
@@ -103,19 +109,34 @@ contract Fund {
         emit JudgeRegistered(judge, agentId);
     }
 
-    /// Hand capital to a judge. This is a real transfer: the USDC leaves the fund and
-    /// lands in the judge's wallet, which is what makes the judge an independent investor
-    /// rather than a permission to spend a shared pot.
-    function allocateToJudge(address judge, uint256 amount) external onlyOperator {
+    /// Commit capital to a judge. Nothing moves here: this is the promise a limited
+    /// partner makes, and the judge decides when to draw against it.
+    function commitCapital(address judge, uint256 amount) external onlyOperator {
         Judge storage j = judges[judge];
         require(j.active, "not a judge");
         require(amount > 0, "zero amount");
 
-        j.allocated += amount;
-        totalAllocated += amount;
+        j.committed += amount;
+        totalCommitted += amount;
+        emit CapitalCommitted(judge, amount, j.committed);
+    }
 
-        require(usdc.transfer(judge, amount), "allocation failed");
-        emit CapitalAllocated(judge, amount);
+    /// A capital call, made by the judge itself. It draws against its own undrawn
+    /// commitment and the USDC lands in its wallet. No operator involvement: this is the
+    /// point at which a judge stops being an account someone tops up and starts being an
+    /// investor that manages its own balance sheet.
+    function callCapital(uint256 amount) external {
+        Judge storage j = judges[msg.sender];
+        require(j.active, "not a judge");
+        require(amount > 0, "zero amount");
+        require(j.called + amount <= j.committed, "exceeds commitment");
+        require(amount <= usdc.balanceOf(address(this)), "fund lacks the cash");
+
+        j.called += amount;
+        totalCalled += amount;
+
+        require(usdc.transfer(msg.sender, amount), "capital call failed");
+        emit CapitalCalled(msg.sender, amount, j.committed - j.called);
     }
 
     /// A judge invests its own capital into a startup. Called by the judge's own wallet,
@@ -165,9 +186,18 @@ contract Fund {
         require(msg.sender == address(revenueShare), "only revenueShare");
         Deal storage d = deals[dealId];
         d.returned += amount;
-        judges[d.judge].returned += amount;
         totalReturned += amount;
+
+        // A judge's winnings raise what it may draw later. The cash stays in the fund
+        // until the judge calls for it, so backing winners earns the right to more
+        // capital rather than an automatic payout.
+        Judge storage j = judges[d.judge];
+        j.returned += amount;
+        j.committed += amount;
+        totalCommitted += amount;
+
         emit ReturnRecorded(dealId, amount);
+        emit CapitalCommitted(d.judge, amount, j.committed);
     }
 
     function closeDeal(uint256 dealId) external {
@@ -190,9 +220,16 @@ contract Fund {
         return usdc.balanceOf(judge);
     }
 
+    /// Commitment a judge has not yet drawn. What it could call for today, subject to the
+    /// fund actually holding the cash.
+    function undrawn(address judge) public view returns (uint256) {
+        Judge storage j = judges[judge];
+        return j.committed > j.called ? j.committed - j.called : 0;
+    }
+
     /// Cash in the fund, capital sitting in judges' wallets, and the book value of live
-    /// positions. Allocating to a judge moves USDC but does not change what the fund is
-    /// worth, so NAV has to count the judges' balances too.
+    /// positions. A capital call moves USDC but does not change what the fund is worth,
+    /// so NAV has to count the judges' balances too.
     function nav() external view returns (uint256) {
         uint256 total = usdc.balanceOf(address(this)) + totalOutstanding;
         for (uint256 i = 0; i < judgeList.length; i++) {
