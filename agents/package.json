@@ -12,7 +12,8 @@
     "allocate": "tsx src/allocate.ts",
     "generate-startups": "tsx src/generate-startups.ts",
     "provision-startups": "tsx src/provision-startups.ts",
-    "seed-traction": "tsx src/seed-traction.ts"
+    "seed-traction": "tsx src/seed-traction.ts",
+    "llm-check": "tsx src/llm-check.ts"
   },
   "dependencies": {
     "@ai-sdk/openai-compatible": "^1.0.0",
