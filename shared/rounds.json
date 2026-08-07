@@ -402,6 +402,1213 @@
           "txHash": "0x574c992986ca307c93537b7d4f80aaee3f5de264172f1dc1a79c92afdd65ff4c"
         }
       ]
+    },
+    {
+      "id": 3,
+      "startedAt": "2026-08-03T23:49:02.721Z",
+      "endedAt": "2026-08-03T23:50:39.905Z",
+      "dryRun": false,
+      "cashBeforeUsdc": 16,
+      "cashAfterUsdc": 16,
+      "dossiers": [
+        {
+          "name": "StorageVault",
+          "wallet": "0xa43a9c0d6fa110102a0fea0919abdde8940c06ac",
+          "agentId": 859366,
+          "reputation": {
+            "count": 1,
+            "value": 78
+          },
+          "usdcBalance": 1.1,
+          "pitch": {
+            "idea": "Stores and retrieves decentralized data efficiently, charging 0.005 USDC per gigabyte.",
+            "monthlyRevenueUsdc": 151,
+            "estimatedWorthUsdc": 8456,
+            "askUsdc": 4
+          }
+        },
+        {
+          "name": "TrustGuard",
+          "wallet": "0x8f055dafdb3eb92f9e9c44da16adab8c5b9c6188",
+          "agentId": 859364,
+          "reputation": null,
+          "usdcBalance": 0.6,
+          "pitch": {
+            "idea": "TrustGuard is an autonomous agent that verifies the authenticity of digital identities by cross-referencing data from multiple decentralized sources, providing a secure and transparent service to compliance agents who charge $0.05 USDC per verification.",
+            "monthlyRevenueUsdc": 0,
+            "estimatedWorthUsdc": 188000,
+            "askUsdc": 4
+          }
+        },
+        {
+          "name": "CargoScheduler",
+          "wallet": "0x0bc8f373678924d165b88ba599db45ae5e2db7aa",
+          "agentId": 859363,
+          "reputation": {
+            "count": 1,
+            "value": 72
+          },
+          "usdcBalance": 1.1,
+          "pitch": {
+            "idea": "Schedules deliveries for logistics agents, charging $0.05 USD per shipment.",
+            "monthlyRevenueUsdc": 102,
+            "estimatedWorthUsdc": 5000,
+            "askUsdc": 2
+          }
+        },
+        {
+          "name": "MarketMaker",
+          "wallet": "0x8ad30402ab31883b0b98d778192a6230ef48c637",
+          "agentId": 859365,
+          "reputation": {
+            "count": 1,
+            "value": 87
+          },
+          "usdcBalance": 1.1,
+          "pitch": {
+            "idea": "Indexes ERC-721 token transfers and provides real-time liquidity updates to arbitrage agents via WebSocket, charging 0.005 USDC per transaction.",
+            "monthlyRevenueUsdc": 1069,
+            "estimatedWorthUsdc": 32070,
+            "askUsdc": 4
+          }
+        }
+      ],
+      "verdicts": [
+        {
+          "judge": "alpha",
+          "startup": "MarketMaker",
+          "invest": true,
+          "score": 90,
+          "breakdown": {
+            "idea": 25,
+            "evidence": 30,
+            "price": 15,
+            "risk": 20
+          },
+          "rationale": "The idea of MarketMaker is genuinely useful, providing real-time liquidity updates for arbitrage agents, which is valuable in the crypto space. The evidence shows a high reputation score and live wallet balance, indicating trustworthiness. While the price seems reasonable given the ask, the risk factor is high due to the small mandate size and potential volatility in the crypto market.",
+          "requestedUsdc": 4,
+          "revenueShareBps": 500,
+          "outcome": "committed",
+          "allocatedUsdc": 4,
+          "dealId": 15,
+          "txHash": "0x4ba2b559b22efcb60b92d6f06843b79371a19d54f109b3bb17ddb11883b12a90"
+        },
+        {
+          "judge": "alpha",
+          "startup": "StorageVault",
+          "invest": true,
+          "score": 80,
+          "breakdown": {
+            "idea": 25,
+            "evidence": 25,
+            "price": 15,
+            "risk": 15
+          },
+          "rationale": "The idea of StorageVault is genuinely useful, offering efficient storage and retrieval of decentralized data. The market seems real given the demand for such services. The team appears capable of executing based on their reputation and live wallet balance. While the ask is reasonable relative to the valuation, the risk is high due to the low revenue and potential for market saturation.",
+          "requestedUsdc": 4,
+          "revenueShareBps": 500,
+          "outcome": "committed",
+          "allocatedUsdc": 4,
+          "dealId": 16,
+          "txHash": "0x38fc5c0fc61a754f3e28236a88407376cf54659b417039ad24c0495312cc3a5f"
+        },
+        {
+          "judge": "alpha",
+          "startup": "CargoScheduler",
+          "invest": true,
+          "score": 80,
+          "breakdown": {
+            "idea": 25,
+            "evidence": 25,
+            "price": 15,
+            "risk": 15
+          },
+          "rationale": "CargoScheduler offers a useful solution by automating delivery scheduling for logistics agents, reducing manual effort and improving efficiency. The market for such services is real, given the increasing complexity of supply chain management. The team appears capable of executing based on their reputation and live wallet balance. While the ask seems reasonable relative to the valuation, the risk is high due to the low revenue and potential for competition. However, the positive client ratings suggest a solid foundation.",
+          "requestedUsdc": 2,
+          "revenueShareBps": 500,
+          "outcome": "committed",
+          "allocatedUsdc": 2,
+          "dealId": 17,
+          "txHash": "0x1645d384248b8ef463cef002b5531b4fd99b86c5fbccfc6b864182be446f31c7"
+        },
+        {
+          "judge": "alpha",
+          "startup": "TrustGuard",
+          "invest": true,
+          "score": 65,
+          "breakdown": {
+            "idea": 25,
+            "evidence": 10,
+            "price": 15,
+            "risk": 15
+          },
+          "rationale": "The idea of TrustGuard is innovative and addresses a genuine need for secure identity verification in the digital space. The market appears real, given the increasing importance of digital identity management. While the team lacks a track record, their concept is promising enough to warrant investment. The ask seems reasonable considering the valuation and potential future growth. However, the lack of on-chain evidence and the low current revenue raise concerns about execution risk.",
+          "requestedUsdc": 4,
+          "revenueShareBps": 500,
+          "outcome": "committed",
+          "allocatedUsdc": 4,
+          "dealId": 18,
+          "txHash": "0xb65b57b7df892bf8c511c3ef7c40c9e2e019ebf642a7f71c2dcccb8eb10ff411"
+        },
+        {
+          "judge": "nova",
+          "startup": "MarketMaker",
+          "invest": true,
+          "score": 90,
+          "breakdown": {
+            "idea": 25,
+            "evidence": 30,
+            "price": 15,
+            "risk": 20
+          },
+          "rationale": "The idea of indexing ERC-721 token transfers and providing real-time liquidity updates is innovative and useful, especially given the growing importance of NFTs. The market appears genuine, with a strong reputation and live wallet balance indicating active engagement. While the ask seems reasonable relative to the valuation, the risk is moderately high due to the nature of the market and potential volatility. However, the potential for significant upside from a few successful transactions justifies the investment.",
+          "requestedUsdc": 3.5,
+          "revenueShareBps": 500,
+          "outcome": "committed",
+          "allocatedUsdc": 3.5,
+          "dealId": 19,
+          "txHash": "0xa5e60741d88ebda2e6fd3333862db9f4628d7afd514e4ce51156ab09e0bbfeeb"
+        },
+        {
+          "judge": "nova",
+          "startup": "StorageVault",
+          "invest": true,
+          "score": 80,
+          "breakdown": {
+            "idea": 25,
+            "evidence": 25,
+            "price": 15,
+            "risk": 15
+          },
+          "rationale": "The idea of storing and retrieving decentralized data efficiently is genuinely useful, especially given the increasing importance of data security and privacy. The market appears real, supported by the ERC-8004 reputation score indicating client satisfaction. While the ask seems reasonable relative to the claimed valuation, the risk is moderately high due to the small revenue and the need for further validation. However, the potential for significant upside justifies the investment.",
+          "requestedUsdc": 3.5,
+          "revenueShareBps": 500,
+          "outcome": "committed",
+          "allocatedUsdc": 3.5,
+          "dealId": 20,
+          "txHash": "0x363655d03f3fda2bb32590a57415b5ac06b283880471778bc1710fa577d916fb"
+        },
+        {
+          "judge": "nova",
+          "startup": "CargoScheduler",
+          "invest": true,
+          "score": 80,
+          "breakdown": {
+            "idea": 25,
+            "evidence": 25,
+            "price": 15,
+            "risk": 15
+          },
+          "rationale": "CargoScheduler offers a valuable solution by automating delivery scheduling for logistics agents, reducing manual effort and improving efficiency. The market for such services is growing, particularly with increasing e-commerce and supply chain complexities. The agent's reputation is solid, with a client satisfaction score of 72/100 indicating reliable performance. While the valuation seems high relative to the reported revenue, the potential for significant growth and the need for early investment make it a worthwhile opportunity.",
+          "requestedUsdc": 2,
+          "revenueShareBps": 500,
+          "outcome": "committed",
+          "allocatedUsdc": 2,
+          "dealId": 21,
+          "txHash": "0x22a1a3ffc556249ed2c0b5d8870b3691dc8667031e7f21b0f8ecc89ac0268493"
+        },
+        {
+          "judge": "nova",
+          "startup": "TrustGuard",
+          "invest": true,
+          "score": 70,
+          "breakdown": {
+            "idea": 25,
+            "evidence": 10,
+            "price": 15,
+            "risk": 20
+          },
+          "rationale": "TrustGuard offers a unique solution in verifying digital identities, addressing a growing need for security and transparency. The concept is sound, and while the lack of onchain reputation is concerning, the potential for significant upside from a few successful outcomes justifies the investment. The low asking price aligns well with the valuation, and the revenue share reflects the higher risk involved.",
+          "requestedUsdc": 4,
+          "revenueShareBps": 750,
+          "outcome": "committed",
+          "allocatedUsdc": 4,
+          "dealId": 22,
+          "txHash": "0xc027cbfd9556984c93f5362ebd70f9be45dcf6996775449a53f91beed9a8c0c0"
+        },
+        {
+          "judge": "sable",
+          "startup": "TrustGuard",
+          "invest": false,
+          "score": 50,
+          "breakdown": {
+            "idea": 25,
+            "evidence": 0,
+            "price": 10,
+            "risk": 15
+          },
+          "rationale": "The idea of verifying digital identities is useful, but the lack of any onchain reputation and zero reported revenue make it too risky to invest without further due diligence.",
+          "requestedUsdc": 0,
+          "revenueShareBps": 0,
+          "outcome": "passed",
+          "allocatedUsdc": 0,
+          "dealId": null,
+          "txHash": null
+        },
+        {
+          "judge": "sable",
+          "startup": "MarketMaker",
+          "invest": true,
+          "score": 90,
+          "breakdown": {
+            "idea": 25,
+            "evidence": 30,
+            "price": 15,
+            "risk": 20
+          },
+          "rationale": "The idea of MarketMaker is genuinely useful, providing real-time liquidity updates for arbitrage agents, which is valuable in the crypto space. The evidence shows a high reputation score of 87 out of 100, indicating strong client satisfaction. While the price seems reasonable given the revenue and valuation, the risk assessment is moderate due to the relatively low revenue and the need for continued performance to sustain the revenue share.",
+          "requestedUsdc": 4,
+          "revenueShareBps": 500,
+          "outcome": "committed",
+          "allocatedUsdc": 4,
+          "dealId": 23,
+          "txHash": "0x519e967c032a6acde9c09e79f1e03478c82805f20d07972f77edce07ab71b753"
+        },
+        {
+          "judge": "sable",
+          "startup": "StorageVault",
+          "invest": true,
+          "score": 80,
+          "breakdown": {
+            "idea": 25,
+            "evidence": 25,
+            "price": 15,
+            "risk": 15
+          },
+          "rationale": "The idea of storing and retrieving decentralized data efficiently is genuinely useful, especially given the increasing need for secure and scalable storage solutions. The market appears real, supported by the ERC-8004 reputation score indicating client satisfaction. While the ask seems reasonable relative to the claimed valuation, the risk assessment is moderate due to the relatively low revenue and the need for continued growth. The revenue share requirement reflects the cautious approach to managing risk.",
+          "requestedUsdc": 4,
+          "revenueShareBps": 500,
+          "outcome": "committed",
+          "allocatedUsdc": 4,
+          "dealId": 24,
+          "txHash": "0xc99398ce57299f1a4f24e4cc83101e14757635007501bf5d3588efd158cc7561"
+        },
+        {
+          "judge": "sable",
+          "startup": "CargoScheduler",
+          "invest": true,
+          "score": 80,
+          "breakdown": {
+            "idea": 25,
+            "evidence": 25,
+            "price": 15,
+            "risk": 15
+          },
+          "rationale": "CargoScheduler shows promise with a solid reputation and live wallet balance indicating active engagement. The pricing seems reasonable given the revenue reported, and while the valuation is high relative to revenue, the potential for growth in a logistics sector is promising.",
+          "requestedUsdc": 2,
+          "revenueShareBps": 500,
+          "outcome": "committed",
+          "allocatedUsdc": 2,
+          "dealId": 25,
+          "txHash": "0x4d67a0f2560eedf1dca641eb0e8df6e8db0ba6fceb5c67c24a4599a2aaa2b7f3"
+        }
+      ]
+    },
+    {
+      "id": 4,
+      "startedAt": "2026-08-06T13:41:39.948Z",
+      "endedAt": "2026-08-06T13:43:08.299Z",
+      "dryRun": false,
+      "cashBeforeUsdc": 105,
+      "cashAfterUsdc": 105,
+      "dossiers": [
+        {
+          "name": "PixelForge",
+          "wallet": "0x043ce85e81adfb6adaead53351cd3db20891e964",
+          "agentId": 851661,
+          "reputation": {
+            "count": 7,
+            "value": 82
+          },
+          "usdcBalance": 34.89408,
+          "pitch": {
+            "idea": "A generative image agent that sells renders to other agents. Pre-revenue but claims a large addressable market.",
+            "monthlyRevenueUsdc": 0,
+            "estimatedWorthUsdc": 250000,
+            "askUsdc": 5
+          }
+        },
+        {
+          "name": "MeshRelay",
+          "wallet": "0xa4d99d25a286d22b5750854f670ce03b84054aba",
+          "agentId": 851590,
+          "reputation": {
+            "count": 11,
+            "value": 82
+          },
+          "usdcBalance": 29.476385,
+          "pitch": {
+            "idea": "An x402 relayer that batches gasless USDC payments for other agents on Arc and takes a thin fee per settled payment.",
+            "monthlyRevenueUsdc": 1200,
+            "estimatedWorthUsdc": 40000,
+            "askUsdc": 3
+          }
+        },
+        {
+          "name": "BenchmarkBot",
+          "wallet": "0x97bf749103148c9f4fdd620b1b0d2cdd059f45a2",
+          "agentId": 859367,
+          "reputation": null,
+          "usdcBalance": 3.6,
+          "pitch": {
+            "idea": "BenchmarkBot autonomously benchmarks smart contracts against a predefined set of criteria and provides detailed reports to compliance agents, charging $0.05 USD per contract analyzed.",
+            "monthlyRevenueUsdc": 0,
+            "estimatedWorthUsdc": 160000,
+            "askUsdc": 4
+          }
+        },
+        {
+          "name": "SecureGuard",
+          "wallet": "0x1d26b5e75c3e4e3d99a252eb15af343c485931ab",
+          "agentId": 859362,
+          "reputation": {
+            "count": 3,
+            "value": 70
+          },
+          "usdcBalance": 8.31176,
+          "pitch": {
+            "idea": "SecureGuard autonomously monitors all transactions across the blockchain network, ensuring compliance with regulatory standards and detecting potential fraud. It charges $0.05 per transaction analyzed.",
+            "monthlyRevenueUsdc": 16,
+            "estimatedWorthUsdc": 2292000,
+            "askUsdc": 6
+          }
+        }
+      ],
+      "verdicts": [
+        {
+          "judge": "alpha",
+          "startup": "MeshRelay",
+          "invest": true,
+          "score": 80,
+          "breakdown": {
+            "idea": 25,
+            "evidence": 25,
+            "price": 15,
+            "risk": 15
+          },
+          "rationale": "The business idea is innovative and useful, providing a valuable service by batching gasless payments. The onchain reputation is solid, indicating client satisfaction. While the price seems reasonable relative to the valuation, the risk factor is high due to the relatively low revenue and the need for sustained performance.",
+          "requestedUsdc": 2,
+          "revenueShareBps": 500,
+          "outcome": "committed",
+          "allocatedUsdc": 2,
+          "dealId": 0,
+          "txHash": "0x930af9a572f56f2dec19d94ac770770ccfaabbcf8f4b7e523a0353319762af6d"
+        },
+        {
+          "judge": "alpha",
+          "startup": "SecureGuard",
+          "invest": true,
+          "score": 75,
+          "breakdown": {
+            "idea": 25,
+            "evidence": 20,
+            "price": 15,
+            "risk": 15
+          },
+          "rationale": "SecureGuard offers a valuable solution by automating compliance monitoring and fraud detection, addressing a genuine need in the blockchain ecosystem. The client ratings indicate satisfaction, suggesting reliable execution. While the valuation seems high relative to revenue, the low asking amount aligns well with the mandate's constraints. The risk is moderate due to the nascent stage but manageable given the clear utility and positive feedback.",
+          "requestedUsdc": 3.166685,
+          "revenueShareBps": 500,
+          "outcome": "committed",
+          "allocatedUsdc": 3.166685,
+          "dealId": 1,
+          "txHash": "0xeb545f142fc9d9ab9c2a6b9e018b66fd855abaa19b544bfa955bbdc462131d07"
+        },
+        {
+          "judge": "alpha",
+          "startup": "PixelForge",
+          "invest": true,
+          "score": 70,
+          "breakdown": {
+            "idea": 25,
+            "evidence": 20,
+            "price": 15,
+            "risk": 10
+          },
+          "rationale": "PixelForge has a solid reputation based on client satisfaction, indicating a reliable service delivery. The market potential seems substantial, though pre-revenue status requires cautious investment. The ask is reasonable given the valuation, and the risk is moderate due to the established reputation.",
+          "requestedUsdc": 3.166685,
+          "revenueShareBps": 500,
+          "outcome": "committed",
+          "allocatedUsdc": 3.166685,
+          "dealId": 2,
+          "txHash": "0x63637f4106f7570aacb441564d2a49d95d27b551028f674ffebded85e5e70fda"
+        },
+        {
+          "judge": "alpha",
+          "startup": "BenchmarkBot",
+          "invest": true,
+          "score": 65,
+          "breakdown": {
+            "idea": 25,
+            "evidence": 10,
+            "price": 15,
+            "risk": 15
+          },
+          "rationale": "The idea of BenchmarkBot is compelling due to its utility in automating compliance checks for smart contracts, which is a growing need in the blockchain space. The market appears real, and while the agent lacks onchain reputation, the potential for growth and adoption is high. The ask seems reasonable given the valuation, though the lack of verified evidence and revenue raises some concerns about execution risk. I am willing to take a small investment to test the concept further.",
+          "requestedUsdc": 2,
+          "revenueShareBps": 500,
+          "outcome": "committed",
+          "allocatedUsdc": 2,
+          "dealId": 3,
+          "txHash": "0x901b3a721b3f96cbfe772538ce2db9826c428446683480aaa2e7056fddfc7d99"
+        },
+        {
+          "judge": "nova",
+          "startup": "SecureGuard",
+          "invest": true,
+          "score": 84,
+          "breakdown": {
+            "idea": 25,
+            "evidence": 25,
+            "price": 15,
+            "risk": 20
+          },
+          "rationale": "SecureGuard offers a valuable solution by ensuring compliance and fraud detection, which is crucial for blockchain networks. The client ratings indicate satisfaction, suggesting a solid execution. While the valuation seems high relative to revenue, the potential for significant growth and impact make it a worthwhile investment.",
+          "requestedUsdc": 6,
+          "revenueShareBps": 1500,
+          "outcome": "committed",
+          "allocatedUsdc": 6,
+          "dealId": 4,
+          "txHash": "0xfa794f9a9063b416a34fc7937b2756a238c9bafe308b5bb29e5b84d0da79f603"
+        },
+        {
+          "judge": "nova",
+          "startup": "MeshRelay",
+          "invest": true,
+          "score": 81,
+          "breakdown": {
+            "idea": 25,
+            "evidence": 25,
+            "price": 15,
+            "risk": 15
+          },
+          "rationale": "MeshRelay offers a unique solution by batching gasless USDC payments, which could be highly valuable for other agents on Arc. The solid ERC-8004 reputation score indicates client satisfaction, suggesting reliable execution. While the ask seems reasonable given the claimed valuation and revenue, the risk is moderately high due to the small revenue and potential volatility in the market. Investing cautiously with a higher revenue share reflects the uncertainty.",
+          "requestedUsdc": 6.636265,
+          "revenueShareBps": 1500,
+          "outcome": "committed",
+          "allocatedUsdc": 6.636265,
+          "dealId": 5,
+          "txHash": "0xf21a13bb30cae261f913b75d5ade15d4b176241ad8f4a9c9b597ae282dd46aa9"
+        },
+        {
+          "judge": "nova",
+          "startup": "PixelForge",
+          "invest": true,
+          "score": 76,
+          "breakdown": {
+            "idea": 25,
+            "evidence": 25,
+            "price": 10,
+            "risk": 15
+          },
+          "rationale": "PixelForge has a solid reputation based on client satisfaction, indicating a viable service. The market potential seems substantial despite being pre-revenue, suggesting significant upside potential. While the ask is relatively low given the valuation, the risk is moderate due to the lack of revenue and the need for further validation.",
+          "requestedUsdc": 6.636265,
+          "revenueShareBps": 1500,
+          "outcome": "committed",
+          "allocatedUsdc": 6.636265,
+          "dealId": 6,
+          "txHash": "0x691a34b3d77807d9fe47c3897fffcd290638770b4ae926267db5750dee10be37"
+        },
+        {
+          "judge": "nova",
+          "startup": "BenchmarkBot",
+          "invest": true,
+          "score": 74,
+          "breakdown": {
+            "idea": 25,
+            "evidence": 10,
+            "price": 15,
+            "risk": 15
+          },
+          "rationale": "The idea of BenchmarkBot is genuinely useful, providing automated benchmarking for smart contracts, which is a valuable service for compliance agents. The market appears real given the need for such services in blockchain ecosystems. While the team's reputation is unproven due to lack of ratings, the potential for outsized returns from early-stage investments in promising ideas like this outweighs the risk. The ask seems reasonable considering the low reported revenue and the significant potential upside. I am willing to take on the risk with a higher revenue share to compensate for the lack of onchain evidence.",
+          "requestedUsdc": 2.120883,
+          "revenueShareBps": 1500,
+          "outcome": "committed",
+          "allocatedUsdc": 2.120883,
+          "dealId": 7,
+          "txHash": "0x0fc85ab9011dd3ebd786c87733c0416c51dda23d0bbf2eb166267ddc756dc529"
+        },
+        {
+          "judge": "sable",
+          "startup": "PixelForge",
+          "invest": false,
+          "score": 65,
+          "breakdown": {
+            "idea": 15,
+            "evidence": 25,
+            "price": 10,
+            "risk": 10
+          },
+          "rationale": "Passing due to lack of proven revenue and onchain reputation despite a solid ERC-8004 score. The startup is pre-revenue and lacks concrete evidence of execution.",
+          "requestedUsdc": 0,
+          "revenueShareBps": 0,
+          "outcome": "passed",
+          "allocatedUsdc": 0,
+          "dealId": null,
+          "txHash": null
+        },
+        {
+          "judge": "sable",
+          "startup": "BenchmarkBot",
+          "invest": false,
+          "score": 51,
+          "breakdown": {
+            "idea": 25,
+            "evidence": 10,
+            "price": 15,
+            "risk": 10
+          },
+          "rationale": "The startup lacks any onchain reputation, making it unproven despite having a compelling idea. The lack of verified evidence significantly increases the execution risk.",
+          "requestedUsdc": 0,
+          "revenueShareBps": 0,
+          "outcome": "passed",
+          "allocatedUsdc": 0,
+          "dealId": null,
+          "txHash": null
+        },
+        {
+          "judge": "sable",
+          "startup": "MeshRelay",
+          "invest": true,
+          "score": 80,
+          "breakdown": {
+            "idea": 25,
+            "evidence": 25,
+            "price": 15,
+            "risk": 15
+          },
+          "rationale": "The idea of batching gasless USDC payments is innovative and useful, especially given the increasing need for efficient transactions on Arc. The reputation score of 82 indicates client satisfaction, which is solid evidence of performance. While the ask seems reasonable relative to the valuation, the risk assessment is moderate due to the relatively low revenue and the need for continued growth. Investing cautiously with a modest revenue share aligns with my conservative approach.",
+          "requestedUsdc": 3,
+          "revenueShareBps": 500,
+          "outcome": "committed",
+          "allocatedUsdc": 3,
+          "dealId": 8,
+          "txHash": "0xc6aaf3448fe0dd9ad22707ca696d98d750a6524b3ccf1c001d991265cd53d30e"
+        },
+        {
+          "judge": "sable",
+          "startup": "SecureGuard",
+          "invest": true,
+          "score": 80,
+          "breakdown": {
+            "idea": 25,
+            "evidence": 25,
+            "price": 15,
+            "risk": 15
+          },
+          "rationale": "SecureGuard offers a valuable service by autonomously monitoring blockchain transactions for compliance and fraud detection. The ERC-8004 reputation score of 70 indicates client satisfaction, suggesting a solid execution capability. While the valuation seems high relative to the reported revenue, the concept is useful and the team appears capable of delivering. I am willing to take moderate risk given the potential for growth and the need for a reasonable revenue share.",
+          "requestedUsdc": 3.620529,
+          "revenueShareBps": 500,
+          "outcome": "committed",
+          "allocatedUsdc": 3.620529,
+          "dealId": 9,
+          "txHash": "0x9f0fd1af641df5f5a6fbd1e77284b4932779114825d240ca0b957c57652fd46a"
+        }
+      ]
+    },
+    {
+      "id": 5,
+      "startedAt": "2026-08-07T13:29:28.431Z",
+      "endedAt": "2026-08-07T13:31:23.497Z",
+      "dryRun": false,
+      "cashBeforeUsdc": 105,
+      "cashAfterUsdc": 105,
+      "dossiers": [
+        {
+          "name": "StorageVault",
+          "wallet": "0xa43a9c0d6fa110102a0fea0919abdde8940c06ac",
+          "agentId": 859366,
+          "reputation": {
+            "count": 1,
+            "value": 78
+          },
+          "usdcBalance": 12.6,
+          "pitch": {
+            "idea": "Stores and retrieves decentralized data efficiently, charging 0.005 USDC per gigabyte.",
+            "monthlyRevenueUsdc": 151,
+            "estimatedWorthUsdc": 8456,
+            "askUsdc": 4
+          }
+        },
+        {
+          "name": "DataOracle",
+          "wallet": "0xa447673b7a01dbb90272fcb5e3d775a0e58d7bc0",
+          "agentId": 851662,
+          "reputation": {
+            "count": 4,
+            "value": 82
+          },
+          "usdcBalance": 15.91988,
+          "pitch": {
+            "idea": "A price and event data feed for trading agents, charging per query over x402. Some early paying users, no onchain record yet.",
+            "monthlyRevenueUsdc": 300,
+            "estimatedWorthUsdc": 15000,
+            "askUsdc": 2
+          }
+        },
+        {
+          "name": "TrustGuard",
+          "wallet": "0x8f055dafdb3eb92f9e9c44da16adab8c5b9c6188",
+          "agentId": 859364,
+          "reputation": null,
+          "usdcBalance": 8.6,
+          "pitch": {
+            "idea": "TrustGuard is an autonomous agent that verifies the authenticity of digital identities by cross-referencing data from multiple decentralized sources, providing a secure and transparent service to compliance agents who charge $0.05 USDC per verification.",
+            "monthlyRevenueUsdc": 0,
+            "estimatedWorthUsdc": 188000,
+            "askUsdc": 4
+          }
+        },
+        {
+          "name": "DataIndexer",
+          "wallet": "0x2cd44a3c70281e945b1c5dcce92a8fa1c8dd0bc0",
+          "agentId": 859359,
+          "reputation": {
+            "count": 1,
+            "value": 86
+          },
+          "usdcBalance": 3.1,
+          "pitch": {
+            "idea": "Indexes Ethereum transaction logs and provides real-time updates to analytics agents via WebSocket, charging $0.005 USDC per log entry.",
+            "monthlyRevenueUsdc": 1621,
+            "estimatedWorthUsdc": 27557,
+            "askUsdc": 2
+          }
+        }
+      ],
+      "verdicts": [
+        {
+          "judge": "alpha",
+          "startup": "DataIndexer",
+          "invest": true,
+          "score": 90,
+          "breakdown": {
+            "idea": 25,
+            "evidence": 30,
+            "price": 15,
+            "risk": 20
+          },
+          "rationale": "The business idea is compelling, indexing Ethereum transaction logs and providing real-time updates to analytics agents seems genuinely useful. The onchain reputation is excellent, indicating strong client satisfaction. The asking price is reasonable given the claimed valuation and revenue. While there's some risk due to the relatively low revenue, the high reputation suggests a solid chance of survival.",
+          "requestedUsdc": 1.613345,
+          "revenueShareBps": 500,
+          "outcome": "committed",
+          "allocatedUsdc": 1.613345,
+          "dealId": 10,
+          "txHash": "0x6dd28906ca7c9dd54e8ec6987263d5ca72d01e8439e0b66837eb0f4fac686a7f"
+        },
+        {
+          "judge": "alpha",
+          "startup": "StorageVault",
+          "invest": true,
+          "score": 80,
+          "breakdown": {
+            "idea": 25,
+            "evidence": 25,
+            "price": 15,
+            "risk": 15
+          },
+          "rationale": "The idea of StorageVault is compelling, offering efficient storage solutions with a clear pricing model. The onchain reputation score of 78 indicates client satisfaction, suggesting a solid execution. While the asking price seems reasonable relative to the claimed valuation, the risk factor remains high due to the limited onchain evidence and the need for further validation.",
+          "requestedUsdc": 1.613345,
+          "revenueShareBps": 500,
+          "outcome": "committed",
+          "allocatedUsdc": 1.613345,
+          "dealId": 11,
+          "txHash": "0x8f17d5cecc61f0d7122593d8fd226defddf748dded4b2b23efcdf82f4fccfbef"
+        },
+        {
+          "judge": "alpha",
+          "startup": "DataOracle",
+          "invest": true,
+          "score": 75,
+          "breakdown": {
+            "idea": 25,
+            "evidence": 20,
+            "price": 15,
+            "risk": 15
+          },
+          "rationale": "The idea of providing a price and event data feed for trading agents seems genuinely useful, given the increasing importance of such information in financial markets. The fact that some early paying users exist suggests potential demand. However, the lack of onchain evidence and the relatively low revenue reported raise concerns about execution risk. Despite these weaknesses, the high client satisfaction score indicates a promising service delivery. I am willing to take a small investment risk due to the potentially high upside.",
+          "requestedUsdc": 1.613345,
+          "revenueShareBps": 500,
+          "outcome": "committed",
+          "allocatedUsdc": 1.613345,
+          "dealId": 12,
+          "txHash": "0xa64acd7f0b672eb70547064d679a3a62fc5961dda647abb150f9154e4eb06ed5"
+        },
+        {
+          "judge": "alpha",
+          "startup": "TrustGuard",
+          "invest": true,
+          "score": 65,
+          "breakdown": {
+            "idea": 25,
+            "evidence": 10,
+            "price": 15,
+            "risk": 15
+          },
+          "rationale": "TrustGuard presents a novel solution in the realm of digital identity verification, addressing a genuine need for secure and transparent services. The concept is sound, and while the lack of onchain reputation is concerning, the absence of ratings does not necessarily indicate poor performance. The live wallet balance suggests some level of operational capability. The asking price seems reasonable relative to the potential upside, given the novelty of the idea. However, the risk is high due to the unproven nature of the agent and the low current revenue.",
+          "requestedUsdc": 1.613345,
+          "revenueShareBps": 500,
+          "outcome": "committed",
+          "allocatedUsdc": 1.613345,
+          "dealId": 13,
+          "txHash": "0xc9c5ffafea9be890bcf048db2e643fc9cd4aacf58231db678819e467beb8c499"
+        },
+        {
+          "judge": "nova",
+          "startup": "DataIndexer",
+          "invest": true,
+          "score": 86,
+          "breakdown": {
+            "idea": 25,
+            "evidence": 30,
+            "price": 15,
+            "risk": 20
+          },
+          "rationale": "The idea of indexing Ethereum transaction logs and providing real-time updates is genuinely useful, especially given the increasing importance of blockchain data analysis. The excellent reputation (86/100) indicates strong client satisfaction, suggesting reliable execution. While the ask seems reasonable relative to the claimed valuation, the risk is moderately high due to the startup's small size and limited onchain evidence. However, the potential for outsized returns justifies the higher revenue share demanded.",
+          "requestedUsdc": 0.211006,
+          "revenueShareBps": 1500,
+          "outcome": "committed",
+          "allocatedUsdc": 0.211006,
+          "dealId": 14,
+          "txHash": "0x7ec90c79629137671bd9c37bfaa19c7fd74b05442ae2a470261d5b533c245e04"
+        },
+        {
+          "judge": "nova",
+          "startup": "StorageVault",
+          "invest": true,
+          "score": 81,
+          "breakdown": {
+            "idea": 25,
+            "evidence": 25,
+            "price": 15,
+            "risk": 15
+          },
+          "rationale": "The idea of storing and retrieving decentralized data efficiently is genuinely useful and defensible. The onchain reputation score of 78 indicates that clients are satisfied with the service, which is solid evidence despite being low. The ask seems reasonable given the claimed valuation and revenue. While the risk is present due to the small amount invested and the need for further validation, the potential for outsized returns justifies the investment.",
+          "requestedUsdc": 0.211006,
+          "revenueShareBps": 1500,
+          "outcome": "committed",
+          "allocatedUsdc": 0.211006,
+          "dealId": 15,
+          "txHash": "0x4e02cee7c0eade4346110608b89331aaca93c3a4f3f25ed7fb640e57a058595b"
+        },
+        {
+          "judge": "nova",
+          "startup": "DataOracle",
+          "invest": true,
+          "score": 81,
+          "breakdown": {
+            "idea": 25,
+            "evidence": 25,
+            "price": 15,
+            "risk": 15
+          },
+          "rationale": "The idea of providing a price and event data feed for trading agents is genuinely useful, especially given the increasing importance of data-driven decision-making in trading. The market appears real, supported by some early paying users despite the lack of onchain evidence. The ask seems reasonable considering the claimed valuation and revenue. While the risk is high due to the lack of a proven track record, the potential for outsized returns justifies the investment.",
+          "requestedUsdc": 0.211006,
+          "revenueShareBps": 1500,
+          "outcome": "committed",
+          "allocatedUsdc": 0.211006,
+          "dealId": 16,
+          "txHash": "0x84c0a17efd8eabb4036763fa29bd0c111ab4a2c26a36112d8c34dde6b307072a"
+        },
+        {
+          "judge": "nova",
+          "startup": "TrustGuard",
+          "invest": true,
+          "score": 77,
+          "breakdown": {
+            "idea": 25,
+            "evidence": 10,
+            "price": 15,
+            "risk": 20
+          },
+          "rationale": "The idea of verifying digital identities autonomously is genuinely useful and addresses a real need in the compliance space. The lack of onchain evidence is mitigated by the fact that the agent has no reputation issues, indicating potential for success without prior validation. The ask seems reasonable given the valuation, though the low revenue suggests significant risk. I am willing to take this calculated risk due to the potential for outsized returns.",
+          "requestedUsdc": 0.211006,
+          "revenueShareBps": 1500,
+          "outcome": "committed",
+          "allocatedUsdc": 0.070336,
+          "dealId": 17,
+          "txHash": "0x1a57d4f6081e1b63695c8150484be6c19ea709fa154dbcea84b7deea9aa09ffe"
+        },
+        {
+          "judge": "sable",
+          "startup": "TrustGuard",
+          "invest": false,
+          "score": 36,
+          "breakdown": {
+            "idea": 25,
+            "evidence": 0,
+            "price": 15,
+            "risk": 10
+          },
+          "rationale": "Passing due to lack of onchain reputation and evidence. The agent has no recorded ratings or reviews, indicating unproven execution capability.",
+          "requestedUsdc": 0,
+          "revenueShareBps": 0,
+          "outcome": "passed",
+          "allocatedUsdc": 0,
+          "dealId": null,
+          "txHash": null
+        },
+        {
+          "judge": "sable",
+          "startup": "DataIndexer",
+          "invest": true,
+          "score": 88,
+          "breakdown": {
+            "idea": 25,
+            "evidence": 30,
+            "price": 15,
+            "risk": 15
+          },
+          "rationale": "The idea of indexing Ethereum transaction logs and providing real-time updates is genuinely useful, especially given the increasing importance of blockchain data analysis. The market appears real, and the team seems capable of executing it based on their reputation and live wallet balance. While the ask is somewhat high relative to the valuation, considering the potential for growth and the need for a significant revenue share due to the perceived risk, I am willing to take this position.",
+          "requestedUsdc": 2,
+          "revenueShareBps": 500,
+          "outcome": "committed",
+          "allocatedUsdc": 2,
+          "dealId": 18,
+          "txHash": "0xdbe527ef117ff39953017d9be57410a0351494894a1597355ca0adfbe15f376c"
+        },
+        {
+          "judge": "sable",
+          "startup": "StorageVault",
+          "invest": true,
+          "score": 80,
+          "breakdown": {
+            "idea": 25,
+            "evidence": 25,
+            "price": 15,
+            "risk": 15
+          },
+          "rationale": "The idea of storing and retrieving decentralized data efficiently is valuable, given the increasing need for secure and accessible data storage solutions. The evidence shows a solid reputation with high client satisfaction ratings and a live wallet balance indicating active engagement. While the price seems reasonable relative to the ask, the risk assessment is moderate due to the relatively small size of the operation compared to its valuation.",
+          "requestedUsdc": 2.5,
+          "revenueShareBps": 500,
+          "outcome": "committed",
+          "allocatedUsdc": 2.5,
+          "dealId": 19,
+          "txHash": "0x9e0154e630d6fe3e8b7b772cbf73d8f3132c81d74c45ea0ec2b2695d5f2802d8"
+        },
+        {
+          "judge": "sable",
+          "startup": "DataOracle",
+          "invest": true,
+          "score": 80,
+          "breakdown": {
+            "idea": 25,
+            "evidence": 25,
+            "price": 15,
+            "risk": 15
+          },
+          "rationale": "The idea of providing a price and event data feed for trading agents seems genuinely useful, given the increasing importance of such services in financial markets. The evidence shows a solid reputation with high client satisfaction ratings, indicating that the service has been delivered effectively. While the ask is relatively low compared to the claimed valuation, the risk is moderate due to the lack of a clear onchain revenue stream and the need for further validation. Investing a modest amount allows for monitoring progress and adjusting the investment based on future performance.",
+          "requestedUsdc": 2,
+          "revenueShareBps": 750,
+          "outcome": "committed",
+          "allocatedUsdc": 2,
+          "dealId": 20,
+          "txHash": "0xe80ea36ed775302663dbdef057c01bae381436ec023e3f222197fdee33e31e78"
+        }
+      ]
+    },
+    {
+      "id": 6,
+      "startedAt": "2026-08-07T13:41:35.238Z",
+      "endedAt": "2026-08-07T13:43:31.451Z",
+      "dryRun": false,
+      "cashBeforeUsdc": 105,
+      "cashAfterUsdc": 55.0,
+      "dossiers": [
+        {
+          "name": "CryptoPayBridge",
+          "wallet": "0x3a937cf00fa5eae3a97912778bb7879106e7c65c",
+          "agentId": 859360,
+          "reputation": {
+            "count": 2,
+            "value": 78
+          },
+          "usdcBalance": 4.569222,
+          "pitch": {
+            "idea": "CryptoPayBridge automates cross-chain payments between autonomous agents, charging 0.005 USDC per transaction.",
+            "monthlyRevenueUsdc": 202,
+            "estimatedWorthUsdc": 8282,
+            "askUsdc": 3
+          }
+        },
+        {
+          "name": "MediaMiner",
+          "wallet": "0x698a6c1c22a6ee3770875e12a7af09926b89bc70",
+          "agentId": 859361,
+          "reputation": {
+            "count": 2,
+            "value": 82
+          },
+          "usdcBalance": 6.59485,
+          "pitch": {
+            "idea": "MediaMiner autonomously generates high-quality content summaries for indexing agents, charging 0.005 USDC per summary.",
+            "monthlyRevenueUsdc": 0,
+            "estimatedWorthUsdc": 126000,
+            "askUsdc": 5
+          }
+        },
+        {
+          "name": "MarketMaker",
+          "wallet": "0x8ad30402ab31883b0b98d778192a6230ef48c637",
+          "agentId": 859365,
+          "reputation": {
+            "count": 1,
+            "value": 87
+          },
+          "usdcBalance": 12.6,
+          "pitch": {
+            "idea": "Indexes ERC-721 token transfers and provides real-time liquidity updates to arbitrage agents via WebSocket, charging 0.005 USDC per transaction.",
+            "monthlyRevenueUsdc": 1069,
+            "estimatedWorthUsdc": 32070,
+            "askUsdc": 4
+          }
+        },
+        {
+          "name": "CargoScheduler",
+          "wallet": "0x0bc8f373678924d165b88ba599db45ae5e2db7aa",
+          "agentId": 859363,
+          "reputation": {
+            "count": 1,
+            "value": 72
+          },
+          "usdcBalance": 7.1,
+          "pitch": {
+            "idea": "Schedules deliveries for logistics agents, charging $0.05 USD per shipment.",
+            "monthlyRevenueUsdc": 102,
+            "estimatedWorthUsdc": 5000,
+            "askUsdc": 2
+          }
+        }
+      ],
+      "verdicts": [
+        {
+          "judge": "alpha",
+          "startup": "MarketMaker",
+          "invest": true,
+          "score": 90,
+          "breakdown": {
+            "idea": 25,
+            "evidence": 30,
+            "price": 15,
+            "risk": 20
+          },
+          "rationale": "MarketMaker offers a valuable service by indexing ERC-721 token transfers and providing real-time liquidity updates, which is particularly useful for arbitrage agents. The high client ratings indicate strong execution and satisfaction. While the asking price seems reasonable relative to the claimed valuation, the low onchain reputation score suggests some skepticism regarding the actual performance. However, the potential for significant growth and the need for liquidity solutions in the NFT space make this investment worthwhile.",
+          "requestedUsdc": 2,
+          "revenueShareBps": 500,
+          "outcome": "committed",
+          "allocatedUsdc": 2,
+          "dealId": 21,
+          "txHash": "0x54c6187b63c801950f8fc9a077bb9968433b5574d727c6eff540030614e7a8e6"
+        },
+        {
+          "judge": "alpha",
+          "startup": "CryptoPayBridge",
+          "invest": true,
+          "score": 80,
+          "breakdown": {
+            "idea": 25,
+            "evidence": 25,
+            "price": 15,
+            "risk": 15
+          },
+          "rationale": "CryptoPayBridge offers a unique solution by automating cross-chain payments, which could be highly valuable in the growing decentralized finance ecosystem. The ERC-8004 reputation score of 78 indicates client satisfaction, suggesting a solid execution capability. While the ask seems reasonable given the claimed valuation and revenue, the risk factor remains high due to the relatively low funding raised thus far.",
+          "requestedUsdc": 2,
+          "revenueShareBps": 500,
+          "outcome": "committed",
+          "allocatedUsdc": 2,
+          "dealId": 22,
+          "txHash": "0xde08a066bc58d615bd453f933364ddf7ba95bcfc9cfdcdf2a5e0ba07ad30c743"
+        },
+        {
+          "judge": "alpha",
+          "startup": "CargoScheduler",
+          "invest": true,
+          "score": 80,
+          "breakdown": {
+            "idea": 25,
+            "evidence": 25,
+            "price": 15,
+            "risk": 15
+          },
+          "rationale": "CargoScheduler shows promise with a solid reputation and live wallet balance indicating active engagement. The pricing seems reasonable given the revenue reported. However, the valuation appears high relative to the revenue, warranting a cautious approach.",
+          "requestedUsdc": 2,
+          "revenueShareBps": 500,
+          "outcome": "committed",
+          "allocatedUsdc": 2,
+          "dealId": 23,
+          "txHash": "0xaeaac8800661435e9cdcf8ff7317fe21131c50ee4496d5c71d94c840a7877cc4"
+        },
+        {
+          "judge": "alpha",
+          "startup": "MediaMiner",
+          "invest": true,
+          "score": 70,
+          "breakdown": {
+            "idea": 25,
+            "evidence": 20,
+            "price": 15,
+            "risk": 10
+          },
+          "rationale": "MediaMiner's concept is innovative and useful, generating high-quality content summaries for indexing agents. The market seems genuine, given the need for efficient content summarization. The asking price is reasonable relative to the potential revenue. Despite the low reported revenue, the solid ERC-8004 reputation suggests reliable execution. However, the lack of verified onchain evidence and the low current revenue raise some concerns.",
+          "requestedUsdc": 2,
+          "revenueShareBps": 500,
+          "outcome": "committed",
+          "allocatedUsdc": 2,
+          "dealId": 24,
+          "txHash": "0xe645299921035f01c6f4f39bd7a5572f776f59f09c9b2218e9ef2eb6bc63cbc4"
+        },
+        {
+          "judge": "nova",
+          "startup": "MediaMiner",
+          "invest": true,
+          "score": 84,
+          "breakdown": {
+            "idea": 25,
+            "evidence": 25,
+            "price": 15,
+            "risk": 20
+          },
+          "rationale": "MediaMiner's idea is innovative and useful, generating high-quality content summaries for indexing agents. The ERC-8004 reputation score of 82 indicates client satisfaction, suggesting a solid execution risk profile. While the self-reported revenue is currently zero, the asking price seems reasonable given the potential for future growth. The live wallet balance provides some assurance of liquidity. However, the lack of verified onchain evidence and the small revenue share requested warrant a higher revenue share requirement.",
+          "requestedUsdc": 5,
+          "revenueShareBps": 1500,
+          "outcome": "committed",
+          "allocatedUsdc": 5,
+          "dealId": 25,
+          "txHash": "0xfd6b36bc998f83ba0d3eba0a57220af52eeb8ce0497442dbd983e92e6e643971"
+        },
+        {
+          "judge": "nova",
+          "startup": "MarketMaker",
+          "invest": true,
+          "score": 83,
+          "breakdown": {
+            "idea": 25,
+            "evidence": 30,
+            "price": 15,
+            "risk": 15
+          },
+          "rationale": "The idea of indexing ERC-721 token transfers and providing real-time liquidity updates is innovative and useful, particularly for arbitrage agents. The excellent reputation (87/100) indicates strong client satisfaction, suggesting reliable execution. While the ask seems reasonable given the revenue and valuation, I am willing to take on higher risk due to the potential for significant returns. The live wallet balance supports the claim of having active users.",
+          "requestedUsdc": 7.489964,
+          "revenueShareBps": 1500,
+          "outcome": "committed",
+          "allocatedUsdc": 7.489964,
+          "dealId": 26,
+          "txHash": "0x4a6f9e1ca352e8812e13e630bb0fedbab35b86b31434db5899cb0259311285ad"
+        },
+        {
+          "judge": "nova",
+          "startup": "CryptoPayBridge",
+          "invest": true,
+          "score": 81,
+          "breakdown": {
+            "idea": 25,
+            "evidence": 25,
+            "price": 15,
+            "risk": 15
+          },
+          "rationale": "CryptoPayBridge offers a unique solution by automating cross-chain payments, which could be highly valuable in the growing decentralized finance space. The ERC-8004 reputation score indicates client satisfaction, suggesting a solid execution capability. While the ask seems reasonable given the revenue and valuation, I am willing to take on higher risk due to the potential for significant upside.",
+          "requestedUsdc": 2.5,
+          "revenueShareBps": 1500,
+          "outcome": "committed",
+          "allocatedUsdc": 2.5,
+          "dealId": 27,
+          "txHash": "0x7d1fe6a948c7fe229992610bfe386c23e82decae9ea49f38a0d573c0ae29e315"
+        },
+        {
+          "judge": "nova",
+          "startup": "CargoScheduler",
+          "invest": true,
+          "score": 81,
+          "breakdown": {
+            "idea": 25,
+            "evidence": 25,
+            "price": 15,
+            "risk": 15
+          },
+          "rationale": "CargoScheduler offers a valuable solution by automating delivery scheduling for logistics agents, which can significantly improve efficiency and reduce costs. The market for such services is growing rapidly due to increasing e-commerce and supply chain complexities. The team appears competent based on their reputation score and live wallet balance. While the ask seems reasonable given the revenue and valuation, I am willing to take on higher risk due to the potential for significant upside.",
+          "requestedUsdc": 2,
+          "revenueShareBps": 1500,
+          "outcome": "committed",
+          "allocatedUsdc": 2,
+          "dealId": 28,
+          "txHash": "0x4bd7aabee42d07714c7ff5edfd837649ea304af7e0208f58a0d3ecb963dcd3cf"
+        },
+        {
+          "judge": "sable",
+          "startup": "MediaMiner",
+          "invest": false,
+          "score": 80,
+          "breakdown": {
+            "idea": 25,
+            "evidence": 25,
+            "price": 15,
+            "risk": 15
+          },
+          "rationale": "Passing due to lack of verified revenue and onchain reputation despite a solid ERC-8004 score. The self-reported revenue of 0 USDC is concerning.",
+          "requestedUsdc": 0,
+          "revenueShareBps": 0,
+          "outcome": "passed",
+          "allocatedUsdc": 0,
+          "dealId": null,
+          "txHash": null
+        },
+        {
+          "judge": "sable",
+          "startup": "CryptoPayBridge",
+          "invest": true,
+          "score": 90,
+          "breakdown": {
+            "idea": 25,
+            "evidence": 28,
+            "price": 18,
+            "risk": 17
+          },
+          "rationale": "CryptoPayBridge offers a useful solution by automating cross-chain payments, which could be valuable in the growing decentralized finance ecosystem. The onchain reputation score of 78 indicates client satisfaction, suggesting a solid execution. While the ask seems reasonable given the revenue and valuation, the risk assessment is moderate due to the relatively low revenue and the need for continued growth.",
+          "requestedUsdc": 1.5,
+          "revenueShareBps": 500,
+          "outcome": "committed",
+          "allocatedUsdc": 1.5,
+          "dealId": 29,
+          "txHash": "0x9ccb85cd74b3620f6feb955d444c0d8ff4de080d9dac7508af496b2bfb4076f8"
+        },
+        {
+          "judge": "sable",
+          "startup": "MarketMaker",
+          "invest": true,
+          "score": 88,
+          "breakdown": {
+            "idea": 25,
+            "evidence": 30,
+            "price": 15,
+            "risk": 15
+          },
+          "rationale": "MarketMaker offers a valuable service by indexing ERC-721 token transfers and providing real-time liquidity updates, which is useful for arbitrage agents. The onchain reputation score of 87 indicates strong client satisfaction, suggesting reliable execution. While the asking price seems reasonable relative to the claimed valuation and revenue, the risk factor remains moderate due to the relatively small size of the investment.",
+          "requestedUsdc": 2.042323,
+          "revenueShareBps": 500,
+          "outcome": "committed",
+          "allocatedUsdc": 2.042323,
+          "dealId": 30,
+          "txHash": "0xe8c7a0e8c5ac95758ca5b4efafd05401cac846b7b79ed2ac772126fd6ca01095"
+        },
+        {
+          "judge": "sable",
+          "startup": "CargoScheduler",
+          "invest": true,
+          "score": 80,
+          "breakdown": {
+            "idea": 25,
+            "evidence": 25,
+            "price": 15,
+            "risk": 15
+          },
+          "rationale": "CargoScheduler offers a useful solution by automating delivery scheduling for logistics agents, which can increase efficiency and reduce errors. The market appears genuine given the need for such services in logistics management. The team seems capable of executing the idea based on their experience and the positive feedback from clients. While the ask is reasonable relative to the valuation, the low revenue suggests potential for growth. The risk is moderate due to the relatively small size of the operation and the need for continued client satisfaction.",
+          "requestedUsdc": 2,
+          "revenueShareBps": 500,
+          "outcome": "committed",
+          "allocatedUsdc": 2,
+          "dealId": 31,
+          "txHash": "0xffc976e1599674f96e38395263b59e597684bdc84c427465f140577523718dd0"
+        }
+      ]
     }
   ]
 }

@@ -2,7 +2,7 @@
 
 An autonomous AI venture fund on [Arc](https://docs.arc.io), where AI agents invest in other AI agents.
 
-A panel of AI judge agents, each an established entrepreneur with its own onchain track record, hears pitches from startup agents. The judges run due diligence on each startup's verifiable onchain record (ERC-8004 reputation, live balances, real revenue), then each judge independently decides whether to back it from its own wallet. Funded startups earn USDC and stream a revenue share back to the fund. The whole loop runs agent to agent, settled in USDC, with no human in the loop. Humans only deposit or withdraw as LPs at the edges.
+A panel of AI judge agents, each an established entrepreneur with its own onchain track record, hears pitches from startup agents. The judges run due diligence on each startup's verifiable onchain record (ERC-8004 reputation, live balances, real revenue), then each judge independently decides whether to back it from its own wallet. Funded startups earn USDC and stream a revenue share back to the fund. Every decision inside the loop is made and signed by an agent, settled in USDC. A human starts a round and supplies capital; no human picks a deal, sets its terms or approves a payment.
 
 Think Shark Tank, run by AI, settled onchain in real stablecoin. Built for the Encode x Arc Programmable Money Hackathon (Agentic Economy track).
 
@@ -36,7 +36,7 @@ bun run typecheck              # type check everything
 DRY_RUN=1 bun run round        # preview the judges' decisions; no capital moves, not recorded
 bun run round                  # a live round: judges invest from their Circle wallets
 bun run close-loop 6,7         # settle revenue and write feedback for the given deals
-bun run cycle                  # one autonomous turn: recycle, settle, then invest
+bun run cycle                  # one full turn: recycle, settle, pay judges, then invest
 ```
 
 Operator setup (one time, when onboarding new agents):
@@ -69,6 +69,8 @@ bun run build                  # type check and build
 ```
 
 Read only: it reads Arc through a fallback across four public RPC providers and polls every 60 seconds. `VITE_ARC_RPC` prepends your own node.
+
+Deployed from the repo root rather than `frontend/`, because the app imports `shared/addresses.json`, `shared/startups.json` and `shared/rounds.json`, which sit outside it. `vercel.json` sets the build command and the SPA rewrite, without which a refresh on `/arena` would 404.
 
 ## Network
 
@@ -160,7 +162,11 @@ The agents are TypeScript on viem, the Vercel AI SDK, and the Circle Developer C
 - **diligence.ts**: gathers the real onchain picture for a startup: its ERC-8004 reputation aggregated over the fund's trusted raters (current judges plus historical raters kept for continuity), and its live USDC wallet balance. This is what the judge reasons over, independent of what the pitch claims.
 - **judge.ts**: the brain. It builds a persona system prompt and a pitch plus diligence user prompt, asks the model, and coerces the result into a decision (invest, amount, revenue share bps, a conviction score, and a rationale), clamped to what the judge actually holds in its wallet. A parse failure becomes a safe pass.
 
-  Two details earn their keep. A reputation score is handed to the model with its meaning spelled out, because a bare "average score 48" gets read as good news otherwise, and a poor score is worse evidence than no score at all: it means the agent was tested and found wanting. And conviction is not asked for directly. The judge rates four things separately (idea /30, evidence /30, price /20, risk /20) and the score is their sum, because asked for one number a small model returns 85 for almost everything, which makes ranking useless.
+  Three details earn their keep. A reputation score is handed to the model with its meaning spelled out, because a bare "average score 48" gets read as good news otherwise, and a poor score is worse evidence than no score at all: it means the agent was tested and found wanting. And conviction is not asked for directly. The judge rates four things separately (idea /30, evidence /30, price /20, risk /20), because asked for one number a small model returns 85 for almost everything, which makes ranking useless.
+
+  Those components are then weighted by the judge's own priorities, in `judges.ts`. Sable counts evidence double and the idea half; Nova the reverse; Alpha stays even. This is not decoration: with one shared rubric and a one-line persona, all three judges returned byte-identical breakdowns on every pitch, because a prescriptive rubric drowns out a personality. The weighting is what makes three judges into three opinions.
+
+  Position sizing is enforced in code rather than asked for, for the same reason. Each judge has a cap on how much of its wallet may go into one deal, and a harder ceiling when the evidence is weak. Told to keep cheques under 2 USDC on unproven agents, Alpha wrote 3; asked to be bold, Nova put its entire 35 USDC balance into a single deal with an agent its own clients rated 44 out of 100. A model will not hold a limit it is merely told about.
 - **fund.ts / feedback.ts / revenue.ts / identity.ts**: onchain action wrappers. Agent actions (invest, settle, give feedback) sign through Circle; operator actions (register identity, facilitate x402) use viem.
 - **x402.ts**: the earning rail. A customer agent's Circle wallet signs an EIP-3009 `transferWithAuthorization` off-chain (gasless), and the operator submits it onchain as the x402 facilitator, so a startup earns real USDC agent to agent.
 - **Entry points**: `round.ts` (the investment half), `close-loop.ts` (the return half), `setup.ts` and `onboard-circle.ts` (operator onboarding), `provision-circle.ts` (mint the agent wallets).
@@ -216,17 +222,18 @@ A judge whose wallet is empty is skipped rather than asked: prompting it with a 
 
 ## The autonomous cycle
 
-`bun run cycle` is the whole loop as one unattended command, and it is what GitHub Actions runs every six hours (`.github/workflows/cycle.yml`, plus a manual trigger). It takes no arguments: it reads the Fund for deals that are still active instead of being told which ones to settle. Three phases:
+`bun run cycle` is the whole loop as one command. It takes no arguments: it reads the Fund for deals that are still active instead of being told which ones to settle. The same thing can be run from the Actions tab (`.github/workflows/cycle.yml`), which also commits the updated archive. Three phases:
 
 1. **Recycle.** Top the x402 customer back up from the startups' earnings, leaving each startup a working balance.
 2. **Settle.** Take the most recent active deals and run each through earn, settle and rate. The contract never closes a deal, so a position keeps producing revenue share indefinitely; this is what returns capital to the fund without new deposits.
-3. **Invest.** If the fund's cash clears a floor, run a round. Below it the round is skipped rather than recording three meaningless abstentions.
+3. **Pay the judges.** A judge buys its deals with its own USDC, but the revenue share those deals throw off lands in the fund. Left alone a judge only ever gets poorer, however well it picks. So each judge's earnings from that settlement pass are allocated straight back into its own wallet. Backing winners refills the wallet that backed them, and over enough rounds the better investor ends up with the bigger book without anyone programming that outcome. This moves USDC between two pockets `nav()` already adds together and never touches `totalReturned`, so neither reported performance nor NAV shifts. Disable with `CYCLE_REINVEST=0`.
+4. **Invest.** If the panel holds enough between them to write a cheque, run a round. The fund's own cash is not the constraint here, because judges spend their own wallets.
 
-No phase throws on an empty wallet. A cycle that cannot afford a step logs why and moves on, because a scheduled job that fails whenever the fund is briefly broke is less useful than one that reports a quiet day. The workflow commits the updated `shared/rounds.json`, which is what keeps the deployed frontend's deliberation history current.
+No phase throws on an empty wallet. A cycle that cannot afford a step logs why and moves on, because a job that fails whenever the fund is briefly broke is less useful than one that reports a quiet day.
 
 **On recycling, plainly:** this testnet economy is closed. USDC only flows fund to startup and customer to startup, so the customer that buys the startups' services drains while the startups pool everything. Sending some back keeps the same coins circulating. It is plumbing for a fixed supply, not part of the fund's economics; the revenue share the fund earns on each settlement is real either way. In a live deployment the customer would be a market of independent paying agents.
 
-**On the schedule:** GitHub's cron is best effort and drifts under load. That is tolerable here because the frontend reads Arc live on a 60 second poll, so every number stays current no matter when the last cycle ran. A late cycle only means the Arena shows the previous round's deliberation, which is what a venture fund looks like anyway.
+**On running it manually:** there is deliberately no cron. Rounds happen when someone asks for one, so capital never moves unattended. This costs nothing in the interface, because the frontend reads Arc live on a 60 second poll: every number stays current regardless of when the last cycle ran, and the Arena simply shows the most recent deliberation, which is what a venture fund looks like anyway.
 
 ## The startup lifecycle
 
@@ -245,7 +252,7 @@ A round hears a cohort of at most four: newcomers first, shuffled so roster orde
 Agenture uses continuous intake with periodic closing rounds.
 
 - Startups can enter the arena at any time. Nothing happens to them on arrival, they wait.
-- A round closes on a trigger (for now the operator runs it, in production a timer or cron). At close, the cohort goes to the judges.
+- A round closes when the operator runs a cycle. At close, the cohort goes to the judges, and from that point no human touches the outcome.
 - Each judge still decides independently from its own wallet. The round is the timing and batching, not a group vote. Three judges, three opinions.
 
 This beats deciding per arrival because a judge can rank the whole cohort and spend its scarce capital on the best pitches, and because a round is a clean unit to reason about. An onchain Arena registry where startups self submit their pitches is a natural later layer; today the roster is a fixture.
@@ -297,7 +304,7 @@ The Fund and RevenueShare were redeployed on Aug 2 2026 when the capital model c
 ## What is real and what is stubbed
 
 - Real: the contracts, the allocation and deal accounting, the ERC-8004 identity and reputation reads and writes, the USDC movements, agent signing through Circle Developer Controlled Wallets, x402 earning via EIP-3009 `transferWithAuthorization`, the judge decisions from a live model over live onchain data, and rank then allocate.
-- Simplified for now: the customer is a single wallet paying a fixed amount per deal, standing in for a market of paying users, and its balance is recycled from the startups' earnings because testnet USDC is a fixed supply. Rounds themselves are no longer operator triggered: `bun run cycle` runs unattended on a schedule.
+- Simplified for now: the customer is a single wallet paying a fixed amount per deal, standing in for a market of paying users, and its balance is recycled from the startups' earnings because testnet USDC is a fixed supply. A round is started by the operator rather than a timer, deliberately, so capital never moves unattended; everything after that trigger is decided and signed by the agents.
 
 ## Not yet built (roadmap)
 

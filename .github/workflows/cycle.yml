@@ -4,13 +4,11 @@ name: Agenture cycle
 # judges deploy what the fund can afford. The round archive it writes is committed back,
 # which is what keeps the deployed frontend's deliberation history current.
 #
-# GitHub's scheduled runs are best effort and drift under load, which is fine here: the
-# frontend reads Arc live, so a late cycle only means the Arena shows the previous round.
-# Use the manual trigger when you need one on demand.
+# Deliberately manual. There is no schedule: rounds run when someone asks for one, either
+# with `bun run cycle` locally or from the Actions tab here. Nothing fires on its own, so
+# capital never moves without a person deciding it should.
 
 on:
-  schedule:
-    - cron: '0 */6 * * *'
   workflow_dispatch:
 
 # Never let two cycles touch the same wallets at once.
