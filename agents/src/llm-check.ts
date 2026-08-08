@@ -1,50 +1,66 @@
 import "dotenv/config";
 
-// Smoke test for whichever LLM endpoint agents/.env points at: lists the models the key
-// can actually reach, then sends one tiny completion. Run this after changing provider,
-// before spending a round finding out it does not work.
+// Smoke test for the endpoints agents/.env points at: for each, list the models the key
+// can reach and report the quota headers. The quota matters as much as the key does,
+// because a daily cap that is shared between the primary and the fallback is not a
+// fallback at all: both die at the same moment, mid-round.
 
-const baseURL = (process.env.LLM_BASE_URL ?? "").replace(/\/$/, "");
-const apiKey = process.env.LLM_API_KEY ?? "";
-const model = process.env.LLM_MODEL ?? "";
+type Endpoint = { label: string; baseURL: string; apiKey: string; model: string };
 
-async function main() {
-  console.log(`endpoint ${baseURL}`);
-  console.log(`key      ${apiKey ? `${apiKey.slice(0, 6)}… (${apiKey.length} chars)` : "MISSING"}`);
-  console.log(`model    ${model || "(not set yet)"}\n`);
-  if (!baseURL || !apiKey) throw new Error("set LLM_BASE_URL and LLM_API_KEY in agents/.env");
-
-  const res = await fetch(`${baseURL}/models`, { headers: { Authorization: `Bearer ${apiKey}` } });
-  const body = await res.text();
-  if (!res.ok) throw new Error(`GET /models -> ${res.status}: ${body.slice(0, 300)}`);
-
-  let ids: string[] = [];
-  try {
-    const parsed = JSON.parse(body) as { data?: { id?: string }[] };
-    ids = (parsed.data ?? []).map((m) => m.id ?? "").filter(Boolean);
-  } catch {
-    console.log(body.slice(0, 500));
-  }
-  console.log(`${ids.length} models available:`);
-  for (const id of ids) console.log(`  ${id}`);
-
-  if (!model) {
-    console.log("\nPick one, set LLM_MODEL, and run this again to send a test completion.");
+async function check(e: Endpoint) {
+  console.log(`\n=== ${e.label} ===`);
+  console.log(`endpoint ${e.baseURL}`);
+  console.log(`key      ${e.apiKey ? `${e.apiKey.slice(0, 6)}… (${e.apiKey.length} chars)` : "MISSING"}`);
+  console.log(`model    ${e.model || "(not set)"}`);
+  if (!e.baseURL || !e.apiKey) {
+    console.log("not configured, skipping.");
     return;
   }
 
-  const chat = await fetch(`${baseURL}/chat/completions`, {
-    method: "POST",
-    headers: { Authorization: `Bearer ${apiKey}`, "Content-Type": "application/json" },
-    body: JSON.stringify({ model, messages: [{ role: "user", content: "Reply with just: OK" }], max_tokens: 20 }),
+  const res = await fetch(`${e.baseURL.replace(/\/$/, "")}/models`, {
+    headers: { Authorization: `Bearer ${e.apiKey}` },
   });
-  const chatBody = await chat.text();
-  if (!chat.ok) throw new Error(`POST /chat/completions -> ${chat.status}: ${chatBody.slice(0, 400)}`);
-  console.log(`\nreply from ${model}: ${chatBody.slice(0, 200)}`);
-  console.log("\nEndpoint works.");
+  const body = await res.text();
+  if (!res.ok) {
+    console.log(`FAILED ${res.status}: ${body.slice(0, 200)}`);
+    return;
+  }
+
+  let ids: string[] = [];
+  try {
+    ids = ((JSON.parse(body) as { data?: { id?: string }[] }).data ?? []).map((m) => m.id ?? "").filter(Boolean);
+  } catch {
+    /* non-JSON body, fall through */
+  }
+  console.log(`models   ${ids.join(", ") || "(none listed)"}`);
+
+  const day = res.headers.get("x-ratelimit-remaining-day");
+  const limit = res.headers.get("x-ratelimit-limit-day");
+  const reset = res.headers.get("x-ratelimit-reset-day");
+  if (day !== null) console.log(`quota    ${day} of ${limit ?? "?"} requests left today${reset ? `, resets ${reset}` : ""}`);
+  else console.log("quota    (no rate-limit headers returned)");
+}
+
+async function main() {
+  await check({
+    label: "primary",
+    baseURL: process.env.LLM_BASE_URL ?? "",
+    apiKey: process.env.LLM_API_KEY ?? "",
+    model: process.env.LLM_MODEL ?? "",
+  });
+  await check({
+    label: "fallback",
+    baseURL: process.env.LLM_FALLBACK_BASE_URL ?? "",
+    apiKey: process.env.LLM_FALLBACK_API_KEY ?? "",
+    model: process.env.LLM_FALLBACK_MODEL ?? "",
+  });
+  console.log(
+    "\nIf both show the same remaining count, the cap is per account and the fallback " +
+      "buys you nothing. If they differ, it is per key and you have real headroom.",
+  );
 }
 
 main().catch((err) => {
-  console.error(`\nFAILED: ${String(err?.message ?? err).slice(0, 500)}`);
+  console.error(`\nFAILED: ${String(err?.message ?? err).slice(0, 400)}`);
   process.exit(1);
 });

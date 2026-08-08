@@ -40,20 +40,21 @@ async function callOnce(e: Endpoint, system: string, user: string, temperature: 
   return text;
 }
 
-// Whether the fallback has already been announced, so a long round logs the switch once
-// rather than on every one of its calls.
-let warned = false;
+// Once the primary has failed we stop going back to it for the rest of the process. The
+// usual reason it fails is a daily quota, which will not clear mid-run, and retrying it
+// every call means paying the SDK's retry backoff on each one before falling back.
+let primaryDown = false;
 
 export async function generate(system: string, user: string, temperature = 0.4): Promise<string> {
+  if (primaryDown && fallback) return callOnce(fallback, system, user, temperature);
+
   try {
     return await callOnce(primary, system, user, temperature);
   } catch (err) {
     if (!fallback) throw err;
-    if (!warned) {
-      warned = true;
-      const why = String((err as Error)?.message ?? err).split("\n")[0];
-      console.log(`LLM primary (${primary.model}) failed, falling back to ${fallback.model}: ${why}`);
-    }
+    primaryDown = true;
+    const why = String((err as Error)?.message ?? err).split("\n")[0];
+    console.log(`LLM primary (${primary.model}) failed, using ${fallback.model} for the rest of this run: ${why}`);
     return await callOnce(fallback, system, user, temperature);
   }
 }
