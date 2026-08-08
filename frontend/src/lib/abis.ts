@@ -104,3 +104,16 @@ export const erc20Abi = [
     outputs: [{ type: 'uint256' }],
   },
 ] as const
+
+// RevenueShare records how much revenue each deal has reported, cumulatively. That is
+// the only onchain trace of what an agent actually sold, so it is what the marketplace
+// view is built from.
+export const revenueShareAbi = [
+  {
+    type: 'function',
+    name: 'reportedRevenue',
+    stateMutability: 'view',
+    inputs: [{ name: '', type: 'uint256' }],
+    outputs: [{ name: '', type: 'uint256' }],
+  },
+] as const

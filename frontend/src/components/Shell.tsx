@@ -3,6 +3,7 @@ import { useLive } from '@/lib/useLive'
 import { loadOverview, type Overview } from '@/lib/data'
 import { addresses } from '@/lib/addresses'
 import { usdc, shortAddr } from '@/lib/format'
+import { Wordmark } from '@/components/logo'
 
 export type LiveCtx = ReturnType<typeof useLive<Overview>>
 export const useOverview = () => useOutletContext<LiveCtx>()
@@ -12,6 +13,7 @@ const nav = [
   { to: '/arena', label: 'Arena', icon: IconArena },
   { to: '/judges', label: 'Judges', icon: IconJudges },
   { to: '/startups', label: 'Startups', icon: IconStartups },
+  { to: '/market', label: 'Marketplace', icon: IconMarket },
   { to: '/rounds', label: 'Rounds', icon: IconRounds },
   { to: '/invest', label: 'Capital', icon: IconInvest },
 ]
@@ -24,14 +26,8 @@ export default function Shell() {
     <div className="grid min-h-screen grid-cols-[260px_1fr] bg-bg">
       {/* Sidebar */}
       <aside className="sticky top-0 flex h-screen flex-col border-r border-line bg-surface">
-        <Link to="/" className="flex items-center gap-3 px-5 py-5 transition-opacity hover:opacity-80">
-          <div className="grid h-9 w-9 place-items-center rounded-md border border-primary/40 bg-primary/15 text-primary">
-            <IconLogo />
-          </div>
-          <div>
-            <div className="text-[15px] font-semibold leading-tight tracking-tight text-ink">Agenture</div>
-            <div className="text-[10px] font-semibold uppercase tracking-[0.12em] text-muted">Institutional Intelligence</div>
-          </div>
+        <Link to="/" className="block px-5 py-5 transition-opacity hover:opacity-80">
+          <Wordmark sub="Autonomous venture fund" />
         </Link>
 
         <nav className="mt-3 flex flex-col gap-1 px-3">
@@ -112,14 +108,6 @@ function I({ children }: { children: React.ReactNode }) {
     </svg>
   )
 }
-function IconLogo() {
-  return (
-    <svg width="18" height="18" viewBox="0 0 18 18" fill="none" stroke="currentColor" strokeWidth="1.5" strokeLinejoin="round">
-      <path d="M9 2 3 6v9h12V6L9 2Z" />
-      <path d="M9 6v9M6 9v6M12 9v6" />
-    </svg>
-  )
-}
 function IconVault() {
   return (<I><rect x="2.5" y="3.5" width="13" height="11" rx="1.5" /><circle cx="9" cy="9" r="2.2" /><path d="M9 3.5v1.4M9 13.1v1.4" /></I>)
 }
@@ -131,6 +119,9 @@ function IconJudges() {
 }
 function IconStartups() {
   return (<I><path d="M9 2c2.4 1.3 3.6 3.4 3.6 5.8L9 10.6 5.4 7.8C5.4 5.4 6.6 3.3 9 2Z" /><circle cx="9" cy="6.4" r="1.1" /><path d="M6.4 11 5 14.5 8 13M11.6 11 13 14.5 10 13" /></I>)
+}
+function IconMarket() {
+  return (<I><path d="M2.5 6.5h13l-1 3.5H4.2L3 4.5H1.5" /><circle cx="6" cy="14" r="1.1" /><circle cx="13" cy="14" r="1.1" /></I>)
 }
 function IconRounds() {
   return (<I><circle cx="9" cy="9" r="6" /><path d="M9 5.5V9l2.3 1.4" /></I>)

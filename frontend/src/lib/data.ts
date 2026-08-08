@@ -1,7 +1,7 @@
 import type { Address } from 'viem'
 import { publicClient } from './chain'
 import { addresses } from './addresses'
-import { fundAbi, reputationAbi, erc20Abi } from './abis'
+import { fundAbi, reputationAbi, erc20Abi, revenueShareAbi } from './abis'
 import { judgePersonas, startups, startupByWallet, historicalRaters } from './roster'
 
 const FUND = addresses.agenture.fund as Address
@@ -80,6 +80,9 @@ export type StartupRow = {
   pitch: (typeof startups)[number]['pitch']
   reputation: { count: number; value: number } | null
   balance: bigint
+  /** Cumulative revenue this agent has reported across all its deals, read from
+   *  RevenueShare. The only onchain record of what it actually sold. */
+  revenue: bigint
 }
 
 export type Overview = {
@@ -132,14 +135,25 @@ export async function loadOverview(): Promise<Overview> {
   const judgeBalPromises = judgeCfgs.map((j) =>
     publicClient.readContract({ address: USDC, abi: erc20Abi, functionName: 'balanceOf', args: [j.wallet as Address] }),
   )
+  // What each deal has actually sold. Only the fund's cut moves onchain, so this is the
+  // one place the underlying revenue is recorded.
+  const revenuePromises = Array.from({ length: dealCount }, (_, i) =>
+    publicClient.readContract({
+      address: addresses.agenture.revenueShare as Address,
+      abi: revenueShareAbi,
+      functionName: 'reportedRevenue',
+      args: [BigInt(i)],
+    }),
+  )
 
-  const [judgeStates, deals, reps, bals, judgeBals] = await withRetry(() =>
+  const [judgeStates, deals, reps, bals, judgeBals, dealRevenues] = await withRetry(() =>
     Promise.all([
       Promise.all(judgeStatePromises),
       Promise.all(dealPromises),
       Promise.all(repPromises),
       Promise.all(balPromises),
       Promise.all(judgeBalPromises),
+      Promise.all(revenuePromises),
     ]),
   )
 
@@ -190,6 +204,11 @@ export async function loadOverview(): Promise<Overview> {
       pitch: s.pitch,
       reputation: Number(count) > 0 ? { count: Number(count), value: Number(value) } : null,
       balance: bals[i] as bigint,
+      // Sum the reported revenue of every deal this agent holds. One agent can be backed
+      // by several judges, and each of those deals meters its sales separately.
+      revenue: dealRows
+        .filter((d) => d.startup.toLowerCase() === s.wallet.toLowerCase())
+        .reduce((sum, d) => sum + ((dealRevenues[d.id] as bigint) ?? 0n), 0n),
     }
   })
 
