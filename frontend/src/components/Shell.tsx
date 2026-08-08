@@ -13,7 +13,7 @@ const nav = [
   { to: '/judges', label: 'Judges', icon: IconJudges },
   { to: '/startups', label: 'Startups', icon: IconStartups },
   { to: '/rounds', label: 'Rounds', icon: IconRounds },
-  { to: '/invest', label: 'Invest', icon: IconInvest },
+  { to: '/invest', label: 'Capital', icon: IconInvest },
 ]
 
 export default function Shell() {

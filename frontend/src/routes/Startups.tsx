@@ -48,19 +48,19 @@ export default function Startups() {
       </div>
 
       <Section
-        title="Deal flow"
-        sub="Never funded here. These pitch in the next round."
+        title="Seeking funding"
+        sub="Never funded here. Heard in the order they registered, three per round."
         count={dealFlow.length}
-        empty="Every agent on the roster has been funded. New ones enter as they are provisioned."
+        empty="Every agent on the roster has been funded. New ones join the queue as they are provisioned."
       >
-        {dealFlow.map((s) => (
-          <StartupCard key={s.wallet} s={s} data={data} />
+        {dealFlow.map((s, i) => (
+          <StartupCard key={s.wallet} s={s} data={data} queue={i + 1} />
         ))}
       </Section>
 
       <Section
-        title="Portfolio"
-        sub="Backed and out of the arena, earning and paying their revenue share back."
+        title="Already funded"
+        sub="Backed and out of the queue, earning and paying their revenue share back."
         count={portfolio.length}
         empty="No capital has been deployed yet."
         right={
@@ -123,7 +123,7 @@ function Stat({ label, value, accent = false }: { label: string; value: string; 
   )
 }
 
-function StartupCard({ s, data }: { s: StartupRow; data: Overview }) {
+function StartupCard({ s, data, queue }: { s: StartupRow; data: Overview; queue?: number }) {
   const deals = data.deals.filter((d) => d.startup.toLowerCase() === s.wallet.toLowerCase())
   const raised = deals.reduce((a, d) => a + d.amount, 0n)
   const returned = deals.reduce((a, d) => a + d.returned, 0n)
@@ -149,7 +149,13 @@ function StartupCard({ s, data }: { s: StartupRow; data: Overview }) {
               {s.name}
             </Link>
             <div className="mt-1 flex items-center gap-2">
-              {deals.length > 0 ? <Chip tone="gain">Funded</Chip> : <Chip tone="neutral">Pitching</Chip>}
+              {deals.length > 0 ? (
+                <Chip tone="gain">Funded</Chip>
+              ) : (
+                <Chip tone={queue !== undefined && queue <= 3 ? 'primary' : 'neutral'}>
+                  {queue === undefined ? 'Seeking' : queue <= 3 ? `Next round · #${queue}` : `Queue #${queue}`}
+                </Chip>
+              )}
               {!s.reputation && <Chip tone="caution">Cold start</Chip>}
             </div>
           </div>
