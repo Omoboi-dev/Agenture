@@ -58,7 +58,7 @@ function JudgeCard({ j, data }: { j: JudgeRow; data: Overview }) {
   const color = judgeColor(j.name)
   const record = trackRecord(j.name)
   const deals = data.deals.filter((d) => d.judgeName === j.name)
-  const utilization = j.allocated > 0n ? Number((j.deployed * 100n) / j.allocated) : 0
+  const utilization = j.committed > 0n ? Number((j.deployed * 100n) / j.committed) : 0
   const profitable = j.roiBps > 0
 
   return (
@@ -88,9 +88,9 @@ function JudgeCard({ j, data }: { j: JudgeRow; data: Overview }) {
 
       <div className="px-5 pb-4">
         <div className="mb-1.5 flex items-center justify-between">
-          <span className="eyebrow">Capital deployed</span>
+          <span className="eyebrow">Deployed against commitment</span>
           <span className="tnum text-[12px] text-subtle">
-            {usdc(j.deployed)} / {usdc(j.allocated)}
+            {usdc(j.deployed)} / {usdc(j.committed)}
           </span>
         </div>
         <Meter pct={utilization} tone="primary" />

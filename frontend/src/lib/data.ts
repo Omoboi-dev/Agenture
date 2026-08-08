@@ -53,7 +53,8 @@ export type JudgeRow = {
   wallet: string
   agentId: number
   active: boolean
-  allocated: bigint
+  committed: bigint // capital the fund has promised, grows with the judge's returns
+  called: bigint // how much of that the judge has drawn into its own wallet
   budget: bigint // USDC actually sitting in the judge's own wallet
   deployed: bigint
   returned: bigint
@@ -143,7 +144,7 @@ export async function loadOverview(): Promise<Overview> {
   )
 
   const judges: JudgeRow[] = judgeCfgs.map((j, i) => {
-    const st = judgeStates[i] as { active: boolean; agentId: bigint; allocated: bigint; deployed: bigint; returned: bigint }
+    const st = judgeStates[i] as { active: boolean; agentId: bigint; committed: bigint; called: bigint; deployed: bigint; returned: bigint }
     const persona = judgePersonas[j.name] ?? { label: '', thesis: '' }
     return {
       name: j.name,
@@ -152,7 +153,8 @@ export async function loadOverview(): Promise<Overview> {
       wallet: j.wallet,
       agentId: Number(j.agentId),
       active: st.active,
-      allocated: st.allocated,
+      committed: st.committed,
+      called: st.called,
       budget: judgeBals[i] as bigint,
       deployed: st.deployed,
       returned: st.returned,

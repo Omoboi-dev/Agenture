@@ -43,7 +43,7 @@ export default function JudgeDetail() {
 
       <div className="mb-6 grid grid-cols-2 gap-4 lg:grid-cols-4">
         <Card>
-          <Stat label="Deployed" value={`${usdc(judge.deployed)} / ${usdc(judge.allocated)}`} unit="USDC" />
+          <Stat label="Deployed" value={`${usdc(judge.deployed)} / ${usdc(judge.committed)}`} unit="USDC" />
         </Card>
         <Card>
           <Stat label="Realized ROI" value={bpsToPct(judge.roiBps)} accent={judge.roiBps > 0} />
@@ -123,7 +123,7 @@ function Stat({ label, value, unit, sub, accent = false }: { label: string; valu
 }
 
 function MandateCard({ judge }: { judge: JudgeRow }) {
-  const utilization = judge.allocated > 0n ? Number((judge.deployed * 100n) / judge.allocated) : 0
+  const utilization = judge.committed > 0n ? Number((judge.deployed * 100n) / judge.committed) : 0
   const remaining = judge.budget
   return (
     <Card>
@@ -135,14 +135,17 @@ function MandateCard({ judge }: { judge: JudgeRow }) {
         </div>
         <Meter pct={utilization} tone="primary" />
         <div className="mt-5 space-y-2.5 text-[12px]">
-          <Row label="Allocated by the fund" value={`${usdc(judge.allocated)} USDC`} />
+          <Row label="Committed by the fund" value={`${usdc(judge.committed)} USDC`} />
+          <Row label="Drawn down" value={`${usdc(judge.called)} USDC`} />
+          <Row label="Still callable" value={`${usdc(judge.committed - judge.called)} USDC`} accent={judge.committed > judge.called} />
           <Row label="Deployed" value={`${usdc(judge.deployed)} USDC`} />
           <Row label="In its wallet now" value={`${usdc(remaining)} USDC`} accent={remaining > 0n} />
           <Row label="Returned to fund" value={`${usdc(judge.returned)} USDC`} />
         </div>
         <p className="mt-4 border-t border-line pt-3.5 text-[12px] leading-relaxed text-faint">
-The fund allocates capital into this judge's own wallet, so what it can spend is simply what it holds. No
-          ceiling to configure and none to exceed: the USDC contract itself is the limit.
+The fund commits capital; the judge draws it down itself with a capital call when it decides it needs
+          the money. Nobody hands it anything. Its returns raise the commitment, so backing winners earns the right
+          to call for more.
         </p>
       </div>
     </Card>
