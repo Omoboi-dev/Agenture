@@ -54,24 +54,31 @@ export async function readPositions(): Promise<Position[]> {
   });
 }
 
-/// Who gets heard this round: agents that have never been funded here, plus portfolio
-/// companies that have earned the right to ask for more. Newcomers come first so a round
-/// is mostly fresh deal flow, and the cohort is capped so a round stays legible.
+/// Who gets heard this round. The queue is first come, first served: agents are heard in
+/// the order they registered, so an agent that provisioned earlier is seen sooner and
+/// nobody jumps ahead. `startups` preserves registration order because
+/// `provision-startups` appends to the roster, so position in that list is the queue.
+///
+/// A funded company is not in the queue at all. It only reappears once it has earned a
+/// follow-on, and then it takes one slot so the round is still mostly fresh deal flow.
 export function pickCohort(positions: Position[], size: number): Position[] {
-  const seeking = positions.filter((p) => p.stage === "seeking");
+  const queue = positions.filter((p) => p.stage === "seeking");
   const followOn = positions.filter((p) => p.stage === "followOn");
 
-  // Shuffle the newcomers so the same names do not lead every round purely because of
-  // their position in the roster file.
-  const shuffled = [...seeking].sort(() => Math.random() - 0.5);
-
   const cohort: Position[] = [];
-  // Leave room for one returning company when there is one to hear.
-  const newcomerSlots = followOn.length > 0 ? size - 1 : size;
-  cohort.push(...shuffled.slice(0, Math.max(1, newcomerSlots)));
+  // Reserve a slot for a returning company when one has qualified.
+  const newSlots = followOn.length > 0 ? Math.max(1, size - 1) : size;
+  cohort.push(...queue.slice(0, newSlots));
   if (followOn.length > 0) cohort.push(followOn[0]);
 
   return cohort.slice(0, size);
+}
+
+/// Where an agent sits in the queue to be heard, 1-based. null once it has been funded.
+export function queuePosition(positions: Position[], name: string): number | null {
+  const queue = positions.filter((p) => p.stage === "seeking");
+  const i = queue.findIndex((p) => p.startup.name === name);
+  return i === -1 ? null : i + 1;
 }
 
 export function describeStage(p: Position): string {

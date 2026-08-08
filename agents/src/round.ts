@@ -12,7 +12,7 @@ const usdc = (base: bigint) => `${formatUnits(base, 6)} USDC`;
 const human = (base: bigint) => Number(formatUnits(base, 6));
 const DRY_RUN = process.env.DRY_RUN === "1" || process.env.DRY_RUN === "true";
 // How many pitches a single round hears. Small enough that a round stays readable.
-const COHORT_SIZE = Number(process.env.COHORT_SIZE ?? "4");
+const COHORT_SIZE = Number(process.env.COHORT_SIZE ?? "3");
 // A judge tops itself up when its wallet drops under this, drawing up to the target from
 // whatever commitment it has left.
 const CALL_WHEN_BELOW = parseUnits(process.env.CALL_WHEN_BELOW_USDC ?? "10", 6);
