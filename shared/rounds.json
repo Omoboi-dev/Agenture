@@ -608,7 +608,7 @@
       "endedAt": "2026-08-07T13:43:31.451Z",
       "dryRun": false,
       "cashBeforeUsdc": 105,
-      "cashAfterUsdc": 55.0,
+      "cashAfterUsdc": 55,
       "dossiers": [
         {
           "name": "CryptoPayBridge",
@@ -903,6 +903,91 @@
           "allocatedUsdc": 2,
           "dealId": 31,
           "txHash": "0xffc976e1599674f96e38395263b59e597684bdc84c427465f140577523718dd0"
+        }
+      ]
+    },
+    {
+      "id": 4,
+      "startedAt": "2026-08-08T15:06:05.707Z",
+      "endedAt": "2026-08-08T15:06:54.167Z",
+      "dryRun": false,
+      "cashBeforeUsdc": 56.979,
+      "cashAfterUsdc": 45.5135,
+      "dossiers": [
+        {
+          "name": "CryptoPayBridge",
+          "wallet": "0x3a937cf00fa5eae3a97912778bb7879106e7c65c",
+          "agentId": 859360,
+          "reputation": {
+            "count": 6,
+            "value": 76
+          },
+          "usdcBalance": 16.507642,
+          "pitch": {
+            "idea": "CryptoPayBridge automates cross-chain payments between autonomous agents, charging 0.005 USDC per transaction.",
+            "monthlyRevenueUsdc": 202,
+            "estimatedWorthUsdc": 8282,
+            "askUsdc": 3
+          }
+        }
+      ],
+      "verdicts": [
+        {
+          "judge": "alpha",
+          "startup": "CryptoPayBridge",
+          "invest": true,
+          "score": 80,
+          "breakdown": {
+            "idea": 25,
+            "evidence": 25,
+            "price": 15,
+            "risk": 15
+          },
+          "rationale": "CryptoPayBridge offers a unique solution by automating cross-chain payments, which could be highly valuable in the growing DeFi ecosystem. The ERC-8004 reputation score of 76 indicates client satisfaction, suggesting a solid execution. While the asking price seems reasonable relative to the claimed valuation, the risk factor remains high due to the nature of the business and the need for continued performance. I am willing to take a calculated risk given the potential upside.",
+          "requestedUsdc": 2,
+          "revenueShareBps": 500,
+          "outcome": "committed",
+          "allocatedUsdc": 2,
+          "dealId": 32,
+          "txHash": "0x14491b573b541a4470c004d519f23f310b9658469f9daccd8082861868c3be4b"
+        },
+        {
+          "judge": "nova",
+          "startup": "CryptoPayBridge",
+          "invest": true,
+          "score": 84,
+          "breakdown": {
+            "idea": 25,
+            "evidence": 25,
+            "price": 15,
+            "risk": 20
+          },
+          "rationale": "CryptoPayBridge offers a unique solution by automating cross-chain payments, which could be highly valuable in the growing DeFi ecosystem. The ERC-8004 reputation score indicates client satisfaction, suggesting a solid execution. While the ask seems reasonable given the revenue and valuation, I am willing to take on higher risk due to the potential for significant returns.",
+          "requestedUsdc": 5.815381,
+          "revenueShareBps": 1500,
+          "outcome": "committed",
+          "allocatedUsdc": 5.815381,
+          "dealId": 33,
+          "txHash": "0xe1e4942dc2e66bc45629a14b17f1ef076aa42daa91fe81a94eefc431d45c8104"
+        },
+        {
+          "judge": "sable",
+          "startup": "CryptoPayBridge",
+          "invest": true,
+          "score": 80,
+          "breakdown": {
+            "idea": 25,
+            "evidence": 25,
+            "price": 15,
+            "risk": 15
+          },
+          "rationale": "CryptoPayBridge offers a useful solution by automating cross-chain payments, which could be valuable in the growing decentralized finance ecosystem. The onchain reputation score of 76 indicates client satisfaction, suggesting a solid execution. While the ask seems reasonable given the revenue and valuation, the risk factor remains moderate due to the nature of the business and potential regulatory challenges.",
+          "requestedUsdc": 1.371481,
+          "revenueShareBps": 500,
+          "outcome": "committed",
+          "allocatedUsdc": 1.371481,
+          "dealId": 34,
+          "txHash": "0x626a3e0e0ba219d8317d35960af8c529f9792298d393d669b2a9b7b15b4cd0d0"
         }
       ]
     }
