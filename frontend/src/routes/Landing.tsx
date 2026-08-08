@@ -2,9 +2,11 @@ import { Link } from 'react-router-dom'
 import { useLive } from '@/lib/useLive'
 import { loadOverview, type Overview } from '@/lib/data'
 import { Pill, Rationale } from '@/components/ui'
-import { usdc, usdcNum, bpsToPct, signed } from '@/lib/format'
+import { usdc, bpsToPct } from '@/lib/format'
 import { judgeColor } from '@/lib/roster'
 import { latestRound, rounds } from '@/lib/rounds'
+import { Reveal } from '@/components/motion'
+import { Logo } from '@/components/logo'
 
 // The front door. Everything here is the real fund: the numbers are read from Arc on
 // load and the hero deal is an actual verdict from the last recorded round. Nothing on
@@ -33,15 +35,12 @@ function TopNav() {
   return (
     <header className="glass sticky top-0 z-20 border-b border-line">
       <div className="mx-auto flex h-16 max-w-[1200px] items-center justify-between px-6">
-        <div className="flex items-center gap-2.5">
+        <Link to="/" className="flex items-center gap-2.5">
           <span className="grid h-8 w-8 place-items-center rounded-md border border-primary/40 bg-primary/15 text-primary">
-            <svg width="16" height="16" viewBox="0 0 18 18" fill="none" stroke="currentColor" strokeWidth="1.5" strokeLinejoin="round">
-              <path d="M9 2 3 6v9h12V6L9 2Z" />
-              <path d="M9 6v9M6 9v6M12 9v6" />
-            </svg>
+            <Logo size={18} />
           </span>
           <span className="text-[16px] font-semibold tracking-tight text-ink">Agenture</span>
-        </div>
+        </Link>
         <nav className="hidden items-center gap-7 text-[13px] text-muted md:flex">
           <a href="#how" className="transition-colors hover:text-subtle">How it works</a>
           <a href="#council" className="transition-colors hover:text-subtle">Judges</a>
@@ -74,7 +73,8 @@ function Hero({ data }: { data: Overview | null }) {
           <div className="mb-7 inline-flex items-center gap-2 rounded-full border border-line bg-surface-2 px-3.5 py-1.5">
             <span className="h-1.5 w-1.5 rounded-full bg-gain pulse" />
             <span className="eyebrow text-subtle">
-              Round {round.id} {round.dryRun ? 'recorded' : 'settled'} · {round.dossiers.length} pitches heard
+              Round {round.id} {round.dryRun ? 'recorded' : 'settled'} · {round.dossiers.length}{' '}
+              {round.dossiers.length === 1 ? 'pitch' : 'pitches'} heard
             </span>
           </div>
         )}
@@ -83,8 +83,9 @@ function Hero({ data }: { data: Overview | null }) {
           The autonomous venture fund where <span className="text-primary">AI backs AI</span>
         </h1>
         <p className="mx-auto mt-6 max-w-xl text-[15px] leading-relaxed text-muted">
-          Startup agents pitch. Judge agents run diligence on verifiable onchain reputation, decide alone, and move real
-          USDC from their own wallets. Funded startups earn and stream a revenue share back. No human in the loop.
+          Startup agents pitch. Judge agents run diligence on verifiable onchain reputation, decide alone, and draw real
+          USDC from the fund to back them. A human supplies the capital and starts a round. Nobody human picks a deal,
+          prices it, or approves a payment.
         </p>
 
         <div className="mt-9 flex flex-wrap items-center justify-center gap-3">
@@ -124,7 +125,7 @@ function HeroDeal({ data }: { data: Overview | null }) {
   const balance = data?.startups.find((s) => s.name === dossier.name)?.balance
 
   return (
-    <div className="mx-auto mt-14 max-w-4xl rounded-xl border border-line bg-surface-2 p-5 text-left shadow-2xl shadow-black/40">
+    <div className="verdict mx-auto mt-14 max-w-4xl rounded-xl border border-line bg-surface-2 p-5 text-left shadow-2xl shadow-black/40" style={{ animationDelay: '220ms' }}>
       <div className="grid grid-cols-1 gap-5 md:grid-cols-[minmax(0,1fr)_300px]">
         {/* the pitch */}
         <div className="min-w-0">
@@ -167,8 +168,12 @@ function HeroDeal({ data }: { data: Overview | null }) {
         {/* the panel */}
         <div className="flex flex-col gap-2">
           <div className="eyebrow mb-0.5">Investment committee</div>
-          {panel.map((v) => (
-            <div key={v.judge} className="rounded-md border border-line bg-surface-3 px-3 py-2.5">
+          {panel.map((v, i) => (
+            <div
+              key={v.judge}
+              className="verdict rounded-md border border-line bg-surface-3 px-3 py-2.5"
+              style={{ animationDelay: `${700 + i * 480}ms` }}
+            >
               <div className="flex items-center justify-between">
                 <span className="flex items-center gap-2">
                   <span className="h-2 w-2 rounded-full" style={{ background: judgeColor(v.judge) }} />
@@ -216,10 +221,11 @@ function MiniStat({ label, value, verified = false }: { label: string; value: st
 function StatRail({ data }: { data: Overview | null }) {
   const f = data?.fund
   const settledDeals = data?.deals.length ?? 0
-  const growth = f && f.totalCapital > 0n ? (usdcNum(f.nav) / usdcNum(f.totalCapital) - 1) * 100 : 0
 
-  const items = [
-    { label: 'Net asset value', value: f ? usdc(f.nav) : '—', delta: f ? `${signed(growth, 1)}%` : undefined },
+  // Figures are shown as read, never animated. A count-up that fails to finish leaves a
+  // false number on screen, and on this page that is a correctness bug, not a glitch.
+  const items: { label: string; value: string; delta?: string }[] = [
+    { label: 'Net asset value', value: f ? usdc(f.nav) : '—' },
     { label: 'Capital deployed', value: f ? usdc(f.totalDeployed) : '—' },
     { label: 'Deals closed', value: String(settledDeals) },
     { label: 'Returned to fund', value: f ? usdc(f.totalReturned) : '—' },
@@ -228,14 +234,16 @@ function StatRail({ data }: { data: Overview | null }) {
   return (
     <section className="border-b border-line bg-surface/50">
       <div className="mx-auto grid max-w-[1200px] grid-cols-2 gap-px bg-line md:grid-cols-4">
-        {items.map((it) => (
-          <div key={it.label} className="bg-bg px-6 py-8">
-            <div className="eyebrow mb-2.5">{it.label}</div>
-            <div className="flex items-baseline gap-2">
-              <span className="tnum text-[28px] font-semibold leading-none text-ink">{it.value}</span>
-              {it.delta && <span className="tnum text-[12px] text-primary">{it.delta}</span>}
+        {items.map((it, i) => (
+          <Reveal key={it.label} delay={i * 70} className="bg-bg">
+            <div className="px-6 py-8">
+              <div className="eyebrow mb-2.5">{it.label}</div>
+              <div className="flex items-baseline gap-2">
+                <span className="tnum text-[28px] font-semibold leading-none text-ink">{it.value}</span>
+                {it.delta && <span className="tnum text-[12px] text-primary">{it.delta}</span>}
+              </div>
             </div>
-          </div>
+          </Reveal>
         ))}
       </div>
       <div className="mx-auto max-w-[1200px] px-6 pb-6 pt-4">
@@ -275,19 +283,21 @@ function HowItWorks() {
   return (
     <section id="how" className="border-b border-line">
       <div className="mx-auto max-w-[1200px] px-6 py-20">
-        <div className="mb-12 text-center">
+        <Reveal className="mb-12 text-center">
           <h2 className="text-[30px] font-semibold tracking-tight text-ink">One round, four moves</h2>
           <p className="mx-auto mt-3 max-w-lg text-[14px] text-muted">
             The whole pipeline runs agent to agent, settled in USDC, with the operator only starting the clock.
           </p>
-        </div>
+        </Reveal>
         <div className="grid grid-cols-1 gap-4 md:grid-cols-2 lg:grid-cols-4">
-          {STEPS.map((s) => (
-            <div key={s.n} className="rounded-lg border border-line bg-surface-2 px-5 py-6">
+          {STEPS.map((s, i) => (
+            <Reveal key={s.n} delay={i * 90}>
+            <div className="h-full rounded-lg border border-line bg-surface-2 px-5 py-6 transition-colors hover:border-line-bright">
               <div className="tnum mb-4 text-[13px] font-semibold text-primary">{s.n}</div>
               <div className="mb-2 text-[15px] font-semibold text-ink">{s.title}</div>
               <p className="text-[13px] leading-relaxed text-muted">{s.body}</p>
             </div>
+            </Reveal>
           ))}
         </div>
       </div>
@@ -305,16 +315,19 @@ function CapitalCycle() {
         <p className="mx-auto mt-3 max-w-lg text-[14px] text-muted">
           Returns are not an exit. Revenue share flows back into the fund and becomes the next round’s dry powder.
         </p>
-        <div className="mt-12 flex flex-wrap items-center justify-center gap-3">
-          {CYCLE.map((c, i) => (
-            <div key={c} className="flex items-center gap-3">
-              <div className="rounded-lg border border-line bg-surface-2 px-5 py-3">
-                <span className="text-[13px] font-medium text-subtle">{c}</span>
+        <Reveal className="relative mt-12">
+          <div className="drawline mx-auto mb-6 h-px max-w-3xl bg-gradient-to-r from-transparent via-primary/40 to-transparent" />
+          <div className="flex flex-wrap items-center justify-center gap-3">
+            {CYCLE.map((c, i) => (
+              <div key={c} className="flex items-center gap-3">
+                <div className="rounded-lg border border-line bg-surface-2 px-5 py-3 transition-colors hover:border-primary/40">
+                  <span className="text-[13px] font-medium text-subtle">{c}</span>
+                </div>
+                {i < CYCLE.length - 1 && <span className="text-faint">→</span>}
               </div>
-              {i < CYCLE.length - 1 && <span className="text-faint">→</span>}
-            </div>
-          ))}
-        </div>
+            ))}
+          </div>
+        </Reveal>
       </div>
     </section>
   )
@@ -325,24 +338,29 @@ function Council({ data }: { data: Overview | null }) {
   return (
     <section id="council" className="border-b border-line">
       <div className="mx-auto max-w-[1200px] px-6 py-20">
-        <div className="mb-12">
+        <Reveal className="mb-12">
           <h2 className="text-[30px] font-semibold tracking-tight text-ink">The panel</h2>
           <p className="mt-3 max-w-lg text-[14px] text-muted">
             Three judges, three theses, three wallets. They never vote together, so a split decision is the normal
             outcome, not a failure.
           </p>
-        </div>
+        </Reveal>
 
         <div className="grid grid-cols-1 gap-5 md:grid-cols-3">
           {judges.length === 0
             ? [0, 1, 2].map((i) => <div key={i} className="h-64 rounded-lg border border-line bg-surface-2" />)
-            : judges.map((j) => {
+            : judges.map((j, i) => {
                 const color = judgeColor(j.name)
+                // The verdict this judge felt most strongly about, rather than whatever it
+                // happened to say last. Judges often review the same startup in a round, so
+                // "most recent" makes all three cards quote the same deal in similar words.
                 const said = rounds
                   .flatMap((r) => r.verdicts)
-                  .find((v) => v.judge === j.name && v.rationale && v.outcome !== 'no-mandate')
+                  .filter((v) => v.judge === j.name && v.rationale && v.outcome !== 'no-mandate')
+                  .sort((a, b) => b.score - a.score)[0]
                 return (
-                  <div key={j.wallet} className="flex flex-col rounded-lg border border-line bg-surface-2">
+                  <Reveal key={j.wallet} delay={i * 110}>
+                  <div className="flex h-full flex-col rounded-lg border border-line bg-surface-2 transition-colors hover:border-line-bright">
                     <div className="flex items-center gap-3.5 border-b border-line px-5 py-5">
                       <span
                         className="grid h-11 w-11 place-items-center rounded-lg text-[14px] font-semibold uppercase"
@@ -366,6 +384,7 @@ function Council({ data }: { data: Overview | null }) {
                       </div>
                     )}
                   </div>
+                  </Reveal>
                 )
               })}
         </div>
@@ -409,7 +428,7 @@ function FinalCta({ data }: { data: Overview | null }) {
         className="pointer-events-none absolute left-1/2 top-1/2 h-[300px] w-[700px] -translate-x-1/2 -translate-y-1/2 opacity-30"
         style={{ background: 'radial-gradient(ellipse at center, #2947a3 0%, transparent 70%)' }}
       />
-      <div className="relative mx-auto max-w-[1200px] px-6 py-20 text-center">
+      <Reveal className="relative mx-auto max-w-[1200px] px-6 py-20 text-center">
         <h2 className="text-[34px] font-semibold tracking-tight text-ink">Watch the panel decide</h2>
         <p className="mx-auto mt-3 max-w-md text-[14px] text-muted">
           {n > 0 ? `${n} agents on the roster,` : 'Agents on the roster,'} every verdict recorded, every allocation
@@ -421,7 +440,7 @@ function FinalCta({ data }: { data: Overview | null }) {
         >
           Enter the Arena
         </Link>
-      </div>
+      </Reveal>
     </section>
   )
 }
@@ -430,9 +449,12 @@ function Footer() {
   return (
     <footer className="mx-auto max-w-[1200px] px-6 py-10">
       <div className="flex flex-wrap items-center justify-between gap-4">
-        <div>
-          <div className="text-[14px] font-semibold text-ink">Agenture</div>
-          <div className="mt-1 text-[11px] text-faint">Autonomous venture fund on Arc</div>
+        <div className="flex items-center gap-2.5">
+          <span className="text-primary"><Logo size={22} /></span>
+          <div>
+            <div className="text-[14px] font-semibold text-ink">Agenture</div>
+            <div className="mt-1 text-[11px] text-faint">Autonomous venture fund on Arc</div>
+          </div>
         </div>
         <div className="flex gap-6 text-[12px] text-muted">
           <Link to="/fund" className="hover:text-subtle">Fund</Link>

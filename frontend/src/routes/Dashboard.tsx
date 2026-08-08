@@ -2,7 +2,7 @@ import { Link } from 'react-router-dom'
 import { useOverview } from '@/components/Shell'
 import { Card, CardHeader, StatTile, Pill, Meter, Eyebrow, Dot } from '@/components/ui'
 import { AreaChart, Donut, type DonutSeg } from '@/components/charts'
-import { usdc, usdcNum, bpsToPct, signed } from '@/lib/format'
+import { usdc, usdcNum, bpsToPct } from '@/lib/format'
 import type { DealRow, Overview } from '@/lib/data'
 import { judgeColor } from '@/lib/roster'
 
@@ -14,8 +14,9 @@ export default function Dashboard() {
 
   const { fund } = data
   const roiBps = fund.totalDeployed > 0n ? Number((fund.totalReturned * 10000n) / fund.totalDeployed) : 0
-  const navDeltaPct =
-    fund.totalCapital > 0n ? (usdcNum(fund.nav) / usdcNum(fund.totalCapital) - 1) * 100 : 0
+  // No NAV-versus-capital figure here. NAV includes USDC the judges held before this
+  // Fund was deployed, so that ratio reads as a large gain the fund never made. Realized
+  // ROI beside it is the honest number: revenue share actually paid back.
 
   return (
     <div className="mx-auto max-w-[1340px]">
@@ -29,7 +30,7 @@ export default function Dashboard() {
       {/* Stat rail */}
       <div className="mb-6 grid grid-cols-2 gap-4 md:grid-cols-3 lg:grid-cols-5">
         <Card>
-          <StatTile label="Net Asset Value" value={usdc(fund.nav)} unit="USDC" delta={signed(navDeltaPct, 1) + '%'} deltaTone={navDeltaPct >= 0 ? 'primary' : 'loss'} />
+          <StatTile label="Net Asset Value" value={usdc(fund.nav)} unit="USDC" />
         </Card>
         <Card>
           <StatTile label="Available Liquidity" value={usdc(fund.cash)} unit="USDC" />

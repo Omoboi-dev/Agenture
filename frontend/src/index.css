@@ -34,6 +34,25 @@
   --radius-xl: 16px;
 }
 
+@media (prefers-reduced-motion: reduce) {
+  *,
+  *::before,
+  *::after {
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.01ms !important;
+    scroll-behavior: auto !important;
+  }
+  .reveal {
+    opacity: 1 !important;
+    transform: none !important;
+  }
+  .verdict {
+    opacity: 1 !important;
+    animation: none !important;
+  }
+}
+
 @layer base {
   html {
     background-color: var(--color-bg);
@@ -83,6 +102,49 @@
     background: color-mix(in srgb, var(--color-surface) 80%, transparent);
     backdrop-filter: blur(12px);
   }
+  /* Scroll reveal. 14px is deliberately small: enough to register as arrival, not enough
+     to make the page feel like it is assembling itself. */
+  .reveal {
+    opacity: 0;
+    transform: translateY(14px);
+    transition:
+      opacity 620ms cubic-bezier(0.22, 1, 0.36, 1),
+      transform 620ms cubic-bezier(0.22, 1, 0.36, 1);
+    will-change: opacity, transform;
+  }
+  .reveal.is-in {
+    opacity: 1;
+    transform: none;
+  }
+
+  /* The signature moment: a judge's verdict arriving. Used only in the hero committee,
+     where the sequence mirrors how a round actually resolves, one judge at a time. */
+  @keyframes verdict-in {
+    from {
+      opacity: 0;
+      transform: translateY(8px) scale(0.985);
+    }
+    to {
+      opacity: 1;
+      transform: none;
+    }
+  }
+  .verdict {
+    opacity: 0;
+    animation: verdict-in 560ms cubic-bezier(0.22, 1, 0.36, 1) forwards;
+  }
+
+  /* A hairline that draws itself as the section arrives, standing in for capital moving
+     along the cycle. */
+  @keyframes draw-line {
+    from { transform: scaleX(0); }
+    to { transform: scaleX(1); }
+  }
+  .drawline {
+    transform-origin: left center;
+    animation: draw-line 900ms cubic-bezier(0.22, 1, 0.36, 1) forwards;
+  }
+
   @keyframes pulse-dot {
     0%, 100% { opacity: 1; }
     50% { opacity: 0.35; }
