@@ -16,6 +16,11 @@ export type Startup = {
     estimatedWorthUsdc: number; // self-reported
     askUsdc: number; // how much it wants
   };
+  // How good the business actually is, 0..1. The ground truth of the simulated world:
+  // it drives how much the agent earns, and therefore how it gets rated and how its
+  // reputation develops. Judges never see it. They can only infer it from the pitch and
+  // from the onchain evidence that accumulates as it trades, which is the whole point.
+  quality: number;
 };
 
 // The roster lives in shared/startups.json so the frontend reads the same list and
@@ -26,6 +31,7 @@ export const startups: Startup[] = roster.startups.map((s) => ({
   walletId: s.walletId,
   agentId: s.agentId === null ? null : BigInt(s.agentId),
   pitch: s.pitch,
+  quality: typeof (s as { quality?: number }).quality === "number" ? (s as { quality: number }).quality : 0.5,
 }));
 
 export function findStartupByWallet(wallet: Address): Startup | undefined {

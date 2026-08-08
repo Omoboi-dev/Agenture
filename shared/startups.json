@@ -10,7 +10,8 @@
         "monthlyRevenueUsdc": 1200,
         "estimatedWorthUsdc": 40000,
         "askUsdc": 3
-      }
+      },
+      "quality": 0.8
     },
     {
       "name": "PixelForge",
@@ -22,7 +23,8 @@
         "monthlyRevenueUsdc": 0,
         "estimatedWorthUsdc": 250000,
         "askUsdc": 5
-      }
+      },
+      "quality": 0.4
     },
     {
       "name": "DataOracle",
@@ -34,7 +36,8 @@
         "monthlyRevenueUsdc": 300,
         "estimatedWorthUsdc": 15000,
         "askUsdc": 2
-      }
+      },
+      "quality": 0.6
     },
     {
       "name": "DataIndexer",
@@ -46,7 +49,8 @@
         "monthlyRevenueUsdc": 1621,
         "estimatedWorthUsdc": 27557,
         "askUsdc": 2
-      }
+      },
+      "quality": 0.85
     },
     {
       "name": "CryptoPayBridge",
@@ -58,7 +62,8 @@
         "monthlyRevenueUsdc": 202,
         "estimatedWorthUsdc": 8282,
         "askUsdc": 3
-      }
+      },
+      "quality": 0.65
     },
     {
       "name": "MediaMiner",
@@ -70,7 +75,8 @@
         "monthlyRevenueUsdc": 0,
         "estimatedWorthUsdc": 126000,
         "askUsdc": 5
-      }
+      },
+      "quality": 0.5
     },
     {
       "name": "SecureGuard",
@@ -82,7 +88,8 @@
         "monthlyRevenueUsdc": 16,
         "estimatedWorthUsdc": 2292000,
         "askUsdc": 6
-      }
+      },
+      "quality": 0.2
     },
     {
       "name": "CargoScheduler",
@@ -94,7 +101,8 @@
         "monthlyRevenueUsdc": 102,
         "estimatedWorthUsdc": 5000,
         "askUsdc": 2
-      }
+      },
+      "quality": 0.55
     },
     {
       "name": "TrustGuard",
@@ -106,7 +114,8 @@
         "monthlyRevenueUsdc": 0,
         "estimatedWorthUsdc": 188000,
         "askUsdc": 4
-      }
+      },
+      "quality": 0.35
     },
     {
       "name": "MarketMaker",
@@ -118,7 +127,8 @@
         "monthlyRevenueUsdc": 1069,
         "estimatedWorthUsdc": 32070,
         "askUsdc": 4
-      }
+      },
+      "quality": 0.85
     },
     {
       "name": "StorageVault",
@@ -130,7 +140,8 @@
         "monthlyRevenueUsdc": 151,
         "estimatedWorthUsdc": 8456,
         "askUsdc": 4
-      }
+      },
+      "quality": 0.65
     },
     {
       "name": "BenchmarkBot",
@@ -142,7 +153,8 @@
         "monthlyRevenueUsdc": 0,
         "estimatedWorthUsdc": 160000,
         "askUsdc": 4
-      }
+      },
+      "quality": 0.6
     }
   ]
 }

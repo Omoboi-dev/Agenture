@@ -9,7 +9,8 @@ import { loadJudges } from "./judges.js";
 import { startups } from "./startups.js";
 import { circleExecute } from "./circle.js";
 import { runRound } from "./round.js";
-import { closeDeal, getDeal, dealCount } from "./close-loop.js";
+import { closeDeal, getDeal, dealCount, demandFor, scoreFor } from "./close-loop.js";
+import { findStartupByWallet } from "./startups.js";
 
 // One autonomous turn of the fund, safe to run unattended on a schedule.
 //
@@ -91,12 +92,20 @@ async function settleDeals(operatorKey: Hex, revenue: bigint, max: number, score
 
   for (const dealId of queue) {
     const funds = await balanceOf(customer);
-    if (funds < revenue) {
+    if (funds < revenue * 2n) {
       console.log(`Customer is down to ${fmt(funds)} USDC, stopping settlement here.`);
       break;
     }
     try {
-      const cut = await closeDeal(dealId, operatorKey, revenue, score);
+      // Demand follows the business, so each startup earns a different amount and gets
+      // rated on what it delivered. Without this every agent earns the same and a judge
+      // that picked well is indistinguishable from one that picked badly.
+      const deal = await getDeal(dealId);
+      const startup = findStartupByWallet(deal.startup);
+      const earned = startup ? demandFor(startup.quality, revenue) : revenue;
+      const rating = startup ? scoreFor(earned, revenue) : score;
+
+      const cut = await closeDeal(dealId, operatorKey, earned, rating);
       if (cut !== null) recovered += cut;
     } catch (e) {
       // One bad deal must not abort the cycle.
@@ -111,9 +120,9 @@ async function settleDeals(operatorKey: Hex, revenue: bigint, max: number, score
 async function main() {
   const operatorKey = envKey("DEPLOYER_PRIVATE_KEY");
   const op = walletFromKey(operatorKey);
-  const revenue = U(process.env.CYCLE_REVENUE_USDC ?? "0.5");
-  const settleMax = Number(process.env.CYCLE_SETTLE_MAX ?? "5");
-  const customerFloat = U(process.env.CYCLE_CUSTOMER_FLOAT_USDC ?? "6");
+  const revenue = U(process.env.CYCLE_REVENUE_USDC ?? "2");
+  const settleMax = Number(process.env.CYCLE_SETTLE_MAX ?? "6");
+  const customerFloat = U(process.env.CYCLE_CUSTOMER_FLOAT_USDC ?? "30");
   const investFloor = U(process.env.CYCLE_INVEST_FLOOR_USDC ?? "2");
   const score = Number(process.env.FEEDBACK_SCORE ?? "82");
 

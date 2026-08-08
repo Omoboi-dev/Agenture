@@ -43,6 +43,25 @@ export async function dealCount(): Promise<bigint> {
 
 // One full earn -> settle -> rate pass over a single deal. Returns the cut that reached
 // the fund, or null if the deal could not be processed.
+// How much a startup sells this cycle. Demand follows how good the business actually is,
+// so a strong agent earns more per cycle than a weak one. This is a demand model standing
+// in for a market of paying agents, not observed customer behaviour: what is real is that
+// the payment, the revenue share and the rating all settle onchain.
+export function demandFor(quality: number, base: bigint): bigint {
+  const mult = 0.3 + 1.7 * Math.max(0, Math.min(1, quality));
+  return (base * BigInt(Math.round(mult * 1000))) / 1000n;
+}
+
+// The rating a judge leaves reflects what the startup delivered against the best any
+// agent could have. A constant score would flatten reputation into noise and make the
+// whole diligence layer pointless.
+export function scoreFor(revenue: bigint, base: bigint): number {
+  const best = (base * 2000n) / 1000n; // the multiplier a perfect agent would earn
+  if (best === 0n) return 50;
+  const pct = Number((revenue * 100n) / best);
+  return Math.max(5, Math.min(99, pct));
+}
+
 export async function closeDeal(
   dealId: bigint,
   operatorKey: Hex,
