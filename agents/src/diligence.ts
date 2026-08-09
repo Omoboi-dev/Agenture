@@ -4,6 +4,7 @@ import { publicClient, withRpcRetry } from "./chain.js";
 import { addresses } from "./config.js";
 import { erc20Abi } from "./abis.js";
 import { readReputationSummary } from "./dd.js";
+import { customers } from "./customers.js";
 import type { Startup } from "./startups.js";
 
 // The real onchain picture a judge gets on a startup, independent of what the pitch
@@ -38,14 +39,16 @@ const HISTORICAL_RATERS = [
   "0xcA76529b251502130b8AAaD091c03b72F37e0008", // spike rater
 ];
 
-const KNOWN_CLIENTS: Address[] = Array.from(
+// The customer agents are the important half of this list. They pay for these services
+// out of their own wallets and owe the fund nothing, so their ratings are the only
+// feedback here that is not an investor marking its own homework. It is also what lets a
+// newcomer arrive with a track record instead of every pitch being a cold start.
+export const KNOWN_CLIENTS: Address[] = Array.from(
   new Set(
     [
       addresses.agenture.operator,
       ...addresses.agenture.judges.map((j) => j.wallet),
-      // The customer agent buys these services, so its rating is an independent signal
-      // about an agent the fund has never backed. This is what lets a newcomer arrive
-      // with a track record instead of every new pitch being a cold start.
+      ...customers.map((c) => c.wallet).filter((w): w is Address => Boolean(w)),
       addresses.agenture.customer.wallet,
       ...HISTORICAL_RATERS,
     ].map((a) => a.toLowerCase()),
