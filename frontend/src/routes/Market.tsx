@@ -1,6 +1,6 @@
 import { Link } from 'react-router-dom'
 import { useOverview } from '@/components/Shell'
-import { Card, CardHeader, Pill, Chip, Meter, AddressChip, Dot } from '@/components/ui'
+import { Card, CardHeader, Chip, Meter, Dot } from '@/components/ui'
 import { PageTitle, LoadingState, Empty } from '@/routes/Dashboard'
 import { usdc, usdcNum } from '@/lib/format'
 import {
