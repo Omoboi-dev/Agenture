@@ -61,3 +61,86 @@ export function Reveal({
     </div>
   )
 }
+
+/**
+ * How far down the document we are, 0 to 1. Continuous, unlike Reveal, which fires once
+ * and then never moves again. That one-shot behaviour is exactly what makes a page feel
+ * inert on the second scroll.
+ */
+export function useScrollProgress(): number {
+  const [p, setP] = useState(0)
+  useEffect(() => {
+    if (reduced()) return
+    let frame = 0
+    const read = () => {
+      frame = 0
+      const max = document.documentElement.scrollHeight - window.innerHeight
+      setP(max > 0 ? Math.min(1, window.scrollY / max) : 0)
+    }
+    const onScroll = () => {
+      // rAF-coalesced: scroll fires far faster than the screen refreshes.
+      if (!frame) frame = requestAnimationFrame(read)
+    }
+    read()
+    window.addEventListener('scroll', onScroll, { passive: true })
+    window.addEventListener('resize', onScroll)
+    return () => {
+      if (frame) cancelAnimationFrame(frame)
+      window.removeEventListener('scroll', onScroll)
+      window.removeEventListener('resize', onScroll)
+    }
+  }, [])
+  return p
+}
+
+/**
+ * How far through one element the viewport has travelled, 0 to 1. Used to drive a section
+ * that tells its story as you scroll it rather than all at once on arrival.
+ */
+export function useSectionProgress<T extends HTMLElement>() {
+  const ref = useRef<T | null>(null)
+  const [p, setP] = useState(0)
+
+  useEffect(() => {
+    const el = ref.current
+    if (!el) return
+    // With motion reduced, sit at the end state so nothing is hidden behind a scroll.
+    if (reduced()) {
+      setP(1)
+      return
+    }
+    let frame = 0
+    const read = () => {
+      frame = 0
+      const r = el.getBoundingClientRect()
+      const travel = r.height - window.innerHeight
+      setP(travel <= 0 ? 0 : Math.min(1, Math.max(0, -r.top / travel)))
+    }
+    const onScroll = () => {
+      if (!frame) frame = requestAnimationFrame(read)
+    }
+    read()
+    window.addEventListener('scroll', onScroll, { passive: true })
+    window.addEventListener('resize', onScroll)
+    return () => {
+      if (frame) cancelAnimationFrame(frame)
+      window.removeEventListener('scroll', onScroll)
+      window.removeEventListener('resize', onScroll)
+    }
+  }, [])
+
+  return { ref, progress: p }
+}
+
+/** A hairline of cobalt across the top, tracking how far through the page you are. */
+export function ScrollProgress() {
+  const p = useScrollProgress()
+  return (
+    <div aria-hidden className="fixed inset-x-0 top-0 z-50 h-0.5 bg-transparent">
+      <div
+        className="h-full origin-left bg-primary/70"
+        style={{ transform: `scaleX(${p})`, transition: 'transform 90ms linear' }}
+      />
+    </div>
+  )
+}

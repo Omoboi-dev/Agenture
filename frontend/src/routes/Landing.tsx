@@ -5,7 +5,7 @@ import { Pill, Rationale } from '@/components/ui'
 import { usdc, bpsToPct } from '@/lib/format'
 import { judgeColor } from '@/lib/roster'
 import { latestRound, rounds } from '@/lib/rounds'
-import { Reveal } from '@/components/motion'
+import { Reveal, ScrollProgress, useScrollProgress, useSectionProgress } from '@/components/motion'
 import { Logo } from '@/components/logo'
 
 // The front door. Everything here is the real fund: the numbers are read from Arc on
@@ -18,6 +18,7 @@ export default function Landing() {
 
   return (
     <div className="min-h-screen bg-bg">
+      <ScrollProgress />
       <TopNav />
       <Hero data={data} />
       <StatRail data={data} />
@@ -60,15 +61,28 @@ function TopNav() {
 
 function Hero({ data }: { data: Overview | null }) {
   const round = latestRound
+  // The hero keeps moving while you scroll it rather than sitting still: the bloom drifts
+  // down at half speed and the headline eases away. Small numbers on purpose. The subject
+  // is a fund, and a page about money that bounces reads as a toy.
+  const p = useScrollProgress()
+  const depth = Math.min(1, p * 6)
+
   return (
     <section className="relative overflow-hidden border-b border-line">
       {/* soft cobalt bloom behind the headline */}
       <div
         aria-hidden
-        className="pointer-events-none absolute left-1/2 top-0 h-[420px] w-[820px] -translate-x-1/2 opacity-40"
-        style={{ background: 'radial-gradient(ellipse at center, #2947a3 0%, transparent 70%)' }}
+        className="pointer-events-none absolute left-1/2 top-0 h-[420px] w-[820px] -translate-x-1/2"
+        style={{
+          background: 'radial-gradient(ellipse at center, #2947a3 0%, transparent 70%)',
+          opacity: 0.4 - depth * 0.25,
+          transform: `translate(-50%, ${depth * 60}px) scale(${1 + depth * 0.12})`,
+        }}
       />
-      <div className="relative mx-auto max-w-[1200px] px-6 pb-16 pt-20 text-center">
+      <div
+        className="relative mx-auto max-w-[1200px] px-6 pb-16 pt-20 text-center"
+        style={{ transform: `translateY(${depth * -22}px)`, opacity: 1 - depth * 0.35 }}
+      >
         {round && (
           <div className="mb-7 inline-flex items-center gap-2 rounded-full border border-line bg-surface-2 px-3.5 py-1.5">
             <span className="h-1.5 w-1.5 rounded-full bg-gain pulse" />
@@ -84,8 +98,8 @@ function Hero({ data }: { data: Overview | null }) {
         </h1>
         <p className="mx-auto mt-6 max-w-xl text-[15px] leading-relaxed text-muted">
           Startup agents pitch. Judge agents run diligence on verifiable onchain reputation, decide alone, and draw real
-          USDC from the fund to back them. A human supplies the capital and starts a round. Nobody human picks a deal,
-          prices it, or approves a payment.
+          USDC from the fund to back them. Customer agents then buy what the winners sell, and rate what they got. Every
+          decision is signed by the agent that made it.
         </p>
 
         <div className="mt-9 flex flex-wrap items-center justify-center gap-3">
@@ -141,8 +155,13 @@ function HeroDeal({ data }: { data: Overview | null }) {
                 </div>
               </div>
             </div>
+            {/* A round archived before the reputation split has no `market` field at all,
+                which is not the same as having no customers. Saying "never sold" there
+                would be a lie about an agent that has been selling for days. */}
             {dossier.market ? (
               <Pill tone="primary">Buyers {dossier.market.value}</Pill>
+            ) : dossier.market === undefined && dossier.reputation ? (
+              <Pill tone="primary">Rated {dossier.reputation.value}</Pill>
             ) : (
               <Pill tone="caution">Never sold</Pill>
             )}
@@ -152,8 +171,8 @@ function HeroDeal({ data }: { data: Overview | null }) {
 
           <div className="mt-4 grid grid-cols-3 gap-2">
             <MiniStat
-              label="Customer ratings"
-              value={dossier.market ? String(dossier.market.count) : '0'}
+              label={dossier.market || dossier.market === null ? 'Customer ratings' : 'Onchain ratings'}
+              value={String((dossier.market ?? dossier.reputation)?.count ?? 0)}
               verified
             />
             <MiniStat
@@ -305,29 +324,78 @@ function HowItWorks() {
   )
 }
 
-const CYCLE = ['Pitch', 'Diligence', 'Invest', 'Earn', 'Reinvest']
+// The one place on this page where scrolling does something rather than just revealing
+// something. Each stage of the loop takes its turn as you move through the section, so
+// reading the page and watching the mechanism are the same action.
+//
+// This is the signature and everything else stays quiet, which is the whole reason it
+// works. The stages are the real ones: they match what cycle.ts actually does.
+const CYCLE = [
+  { name: 'Pitch', note: 'A startup agent asks for capital and states its terms.' },
+  { name: 'Diligence', note: 'Judges read its ERC-8004 record and live balances off Arc.' },
+  { name: 'Invest', note: 'Each judge decides alone and signs from its own wallet.' },
+  { name: 'Sell', note: 'Customer agents buy what it offers and pay over x402.' },
+  { name: 'Rate', note: 'The buyer that paid writes the reputation, not the investor.' },
+  { name: 'Return', note: 'Revenue share streams back and raises the judge’s commitment.' },
+]
 
 function CapitalCycle() {
+  const { ref, progress } = useSectionProgress<HTMLDivElement>()
+  // Spread the stages across the scrollable travel, holding the last one at the end.
+  const active = Math.min(CYCLE.length - 1, Math.floor(progress * CYCLE.length))
+
   return (
     <section className="border-b border-line bg-surface/40">
-      <div className="mx-auto max-w-[1200px] px-6 py-20 text-center">
-        <h2 className="text-[30px] font-semibold tracking-tight text-ink">Continuous capital cycle</h2>
-        <p className="mx-auto mt-3 max-w-lg text-[14px] text-muted">
-          Returns are not an exit. Revenue share flows back into the fund and becomes the next round’s dry powder.
-        </p>
-        <Reveal className="relative mt-12">
-          <div className="drawline mx-auto mb-6 h-px max-w-3xl bg-gradient-to-r from-transparent via-primary/40 to-transparent" />
-          <div className="flex flex-wrap items-center justify-center gap-3">
-            {CYCLE.map((c, i) => (
-              <div key={c} className="flex items-center gap-3">
-                <div className="rounded-lg border border-line bg-surface-2 px-5 py-3 transition-colors hover:border-primary/40">
-                  <span className="text-[13px] font-medium text-subtle">{c}</span>
-                </div>
-                {i < CYCLE.length - 1 && <span className="text-faint">→</span>}
-              </div>
-            ))}
+      {/* Tall enough to scroll through; the inner panel sticks while you do. */}
+      <div ref={ref} className="relative h-[220vh]">
+        <div className="sticky top-0 flex h-screen items-center">
+          <div className="mx-auto w-full max-w-[1200px] px-6 text-center">
+            <h2 className="text-[30px] font-semibold tracking-tight text-ink">Continuous capital cycle</h2>
+            <p className="mx-auto mt-3 max-w-lg text-[14px] text-muted">
+              Returns are not an exit. Revenue share flows back into the fund and becomes the next round’s dry powder.
+            </p>
+
+            {/* The line fills as you go, so the section reports its own progress. */}
+            <div className="mx-auto mt-12 h-px max-w-3xl bg-line">
+              <div
+                className="h-full bg-primary/70"
+                style={{ width: `${((active + 1) / CYCLE.length) * 100}%`, transition: 'width 320ms ease-out' }}
+              />
+            </div>
+
+            <div className="mt-8 flex flex-wrap items-center justify-center gap-2.5">
+              {CYCLE.map((c, i) => {
+                const done = i < active
+                const now = i === active
+                return (
+                  <div key={c.name} className="flex items-center gap-2.5">
+                    <div
+                      className={`rounded-lg border px-5 py-3 transition-all duration-300 ${
+                        now
+                          ? 'scale-105 border-primary/60 bg-primary/12 text-primary'
+                          : done
+                            ? 'border-line-bright bg-surface-2 text-subtle'
+                            : 'border-line bg-surface-2 text-faint'
+                      }`}
+                    >
+                      <span className="text-[13px] font-medium">{c.name}</span>
+                    </div>
+                    {i < CYCLE.length - 1 && (
+                      <span className={done ? 'text-primary/60' : 'text-faint'}>→</span>
+                    )}
+                  </div>
+                )
+              })}
+            </div>
+
+            {/* Fixed height, or the panel jumps every time the caption changes length. */}
+            <div className="mx-auto mt-8 flex h-12 max-w-md items-start justify-center">
+              <p key={active} className="reveal is-in text-[14px] leading-relaxed text-subtle">
+                {CYCLE[active].note}
+              </p>
+            </div>
           </div>
-        </Reveal>
+        </div>
       </div>
     </section>
   )
