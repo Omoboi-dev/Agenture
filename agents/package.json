@@ -17,11 +17,15 @@
     "provision-startups": "tsx src/provision-startups.ts",
     "seed-traction": "tsx src/seed-traction.ts",
     "llm-check": "tsx src/llm-check.ts",
-    "fund-customers": "tsx src/fund-customers.ts"
+    "fund-customers": "tsx src/fund-customers.ts",
+    "gateway-deposit": "tsx src/nanopay.ts"
   },
   "dependencies": {
     "@ai-sdk/openai-compatible": "^1.0.0",
     "@circle-fin/developer-controlled-wallets": "^10.8.0",
+    "@circle-fin/x402-batching": "^3.3.0",
+    "@x402/core": "^2.21.0",
+    "@x402/evm": "^2.21.0",
     "ai": "^5.0.0",
     "dotenv": "^16.4.5",
     "viem": "^2.31.7",

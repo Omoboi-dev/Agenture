@@ -10,6 +10,7 @@ import { liveCustomers, budgetOf, type LiveCustomer } from "./customers.js";
 import { readReputationSummary } from "./dd.js";
 import { KNOWN_CLIENTS } from "./diligence.js";
 import { payViaX402 } from "./x402.js";
+import { payViaNanopayments, gatewayBalance } from "./nanopay.js";
 import { rateAfterPurchase } from "./feedback.js";
 import { settle } from "./revenue.js";
 import { getDeal, dealCount } from "./close-loop.js";
@@ -171,6 +172,36 @@ export function experienceOf(quality: number, rnd: () => number = Math.random): 
 }
 
 const JOBS_PER_ORDER = Number(process.env.MARKET_JOBS_PER_ORDER ?? "3");
+
+/**
+ * Pay for one order, preferring Circle Gateway nanopayments.
+ *
+ * Nanopayments is the right rail for this market: orders are fractions of a USDC, and
+ * settling each one onchain costs gas to move less than a dollar. Gateway takes the
+ * buyer's signed authorization, batches it with everyone else's, and pays gas once for
+ * the batch. The buyer needs a Gateway balance for that, so a buyer that has not
+ * deposited yet falls through to the direct x402 rail rather than failing to trade.
+ *
+ * Set MARKET_RAIL=x402 to force the onchain path.
+ */
+async function payForOrder(
+  walletId: string,
+  buyer: Address,
+  seller: Address,
+  amount: bigint,
+  operatorKey: Hex,
+): Promise<{ tx: string | null; rail: "nanopayments" | "x402" }> {
+  if (process.env.MARKET_RAIL !== "x402") {
+    try {
+      const res = await payViaNanopayments(walletId, buyer, seller, amount);
+      if (res.settled) return { tx: res.tx, rail: "nanopayments" };
+      console.log(`    nanopayments unavailable (${res.reason}), settling onchain instead`);
+    } catch (e) {
+      console.log(`    nanopayments failed (${String((e as Error).message).split("\n")[0]}), settling onchain instead`);
+    }
+  }
+  return { tx: await payViaX402(walletId, buyer, operatorKey, seller, amount), rail: "x402" };
+}
 
 /**
  * Buy the service for real: the buyer sets a task, the seller performs it, the buyer
@@ -375,12 +406,20 @@ export async function runMarket(opts: { dryRun?: boolean; operatorKey?: Hex } = 
   const sales = new Map<string, bigint>();
 
   for (const c of buyers) {
+    // A buyer's spending power is its wallet plus its Gateway balance, because payments
+    // draw on either rail. Counting only the wallet made buyers look broke moments after
+    // they had deposited into Gateway, which is where their money had gone.
+    //
+    // The gas reserve comes off the wallet alone. Gateway funds pay for goods; the small
+    // amount of gas an agent needs to write its ERC-8004 rating has to be in the wallet.
     const held = await balanceOf(c.wallet);
-    const spendable = held > GAS_RESERVE ? held - GAS_RESERVE : 0n;
+    const inGateway = await gatewayBalance(c.wallet).catch(() => 0n);
+    const walletSpendable = held > GAS_RESERVE ? held - GAS_RESERVE : 0n;
+    const spendable = walletSpendable + inGateway;
     const budget = spendable < budgetOf(c) ? spendable : budgetOf(c);
 
     if (budget < U("0.3")) {
-      console.log(`${c.name} holds ${fmt(held)} USDC and cannot buy anything this run.\n`);
+      console.log(`${c.name} holds ${fmt(held)} USDC and ${fmt(inGateway)} in Gateway; cannot buy this run.\n`);
       continue;
     }
 
@@ -390,7 +429,7 @@ export async function runMarket(opts: { dryRun?: boolean; operatorKey?: Hex } = 
       continue;
     }
 
-    console.log(`${c.name} · budget ${fmt(budget)} USDC`);
+    console.log(`${c.name} · budget ${fmt(budget)} USDC (wallet ${fmt(held)}, Gateway ${fmt(inGateway)})`);
     for (const it of intents) {
       const p = it.provider;
       const label = SECTOR_LABEL[p.sectors[0]] ?? p.sectors[0];
@@ -410,6 +449,7 @@ export async function runMarket(opts: { dryRun?: boolean; operatorKey?: Hex } = 
         amountUsdc: num(it.amount),
         reason: it.reason,
         paidTx: null,
+        rail: undefined,
         satisfaction: null,
         rated: null,
         ratedTx: null,
@@ -420,7 +460,10 @@ export async function runMarket(opts: { dryRun?: boolean; operatorKey?: Hex } = 
 
       if (!dryRun) {
         try {
-          order.paidTx = await payViaX402(c.walletId, c.wallet, opts.operatorKey as Hex, p.startup.wallet, it.amount);
+          const paid = await payForOrder(c.walletId, c.wallet, p.startup.wallet, it.amount, opts.operatorKey as Hex);
+          order.paidTx = paid.tx;
+          order.rail = paid.rail;
+          console.log(`    paid via ${paid.rail === "nanopayments" ? "Gateway nanopayments, gasless" : "x402 onchain"}`);
         } catch (e) {
           console.log(`    payment failed: ${String((e as Error).message).split("\n")[0]}`);
           orders.push(order);

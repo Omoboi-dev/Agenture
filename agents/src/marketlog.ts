@@ -39,6 +39,9 @@ export type Order = {
   reason: Reason;
   /** Null until the payment lands, so a failed order is visibly a failed order. */
   paidTx: string | null;
+  /** Which rail settled it: Circle Gateway nanopayments (batched, gasless) or a direct
+   *  onchain x402 transfer. Recorded because the two have very different economics. */
+  rail?: "nanopayments" | "x402";
   satisfaction: number | null;
   rated: number | null;
   ratedTx: string | null;
