@@ -300,11 +300,26 @@ function OrderRow({ o }: { o: Order }) {
           {o.units} x {sectorLabel(o.sector)} · {reasonLabel(o.reason)}
         </span>
         {o.rated !== null && (
-          <span className={`tnum text-[11px] ${o.rated >= 70 ? 'text-gain' : o.rated >= 45 ? 'text-muted' : 'text-loss'}`}>
-            rated {o.rated}
+          <span className="flex items-center gap-1.5">
+            {o.delivery?.verified && (
+              <span
+                title={`Checked by the buyer over ${o.delivery.jobs} jobs: ${o.delivery.note}`}
+                className="rounded border border-gain/40 bg-gain/10 px-1 py-px text-[9.5px] font-semibold uppercase tracking-wide text-gain"
+              >
+                Verified
+              </span>
+            )}
+            <span className={`tnum text-[11px] ${o.rated >= 70 ? 'text-gain' : o.rated >= 45 ? 'text-muted' : 'text-loss'}`}>
+              rated {o.rated}
+            </span>
           </span>
         )}
       </div>
+      {/* The buyer's own reason for the score. The whole point of doing the work for real
+          is that a rating stops being a number you have to take on trust. */}
+      {o.delivery?.verified && (
+        <p className="mt-1.5 pl-3.5 text-[10.5px] leading-relaxed text-faint">{o.delivery.note}</p>
+      )}
     </div>
   )
 }
@@ -340,12 +355,14 @@ function Listing({
               >
                 {s.name}
               </Link>
-              {s.reputation ? (
-                <Chip tone={s.reputation.value >= 70 ? 'gain' : s.reputation.value >= 50 ? 'neutral' : 'caution'}>
-                  Rated {s.reputation.value}
+              {/* The buyers' score, not the blend. This is the marketplace: what the
+                  people who paid thought is the only rating that belongs on it. */}
+              {s.market ? (
+                <Chip tone={s.market.value >= 70 ? 'gain' : s.market.value >= 50 ? 'neutral' : 'caution'}>
+                  Buyers rate {s.market.value}
                 </Chip>
               ) : (
-                <Chip tone="caution">Unrated</Chip>
+                <Chip tone="caution">Unrated by buyers</Chip>
               )}
             </div>
             <p className="mt-1 max-w-xl text-[12px] leading-relaxed text-muted">{s.pitch.idea}</p>

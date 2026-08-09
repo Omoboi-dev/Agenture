@@ -38,6 +38,10 @@ export type Order = {
   satisfaction: number | null
   rated: number | null
   ratedTx: string | null
+  /** Present when the seller actually performed the work and the buyer checked it.
+   *  Null means the sector has no implementation yet and the score came from the
+   *  seller's hidden quality instead. Mirrors agents/src/marketlog.ts. */
+  delivery?: { verified: boolean; jobs: number; note: string } | null
 }
 
 export type Settlement = {
