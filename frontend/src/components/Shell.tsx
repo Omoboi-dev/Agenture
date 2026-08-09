@@ -54,16 +54,28 @@ export default function Shell() {
           ))}
         </nav>
 
+        {/* This sits where an app usually puts "you are signed in as", which is what made
+            it read as an account chip for a session nobody has. It is not that. It is the
+            operator: the account that funds the buyers and submits x402 settlements, and
+            the only human-held key in the system. Worth showing, because the honest claim
+            is "a human does these two things and nothing else", but it has to say so and
+            it has to be checkable. "Admin custodian" was neither: Circle holds the keys,
+            so nothing here is a custodian. */}
         <div className="mt-auto px-3 pb-4">
-          <div className="flex items-center gap-3 rounded-md border border-line bg-surface-2 px-3 py-2.5">
+          <a
+            href={`${addresses.explorer}/address/${addresses.agenture.operator}`}
+            target="_blank"
+            rel="noreferrer"
+            className="flex items-center gap-3 rounded-md border border-line bg-surface-2 px-3 py-2.5 transition-colors hover:border-line-bright"
+          >
             <span className="grid h-7 w-7 place-items-center rounded-md bg-surface-4 text-muted">
               <IconShield />
             </span>
             <div className="min-w-0">
               <div className="tnum truncate text-[12px] text-subtle">{shortAddr(addresses.agenture.operator)}</div>
-              <div className="text-[10px] uppercase tracking-wide text-faint">Admin custodian</div>
+              <div className="text-[10px] uppercase tracking-wide text-faint">Operator · funds buyers, settles x402</div>
             </div>
-          </div>
+          </a>
         </div>
       </aside>
 
@@ -83,13 +95,18 @@ export default function Shell() {
               <span className="tnum text-subtle">{live.error ? 'RPC busy' : live.loading ? 'Syncing' : 'Live'}</span>
             </span>
           </div>
-          <button
-            type="button"
-            title="Read-only demo"
-            className="cursor-default rounded-md bg-primary px-4 py-2 text-[13px] font-semibold text-on-primary opacity-90"
+          {/* Was a Connect Wallet button that connected nothing. A control that does not
+              work is worse than no control: the first thing anyone does is click it. The
+              slot is better spent on the one thing a visitor actually wants, which is a
+              way to check that any of this is real. */}
+          <a
+            href={`${addresses.explorer}/address/${addresses.agenture.fund}`}
+            target="_blank"
+            rel="noreferrer"
+            className="rounded-md border border-line-bright bg-surface-2 px-4 py-2 text-[13px] font-semibold text-subtle transition-colors hover:border-primary/40 hover:text-ink"
           >
-            Connect Wallet
-          </button>
+            Fund contract ↗
+          </a>
         </header>
 
         <main className="min-w-0 flex-1 px-8 py-8">
