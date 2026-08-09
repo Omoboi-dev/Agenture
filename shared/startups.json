@@ -11,7 +11,12 @@
         "estimatedWorthUsdc": 40000,
         "askUsdc": 3
       },
-      "quality": 0.8
+      "quality": 0.8,
+      "service": {
+        "sectors": [
+          "payments"
+        ]
+      }
     },
     {
       "name": "PixelForge",
@@ -24,7 +29,12 @@
         "estimatedWorthUsdc": 250000,
         "askUsdc": 5
       },
-      "quality": 0.4
+      "quality": 0.4,
+      "service": {
+        "sectors": [
+          "media"
+        ]
+      }
     },
     {
       "name": "DataOracle",
@@ -37,7 +47,12 @@
         "estimatedWorthUsdc": 15000,
         "askUsdc": 2
       },
-      "quality": 0.6
+      "quality": 0.6,
+      "service": {
+        "sectors": [
+          "market-data"
+        ]
+      }
     },
     {
       "name": "DataIndexer",
@@ -50,7 +65,12 @@
         "estimatedWorthUsdc": 27557,
         "askUsdc": 2
       },
-      "quality": 0.85
+      "quality": 0.85,
+      "service": {
+        "sectors": [
+          "onchain-data"
+        ]
+      }
     },
     {
       "name": "CryptoPayBridge",
@@ -63,7 +83,12 @@
         "estimatedWorthUsdc": 8282,
         "askUsdc": 3
       },
-      "quality": 0.65
+      "quality": 0.65,
+      "service": {
+        "sectors": [
+          "payments"
+        ]
+      }
     },
     {
       "name": "MediaMiner",
@@ -76,7 +101,12 @@
         "estimatedWorthUsdc": 126000,
         "askUsdc": 5
       },
-      "quality": 0.5
+      "quality": 0.5,
+      "service": {
+        "sectors": [
+          "media"
+        ]
+      }
     },
     {
       "name": "SecureGuard",
@@ -89,7 +119,13 @@
         "estimatedWorthUsdc": 2292000,
         "askUsdc": 6
       },
-      "quality": 0.2
+      "quality": 0.2,
+      "service": {
+        "sectors": [
+          "compliance",
+          "security"
+        ]
+      }
     },
     {
       "name": "CargoScheduler",
@@ -102,7 +138,12 @@
         "estimatedWorthUsdc": 5000,
         "askUsdc": 2
       },
-      "quality": 0.55
+      "quality": 0.55,
+      "service": {
+        "sectors": [
+          "logistics"
+        ]
+      }
     },
     {
       "name": "TrustGuard",
@@ -115,7 +156,13 @@
         "estimatedWorthUsdc": 188000,
         "askUsdc": 4
       },
-      "quality": 0.35
+      "quality": 0.35,
+      "service": {
+        "sectors": [
+          "identity",
+          "compliance"
+        ]
+      }
     },
     {
       "name": "MarketMaker",
@@ -128,7 +175,13 @@
         "estimatedWorthUsdc": 32070,
         "askUsdc": 4
       },
-      "quality": 0.85
+      "quality": 0.85,
+      "service": {
+        "sectors": [
+          "market-data",
+          "onchain-data"
+        ]
+      }
     },
     {
       "name": "StorageVault",
@@ -141,7 +194,12 @@
         "estimatedWorthUsdc": 8456,
         "askUsdc": 4
       },
-      "quality": 0.65
+      "quality": 0.65,
+      "service": {
+        "sectors": [
+          "storage"
+        ]
+      }
     },
     {
       "name": "BenchmarkBot",
@@ -154,7 +212,12 @@
         "estimatedWorthUsdc": 160000,
         "askUsdc": 4
       },
-      "quality": 0.6
+      "quality": 0.6,
+      "service": {
+        "sectors": [
+          "security"
+        ]
+      }
     }
   ]
 }

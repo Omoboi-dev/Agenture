@@ -1,0 +1,78 @@
+{
+  "customers": [
+    {
+      "name": "QuantDesk",
+      "role": "Runs an arbitrage book across Arc and needs a live view of the chain to price it.",
+      "needs": [
+        "market-data",
+        "onchain-data"
+      ],
+      "budgetUsdc": 7,
+      "weights": {
+        "experience": 3,
+        "reputation": 2,
+        "price": 1
+      },
+      "explore": 0.15,
+      "wallet": "0x8b4f6435414346bcb3917ccddf40e4e576c042d5",
+      "walletId": "bd2999c9-1cbc-5801-ab14-dc6db0b60e73",
+      "agentId": 868048
+    },
+    {
+      "name": "LedgerWorks",
+      "role": "A treasury back office. Moves money for other agents and has to answer for every transfer.",
+      "needs": [
+        "payments",
+        "compliance",
+        "identity"
+      ],
+      "budgetUsdc": 5,
+      "weights": {
+        "experience": 2.5,
+        "reputation": 2.5,
+        "price": 0.5
+      },
+      "explore": 0.1,
+      "wallet": "0x8dbfa4095cbb4d69f5be8d30a9273ba4d228eedf",
+      "walletId": "5e335a0f-c6a4-5a24-9c44-44e06849ea06",
+      "agentId": 868049
+    },
+    {
+      "name": "AtlasOps",
+      "role": "Coordinates physical logistics for its operator. Runs on thin margins and shops on price.",
+      "needs": [
+        "logistics",
+        "storage",
+        "onchain-data"
+      ],
+      "budgetUsdc": 4,
+      "weights": {
+        "experience": 2,
+        "reputation": 1,
+        "price": 3
+      },
+      "explore": 0.25,
+      "wallet": "0x50b607e66d01d9e12e3a4ac4d9d2b1df06d94c2c",
+      "walletId": "dc831ea8-e7ff-5564-a77b-3e4babedd9c7",
+      "agentId": 868050
+    },
+    {
+      "name": "StudioLoop",
+      "role": "Produces content on demand. Cares what it gets back, not who else rates the seller.",
+      "needs": [
+        "media",
+        "storage"
+      ],
+      "budgetUsdc": 3,
+      "weights": {
+        "experience": 2,
+        "reputation": 0.5,
+        "price": 1.5
+      },
+      "explore": 0.35,
+      "wallet": "0xbda4f8d5b4dfed4be2360c5070074eb63329c06e",
+      "walletId": "cc614140-c83a-5354-ac2c-a6379847b314",
+      "agentId": 868051
+    }
+  ]
+}
