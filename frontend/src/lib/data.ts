@@ -2,25 +2,31 @@ import type { Address } from 'viem'
 import { publicClient } from './chain'
 import { addresses } from './addresses'
 import { fundAbi, reputationAbi, erc20Abi, revenueShareAbi } from './abis'
-import { judgePersonas, startups, startupByWallet, allRaters, marketRaters, investorRaters } from './roster'
+import { judgePersonas, startups, startupByWallet, marketRaters, investorRaters } from './roster'
 import { customers as customerRoster } from './market'
 
 const FUND = addresses.agenture.fund as Address
 const USDC = addresses.usdc as Address
 const REP = addresses.erc8004.reputationRegistry as Address
 
-// Arc's public RPC has a tight quota and returns -32011 "request limit reached" on
-// bursts. Retry the affected batch with backoff so a poll recovers on its own.
+// Arc's public RPC refuses bursts. Measured against it directly: 10 concurrent calls all
+// succeed, 30 loses half, 120 loses every one, each with -32005 "rate limit exceeded".
+// It also returns -32011 "request limit reached" when the longer-run quota is hit.
+//
+// Both codes matter. Missing -32005 is what made the dashboard hang on "Reading Arc" for
+// ever: the error was not recognised as retryable, so it escaped loadOverview and there
+// was never any data to render.
 async function withRetry<T>(fn: () => Promise<T>, tries = 7): Promise<T> {
-  let delay = 900
+  let delay = 700
   for (let i = 0; i < tries; i++) {
     try {
       return await fn()
     } catch (e) {
       const msg = String((e as { message?: string })?.message ?? e)
+      const code = (e as { code?: number })?.code
       const rateLimited =
-        msg.includes('request limit') || msg.includes('RPC Request failed') || msg.includes('429') ||
-        (e as { code?: number })?.code === -32011
+        msg.includes('rate limit') || msg.includes('request limit') || msg.includes('RPC Request failed') ||
+        msg.includes('429') || code === -32011 || code === -32005
       if (!rateLimited || i === tries - 1) throw e
       await new Promise((r) => setTimeout(r, delay))
       delay *= 1.8
@@ -29,8 +35,30 @@ async function withRetry<T>(fn: () => Promise<T>, tries = 7): Promise<T> {
   throw new Error('unreachable')
 }
 
+/**
+ * Run reads a few at a time instead of all at once, retrying each one on its own.
+ *
+ * Firing everything into Promise.all was the other half of the hang: one poll wants about
+ * 130 calls, the node drops most of them, and because the retry wrapped the whole batch a
+ * single failure re-sent all 130 into the same wall. Eight at a time gets through, and a
+ * call that trips the limiter now only costs itself.
+ */
+const CONCURRENCY = 8
+
+async function pool<T, R>(items: T[], fn: (item: T, index: number) => Promise<R>): Promise<R[]> {
+  const out = new Array<R>(items.length)
+  let next = 0
+  const workers = Array.from({ length: Math.min(CONCURRENCY, items.length) }, async () => {
+    while (next < items.length) {
+      const i = next++
+      out[i] = await withRetry(() => fn(items[i], i))
+    }
+  })
+  await Promise.all(workers)
+  return out
+}
+
 const lower = (xs: string[]) => Array.from(new Set(xs.map((a) => a.toLowerCase()))) as Address[]
-const KNOWN_CLIENTS = lower(allRaters)
 const MARKET_CLIENTS = lower(marketRaters)
 const INVESTOR_CLIENTS = lower(investorRaters)
 
@@ -76,8 +104,8 @@ export type StartupRow = {
   wallet: string
   agentId: number
   pitch: (typeof startups)[number]['pitch']
-  reputation: { count: number; value: number } | null
-  /** The same reputation split by who wrote it. `market` is buyers that paid for the
+  /** Reputation, split by who wrote it. There is deliberately no blended figure: nothing
+   *  should show one, and reading it cost 18 RPC calls a minute to display nowhere. `market` is buyers that paid for the
    *  service; `investor` is judges rating agents they already backed. They disagree, and
    *  the disagreement is the point: see agents/src/diligence.ts. */
   market: { count: number; value: number } | null
@@ -91,8 +119,9 @@ export type StartupRow = {
 export type CustomerRow = {
   name: string
   role: string
-  needs: string[]
   budgetUsdc: number
+  /** How it picks: its own past satisfaction, the public score, and price. */
+  weights: { experience: number; reputation: number; price: number }
   wallet: string | null
   /** What is actually in its wallet right now. A buyer with an empty wallet is not a
    *  buyer, however good its intentions look in the roster. */
@@ -115,26 +144,21 @@ const judgeName = (wallet: string) =>
   addresses.agenture.judges.find((j) => j.wallet.toLowerCase() === wallet.toLowerCase())?.name ?? 'unknown'
 
 export async function loadOverview(): Promise<Overview> {
-  // Round 1 (batched): fund scalars.
-  const [cash, nav, totalCapital, totalDeployed, totalReturned, totalOutstanding, dealCountRaw] = (await withRetry(() =>
-    Promise.all([
-      fund('cash'),
-      fund('nav'),
-      fund('totalCapital'),
-      fund('totalDeployed'),
-      fund('totalReturned'),
-      fund('totalOutstanding'),
-      fund('dealCount'),
-    ]),
+  // Round 1: fund scalars.
+  const [cash, nav, totalCapital, totalDeployed, totalReturned, totalOutstanding, dealCountRaw] = (await pool(
+    ['cash', 'nav', 'totalCapital', 'totalDeployed', 'totalReturned', 'totalOutstanding', 'dealCount'],
+    (name) => fund(name),
   )) as bigint[]
 
   const dealCount = Number(dealCountRaw)
   const fundState: FundState = { cash, nav, totalCapital, totalDeployed, totalReturned, totalOutstanding, dealCount }
 
-  // Round 2 (batched): judges, deals, startup reputation + balances, all at once.
+  // Round 2: everything else. One poll is about 130 calls, so they go through the pool a
+  // few at a time rather than all at once.
   const judgeCfgs = addresses.agenture.judges
-  const judgeStatePromises = judgeCfgs.map((j) => fund('getJudge', [j.wallet as Address]))
-  const dealPromises = Array.from({ length: dealCount }, (_, i) => fund('getDeal', [BigInt(i)]))
+  const dealIds = Array.from({ length: dealCount }, (_, i) => BigInt(i))
+  const funded = customerRoster.filter((c) => c.wallet)
+
   const summary = (agentId: number, clients: Address[]) =>
     publicClient.readContract({
       address: REP,
@@ -142,46 +166,26 @@ export async function loadOverview(): Promise<Overview> {
       functionName: 'getSummary',
       args: [BigInt(agentId), clients, '', ''],
     })
-  const repPromises = startups.map((s) => summary(s.agentId, KNOWN_CLIENTS))
-  const marketRepPromises = startups.map((s) => summary(s.agentId, MARKET_CLIENTS))
-  const investorRepPromises = startups.map((s) => summary(s.agentId, INVESTOR_CLIENTS))
-  const balPromises = startups.map((s) =>
-    publicClient.readContract({ address: USDC, abi: erc20Abi, functionName: 'balanceOf', args: [s.wallet as Address] }),
-  )
-  // A judge's spendable budget is simply the USDC in its own wallet.
-  const judgeBalPromises = judgeCfgs.map((j) =>
-    publicClient.readContract({ address: USDC, abi: erc20Abi, functionName: 'balanceOf', args: [j.wallet as Address] }),
-  )
+  const balanceOf = (wallet: string) =>
+    publicClient.readContract({ address: USDC, abi: erc20Abi, functionName: 'balanceOf', args: [wallet as Address] })
+
+  const judgeStates = await pool(judgeCfgs, (j) => fund('getJudge', [j.wallet as Address]))
+  const deals = await pool(dealIds, (id) => fund('getDeal', [id]))
+  const marketReps = await pool(startups, (s) => summary(s.agentId, MARKET_CLIENTS))
+  const investorReps = await pool(startups, (s) => summary(s.agentId, INVESTOR_CLIENTS))
+  const bals = await pool(startups, (s) => balanceOf(s.wallet))
+  const judgeBals = await pool(judgeCfgs, (j) => balanceOf(j.wallet))
   // What each deal has actually sold. Only the fund's cut moves onchain, so this is the
   // one place the underlying revenue is recorded.
-  const revenuePromises = Array.from({ length: dealCount }, (_, i) =>
+  const dealRevenues = await pool(dealIds, (id) =>
     publicClient.readContract({
       address: addresses.agenture.revenueShare as Address,
       abi: revenueShareAbi,
       functionName: 'reportedRevenue',
-      args: [BigInt(i)],
+      args: [id],
     }),
   )
-
-  const funded = customerRoster.filter((c) => c.wallet)
-  const customerBalPromises = funded.map((c) =>
-    publicClient.readContract({ address: USDC, abi: erc20Abi, functionName: 'balanceOf', args: [c.wallet as Address] }),
-  )
-
-  const [judgeStates, deals, reps, marketReps, investorReps, bals, judgeBals, dealRevenues, customerBals] =
-    await withRetry(() =>
-      Promise.all([
-        Promise.all(judgeStatePromises),
-        Promise.all(dealPromises),
-        Promise.all(repPromises),
-        Promise.all(marketRepPromises),
-        Promise.all(investorRepPromises),
-        Promise.all(balPromises),
-        Promise.all(judgeBalPromises),
-        Promise.all(revenuePromises),
-        Promise.all(customerBalPromises),
-      ]),
-    )
+  const customerBals = await pool(funded, (c) => balanceOf(c.wallet as string))
 
   const judges: JudgeRow[] = judgeCfgs.map((j, i) => {
     const st = judgeStates[i] as { active: boolean; agentId: bigint; committed: bigint; called: bigint; deployed: bigint; returned: bigint }
@@ -232,7 +236,6 @@ export async function loadOverview(): Promise<Overview> {
       wallet: s.wallet,
       agentId: s.agentId,
       pitch: s.pitch,
-      reputation: asSignal(reps[i]),
       market: asSignal(marketReps[i]),
       investor: asSignal(investorReps[i]),
       balance: bals[i] as bigint,
@@ -249,8 +252,8 @@ export async function loadOverview(): Promise<Overview> {
     return {
       name: c.name,
       role: c.role,
-      needs: c.needs,
       budgetUsdc: c.budgetUsdc,
+      weights: c.weights,
       wallet: c.wallet,
       balance: i === -1 ? 0n : ((customerBals[i] as bigint) ?? 0n),
     }
