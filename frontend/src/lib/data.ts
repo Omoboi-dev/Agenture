@@ -3,6 +3,7 @@ import { publicClient } from './chain'
 import { addresses } from './addresses'
 import { fundAbi, reputationAbi, erc20Abi, revenueShareAbi } from './abis'
 import { judgePersonas, startups, startupByWallet, historicalRaters } from './roster'
+import { customers as customerRoster } from './market'
 
 const FUND = addresses.agenture.fund as Address
 const USDC = addresses.usdc as Address
@@ -85,11 +86,23 @@ export type StartupRow = {
   revenue: bigint
 }
 
+export type CustomerRow = {
+  name: string
+  role: string
+  needs: string[]
+  budgetUsdc: number
+  wallet: string | null
+  /** What is actually in its wallet right now. A buyer with an empty wallet is not a
+   *  buyer, however good its intentions look in the roster. */
+  balance: bigint
+}
+
 export type Overview = {
   fund: FundState
   judges: JudgeRow[]
   deals: DealRow[]
   startups: StartupRow[]
+  customers: CustomerRow[]
 }
 
 function fund<const T extends string>(functionName: T, args?: readonly unknown[]) {
@@ -146,7 +159,12 @@ export async function loadOverview(): Promise<Overview> {
     }),
   )
 
-  const [judgeStates, deals, reps, bals, judgeBals, dealRevenues] = await withRetry(() =>
+  const funded = customerRoster.filter((c) => c.wallet)
+  const customerBalPromises = funded.map((c) =>
+    publicClient.readContract({ address: USDC, abi: erc20Abi, functionName: 'balanceOf', args: [c.wallet as Address] }),
+  )
+
+  const [judgeStates, deals, reps, bals, judgeBals, dealRevenues, customerBals] = await withRetry(() =>
     Promise.all([
       Promise.all(judgeStatePromises),
       Promise.all(dealPromises),
@@ -154,6 +172,7 @@ export async function loadOverview(): Promise<Overview> {
       Promise.all(balPromises),
       Promise.all(judgeBalPromises),
       Promise.all(revenuePromises),
+      Promise.all(customerBalPromises),
     ]),
   )
 
@@ -212,5 +231,17 @@ export async function loadOverview(): Promise<Overview> {
     }
   })
 
-  return { fund: fundState, judges, deals: dealRows, startups: startupRows }
+  const customerRows: CustomerRow[] = customerRoster.map((c) => {
+    const i = funded.indexOf(c)
+    return {
+      name: c.name,
+      role: c.role,
+      needs: c.needs,
+      budgetUsdc: c.budgetUsdc,
+      wallet: c.wallet,
+      balance: i === -1 ? 0n : ((customerBals[i] as bigint) ?? 0n),
+    }
+  })
+
+  return { fund: fundState, judges, deals: dealRows, startups: startupRows, customers: customerRows }
 }

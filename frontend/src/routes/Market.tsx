@@ -3,15 +3,28 @@ import { useOverview } from '@/components/Shell'
 import { Card, CardHeader, Pill, Chip, Meter, AddressChip, Dot } from '@/components/ui'
 import { PageTitle, LoadingState, Empty } from '@/routes/Dashboard'
 import { usdc, usdcNum } from '@/lib/format'
-import { addresses } from '@/lib/addresses'
-import type { Overview, StartupRow } from '@/lib/data'
+import {
+  latestRun,
+  memory,
+  ordersBy,
+  buyersOf,
+  customerColor,
+  sectorLabel,
+  reasonLabel,
+  type Order,
+} from '@/lib/market'
+import type { Overview, StartupRow, CustomerRow } from '@/lib/data'
 
-// The selling side. Every other page looks at the fund: what it committed, what it
-// deployed, what came back. This one looks at the agents doing the work, ranked by what
-// they have actually sold, because that is the number the whole fund is a bet on.
+// Both sides of the market on one page, and the buyers come first.
 //
-// Revenue here is read from RevenueShare.reportedRevenue, deal by deal. It is the only
-// onchain record of what an agent sold, as opposed to the cut the fund took from it.
+// Every other page looks outward from the fund: what it committed, what it deployed, what
+// came back. Here the fund is a spectator. Four customer agents hold their own wallets
+// and decide for themselves what they need; a seller earns because one of them chose it,
+// and the fund's returns are whatever is left after those choices.
+//
+// Revenue is read from RevenueShare.reportedRevenue deal by deal, which is the only
+// onchain record of what an agent sold as opposed to the cut the fund took from it. Who
+// bought and why comes from shared/market.json, because a chain does not record reasons.
 
 export default function Market() {
   const { data, error } = useOverview()
@@ -25,12 +38,13 @@ export default function Market() {
   const volume = data.startups.reduce((a, s) => a + s.revenue, 0n)
   const toFund = data.deals.reduce((a, d) => a + d.returned, 0n)
   const topRevenue = trading[0]?.revenue ?? 1n
+  const buying = data.customers.filter((c) => c.wallet)
 
   return (
     <div className="mx-auto max-w-[1340px]">
       <PageTitle
         title="Marketplace"
-        sub="What the funded agents are selling, and to whom. Every sale is an x402 payment settled on Arc; the fund's cut is skimmed from it automatically."
+        sub="Independent customer agents buy what they need from the funded roster. Each holds its own wallet, picks its own suppliers, and rates them afterwards. The fund earns a share of whatever they decide to spend."
       />
 
       <div className="mb-8 grid grid-cols-2 gap-4 lg:grid-cols-4">
@@ -51,7 +65,11 @@ export default function Market() {
         </Card>
       </div>
 
-      <div className="grid grid-cols-1 gap-6 lg:grid-cols-[minmax(0,1fr)_360px]">
+      <BuyersStrip customers={buying} />
+
+      {/* items-start, or the order book stretches to whatever height the two cards beside
+          it happen to add up to and trails a column of empty surface. */}
+      <div className="grid grid-cols-1 items-start gap-6 lg:grid-cols-[minmax(0,1fr)_360px]">
         <Card>
           <CardHeader
             title="Order book"
@@ -68,7 +86,7 @@ export default function Market() {
           )}
           {idle.length > 0 && (
             <div className="border-t border-line px-5 py-3.5">
-              <span className="eyebrow mb-1.5 block">Funded but not yet trading</span>
+              <span className="eyebrow mb-1.5 block">Funded, but no customer yet</span>
               <div className="flex flex-wrap gap-2">
                 {idle.map((s) => (
                   <Link
@@ -85,7 +103,7 @@ export default function Market() {
         </Card>
 
         <div className="flex flex-col gap-6">
-          <BuyerCard />
+          <LastRunCard />
           <RailsCard />
         </div>
       </div>
@@ -122,6 +140,175 @@ function Stat({
   )
 }
 
+// The buyers. They lead the page because they are the reason any of the numbers below
+// move: nothing in this market is allocated, it is chosen.
+function BuyersStrip({ customers }: { customers: CustomerRow[] }) {
+  if (customers.length === 0) {
+    return (
+      <Card className="mb-6">
+        <div className="px-5 py-6 text-[13px] text-muted">
+          No customer agents have wallets yet. Until they do, nothing on the roster has anyone to sell to.
+        </div>
+      </Card>
+    )
+  }
+
+  return (
+    <div className="mb-6">
+      <div className="mb-3 flex items-baseline justify-between">
+        <h2 className="text-[16px] font-semibold tracking-tight text-ink">The buyers</h2>
+        <span className="eyebrow text-faint">{customers.length} independent wallets</span>
+      </div>
+      <div className="grid grid-cols-1 gap-4 md:grid-cols-2 xl:grid-cols-4">
+        {customers.map((c) => (
+          <BuyerCard key={c.name} c={c} />
+        ))}
+      </div>
+    </div>
+  )
+}
+
+function BuyerCard({ c }: { c: CustomerRow }) {
+  const orders = ordersBy(c.name)
+  const spent = orders.reduce((a, o) => a + (o.paidTx ? o.amountUsdc : 0), 0)
+  const book = Object.entries(memory[c.name] ?? {}).sort((a, b) => b[1].satisfaction - a[1].satisfaction)
+  const color = customerColor(c.name)
+
+  return (
+    <Card>
+      <div className="flex items-start gap-3 border-b border-line px-4 py-3.5">
+        <span
+          className="mt-1 h-2.5 w-2.5 shrink-0 rounded-full"
+          style={{ background: color, boxShadow: `0 0 0 3px ${color}22` }}
+        />
+        <div className="min-w-0 flex-1">
+          <div className="text-[14px] font-semibold text-ink">{c.name}</div>
+          <p className="mt-1 text-[11.5px] leading-relaxed text-muted">{c.role}</p>
+        </div>
+      </div>
+
+      <div className="flex items-baseline justify-between px-4 py-3">
+        <div>
+          <div className="eyebrow mb-1">Wallet</div>
+          <div className="tnum text-[15px] font-semibold text-ink">{usdc(c.balance)}</div>
+        </div>
+        <div className="text-right">
+          <div className="eyebrow mb-1">Spent last run</div>
+          <div className="tnum text-[15px] font-semibold text-primary">{spent.toFixed(2)}</div>
+        </div>
+      </div>
+
+      <div className="px-4 pb-3">
+        <div className="eyebrow mb-1.5">Buys</div>
+        <div className="flex flex-wrap gap-1.5">
+          {c.needs.map((n) => (
+            <span key={n} className="rounded border border-line bg-surface-3 px-1.5 py-0.5 text-[10.5px] text-subtle">
+              {sectorLabel(n)}
+            </span>
+          ))}
+        </div>
+      </div>
+
+      {book.length > 0 && (
+        <div className="border-t border-line px-4 py-3">
+          <div className="eyebrow mb-2">Who it trusts</div>
+          <div className="space-y-1.5">
+            {book.slice(0, 3).map(([provider, e]) => (
+              <div key={provider} className="flex items-center gap-2 text-[11.5px]">
+                <Link
+                  to={`/startups/${provider.toLowerCase()}`}
+                  className="min-w-0 flex-1 truncate text-subtle transition-colors hover:text-primary"
+                >
+                  {provider}
+                </Link>
+                <span className="tnum shrink-0 text-faint">{e.orders}x</span>
+                <span
+                  className={`tnum shrink-0 ${e.satisfaction >= 0.7 ? 'text-gain' : e.satisfaction >= 0.45 ? 'text-subtle' : 'text-loss'}`}
+                >
+                  {Math.round(e.satisfaction * 100)}
+                </span>
+              </div>
+            ))}
+          </div>
+        </div>
+      )}
+    </Card>
+  )
+}
+
+// What happened in the most recent market run, in the buyer's own words where there are
+// any. The sentence is written by the model after the fact and changes nothing: the
+// trading below it is what settled onchain.
+function LastRunCard() {
+  if (!latestRun) {
+    return (
+      <Card>
+        <CardHeader title="Last market run" />
+        <Empty label="No market run recorded yet." />
+      </Card>
+    )
+  }
+
+  const paid = latestRun.orders.filter((o) => o.paidTx)
+  const when = new Date(latestRun.at).toLocaleString(undefined, { month: 'short', day: 'numeric', hour: '2-digit', minute: '2-digit' })
+
+  return (
+    <Card>
+      <CardHeader
+        title="Last market run"
+        right={<span className="eyebrow text-faint">{when}</span>}
+      />
+      {latestRun.note && (
+        <div className="border-b border-line px-5 py-4">
+          <p className="text-[12.5px] italic leading-relaxed text-subtle">“{latestRun.note.text}”</p>
+          <div className="mt-2 flex items-center gap-1.5">
+            <span className="h-1.5 w-1.5 rounded-full" style={{ background: customerColor(latestRun.note.customer) }} />
+            <span className="eyebrow">{latestRun.note.customer}</span>
+          </div>
+        </div>
+      )}
+      {paid.length === 0 ? (
+        <Empty label="Nothing was bought." />
+      ) : (
+        <div className="divide-y divide-line">
+          {paid.map((o, i) => (
+            <OrderRow key={`${o.customer}-${o.provider}-${i}`} o={o} />
+          ))}
+        </div>
+      )}
+    </Card>
+  )
+}
+
+function OrderRow({ o }: { o: Order }) {
+  return (
+    <div className="px-5 py-3">
+      <div className="flex items-center gap-2">
+        <span className="h-1.5 w-1.5 shrink-0 rounded-full" style={{ background: customerColor(o.customer) }} />
+        <span className="truncate text-[12.5px] text-subtle">{o.customer}</span>
+        <span className="shrink-0 text-faint">→</span>
+        <Link
+          to={`/startups/${o.provider.toLowerCase()}`}
+          className="min-w-0 flex-1 truncate text-[12.5px] font-medium text-ink transition-colors hover:text-primary"
+        >
+          {o.provider}
+        </Link>
+        <span className="tnum shrink-0 text-[12.5px] text-ink">{o.amountUsdc.toFixed(2)}</span>
+      </div>
+      <div className="mt-1 flex items-center justify-between pl-3.5">
+        <span className="text-[11px] text-faint">
+          {o.units} x {sectorLabel(o.sector)} · {reasonLabel(o.reason)}
+        </span>
+        {o.rated !== null && (
+          <span className={`tnum text-[11px] ${o.rated >= 70 ? 'text-gain' : o.rated >= 45 ? 'text-muted' : 'text-loss'}`}>
+            rated {o.rated}
+          </span>
+        )}
+      </div>
+    </div>
+  )
+}
+
 function Listing({
   s,
   rank,
@@ -136,6 +323,7 @@ function Listing({
   const deals = data.deals.filter((d) => d.startup.toLowerCase() === s.wallet.toLowerCase())
   const cut = deals.reduce((a, d) => a + d.returned, 0n)
   const share = Number((s.revenue * 100n) / (topRevenue > 0n ? topRevenue : 1n))
+  const buyers = buyersOf(s.name)
 
   return (
     <div className="px-5 py-4">
@@ -170,19 +358,41 @@ function Listing({
           <div className="tnum mt-0.5 text-[11px] text-gain">{usdc(cut)} to the fund</div>
         </div>
       </div>
-      <div className="mt-3 pl-8">
-        <Meter pct={share} tone="primary" />
+      <div className="mt-3 flex items-center gap-3 pl-8">
+        <div className="min-w-0 flex-1">
+          <Meter pct={share} tone="primary" />
+        </div>
+        <div className="flex shrink-0 items-center gap-1.5">
+          {buyers.length === 0 ? (
+            <span className="text-[10.5px] text-faint">no repeat buyer</span>
+          ) : (
+            buyers.map((b) => (
+              <span
+                key={b}
+                title={`${b} buys from ${s.name}`}
+                className="h-1.5 w-1.5 rounded-full"
+                style={{ background: customerColor(b) }}
+              />
+            ))
+          )}
+        </div>
       </div>
     </div>
   )
 }
 
-function BuyerCard() {
-  const customer = addresses.agenture.customer
+const RAILS = [
+  { k: 'Choice', v: 'Each buyer scores only the sellers in the sectors it needs, on its own past satisfaction, the public ERC-8004 score, and price' },
+  { k: 'Payment', v: 'x402 over EIP-3009. The buyer signs off-chain and the operator submits, so it never needs gas to buy' },
+  { k: 'Settlement', v: 'RevenueShare.settle, called by the seller. Revenue splits across every deal backing it' },
+  { k: 'Rating', v: 'ERC-8004 feedback, written by the buyer that paid. No judge rates its own portfolio' },
+]
+
+function RailsCard() {
   return (
     <Card>
       <CardHeader
-        title="The buyer"
+        title="How a sale works"
         right={
           <span className="flex items-center gap-1.5">
             <Dot tone="primary" />
@@ -190,40 +400,6 @@ function BuyerCard() {
           </span>
         }
       />
-      <div className="px-5 py-5">
-        <div className="mb-3 flex items-center justify-between">
-          <span className="text-[14px] font-medium capitalize text-ink">{customer.name}</span>
-          <Pill tone="neutral">Agent</Pill>
-        </div>
-        <p className="text-[12px] leading-relaxed text-muted">
-          A single agent wallet buys from every service here. It signs an EIP-3009 authorization off-chain and the
-          operator submits it as the x402 facilitator, so the buyer never needs gas and never sends a transaction
-          itself.
-        </p>
-        <div className="mt-4">
-          <AddressChip addr={customer.wallet} />
-        </div>
-      </div>
-      <p className="border-t border-line px-5 py-3.5 text-[12px] leading-relaxed text-faint">
-        One buyer stands in for a market of paying agents, and how much it spends on each service is modelled from how
-        good that service is rather than observed from real demand. The payment, the revenue share and the rating that
-        follows are all real and settle onchain.
-      </p>
-    </Card>
-  )
-}
-
-const RAILS = [
-  { k: 'Payment', v: 'x402 over EIP-3009, gasless for the buyer' },
-  { k: 'Settlement', v: 'RevenueShare.settle, called by the seller' },
-  { k: 'Metering', v: 'reportedRevenue per deal, read live from Arc' },
-  { k: 'Rating', v: 'ERC-8004 feedback, written by the deal’s judge' },
-]
-
-function RailsCard() {
-  return (
-    <Card>
-      <CardHeader title="How a sale settles" />
       <div className="divide-y divide-line">
         {RAILS.map((r) => (
           <div key={r.k} className="px-5 py-3">
@@ -232,6 +408,11 @@ function RailsCard() {
           </div>
         ))}
       </div>
+      <p className="border-t border-line px-5 py-3.5 text-[12px] leading-relaxed text-faint">
+        What is simulated is the delivery itself: a buyer's satisfaction is drawn from how good the seller actually is,
+        because there is no real service behind these agents. Everything downstream of that opinion is real. The buyer
+        chooses, pays, and rates on its own wallet, and a seller nobody needs earns nothing however good it is.
+      </p>
     </Card>
   )
 }

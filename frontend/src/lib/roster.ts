@@ -1,4 +1,5 @@
 import roster from '@shared/startups.json'
+import { customers } from '@/lib/market'
 
 // Display metadata that mirrors the agents' config (personas + pitches). Onchain facts
 // (mandates, deals, reputation, balances) are read live; this is the human-facing copy.
@@ -48,10 +49,12 @@ export function startupByWallet(wallet: string): StartupMeta | undefined {
   return startups.find((s) => s.wallet.toLowerCase() === w)
 }
 
-// The raters whose ERC-8004 feedback the fund trusts: operator + judges + historical
-// pre-migration wallets. Mirrors the agents' diligence set.
+// The raters whose ERC-8004 feedback the fund trusts: operator + judges + the customer
+// agents that buy these services + historical pre-migration wallets. Mirrors the agents'
+// diligence set, and getSummary aggregates over exactly this list.
 export const historicalRaters = [
-  '0xd4d1bae70e727c9f66c3ed0efbf7bf57b46fd92f', // the customer agent, which pays for services
+  ...customers.map((c) => c.wallet).filter((w): w is string => Boolean(w)),
+  '0xd4d1bae70e727c9f66c3ed0efbf7bf57b46fd92f', // the original single house customer
   '0x7F2733B91b12bcF2cfE99E2aa2617286b93cA7de',
   '0xf2fD1775118E21Ea5B9507235d3556C97181a9F7',
   '0x62050AB71Cd055cD48ed4fc2aD940606F7d63467',
