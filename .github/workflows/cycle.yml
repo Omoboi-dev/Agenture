@@ -1,8 +1,8 @@
 name: Agenture cycle
 
-# One autonomous turn of the fund: startups earn and settle their revenue share, then the
-# judges deploy what the fund can afford. The round archive it writes is committed back,
-# which is what keeps the deployed frontend's deliberation history current.
+# One turn of the fund: the buyers are topped up, the market runs, and then the judges
+# deploy if any of them can still write a cheque. The archive it writes is committed back,
+# which is what keeps the deployed frontend's history current.
 #
 # Deliberately manual. There is no schedule: rounds run when someone asks for one, either
 # with `bun run cycle` locally or from the Actions tab here. Nothing fires on its own, so
@@ -38,13 +38,11 @@ jobs:
       - name: Run the cycle
         working-directory: agents
         env:
-          # A 500bps share of a small revenue barely moves the fund, so settle enough per
-          # cycle that capital actually returns and a round can open every cycle or two.
-          # The customer's balance is recycled from the startups, so a higher throughput
-          # circulates the same coins rather than consuming them.
-          CYCLE_REVENUE_USDC: '3'
-          CYCLE_SETTLE_MAX: '8'
-          CYCLE_CUSTOMER_FLOAT_USDC: '26'
+          # How far above its budget each buyer is topped up, so it does not run dry
+          # mid-run. Paid by the operator, which is outside the economy.
+          CYCLE_CUSTOMER_HEADROOM: '1.4'
+          # Circle Gateway serves no testnet on its default (mainnet) host.
+          GATEWAY_API_URL: https://gateway-api-testnet.circle.com
           DEPLOYER_PRIVATE_KEY: ${{ secrets.DEPLOYER_PRIVATE_KEY }}
           CIRCLE_API_KEY: ${{ secrets.CIRCLE_API_KEY }}
           ENTITY_SECRET: ${{ secrets.ENTITY_SECRET }}
@@ -60,14 +58,16 @@ jobs:
           LLM_FALLBACK_MODEL: ${{ secrets.LLM_FALLBACK_MODEL }}
         run: bun run cycle
 
-      - name: Commit the round archive
+      - name: Commit the archives
         run: |
-          if git diff --quiet -- shared/rounds.json; then
-            echo "No new round recorded this cycle."
+          # market.json as well as rounds.json: the deliberation and the trading are two
+          # halves of the same turn, and the frontend reads both.
+          if git diff --quiet -- shared/rounds.json shared/market.json; then
+            echo "Nothing new recorded this cycle."
             exit 0
           fi
           git config user.name "agenture-bot"
           git config user.email "agenture-bot@users.noreply.github.com"
-          git add shared/rounds.json
-          git commit -m "chore: record autonomous cycle $(date -u +%Y-%m-%dT%H:%MZ)"
+          git add shared/rounds.json shared/market.json
+          git commit -m "chore: record cycle $(date -u +%Y-%m-%dT%H:%MZ)"
           git push
