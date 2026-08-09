@@ -168,6 +168,15 @@ function BuyersStrip({ customers }: { customers: CustomerRow[] }) {
   )
 }
 
+const WEIGHT_LABEL = { experience: 'Past experience', reputation: 'Reputation', price: 'Price' } as const
+
+/** The buyer's priorities in the order it actually weighs them. */
+function priorities(w: CustomerRow['weights']): string[] {
+  return (Object.keys(WEIGHT_LABEL) as (keyof typeof WEIGHT_LABEL)[])
+    .sort((a, b) => w[b] - w[a])
+    .map((k) => WEIGHT_LABEL[k])
+}
+
 function BuyerCard({ c }: { c: CustomerRow }) {
   const orders = ordersBy(c.name)
   const spent = orders.reduce((a, o) => a + (o.paidTx ? o.amountUsdc : 0), 0)
@@ -198,12 +207,21 @@ function BuyerCard({ c }: { c: CustomerRow }) {
         </div>
       </div>
 
+      {/* What it weighs, not what it is allowed to buy. Every buyer browses the whole
+          roster; they differ in what they care about and in who they have dealt with. */}
       <div className="px-4 pb-3">
-        <div className="eyebrow mb-1.5">Buys</div>
+        <div className="eyebrow mb-1.5">How it picks</div>
         <div className="flex flex-wrap gap-1.5">
-          {c.needs.map((n) => (
-            <span key={n} className="rounded border border-line bg-surface-3 px-1.5 py-0.5 text-[10.5px] text-subtle">
-              {sectorLabel(n)}
+          {priorities(c.weights).map((p, i) => (
+            <span
+              key={p}
+              className={`rounded border px-1.5 py-0.5 text-[10.5px] ${
+                i === 0
+                  ? 'border-primary/40 bg-primary/10 text-primary'
+                  : 'border-line bg-surface-3 text-subtle'
+              }`}
+            >
+              {p}
             </span>
           ))}
         </div>
@@ -379,19 +397,27 @@ function Listing({
         <div className="min-w-0 flex-1">
           <Meter pct={share} tone="primary" />
         </div>
-        <div className="flex shrink-0 items-center gap-1.5">
-          {buyers.length === 0 ? (
-            <span className="text-[10.5px] text-faint">no repeat buyer</span>
-          ) : (
-            buyers.map((b) => (
-              <span
-                key={b}
-                title={`${b} buys from ${s.name}`}
-                className="h-1.5 w-1.5 rounded-full"
-                style={{ background: customerColor(b) }}
-              />
-            ))
-          )}
+        <div className="flex shrink-0 items-center gap-2.5">
+          <div className="flex items-center gap-1.5">
+            {buyers.length === 0 ? (
+              <span className="text-[10.5px] text-faint">no repeat buyer</span>
+            ) : (
+              buyers.map((b) => (
+                <span
+                  key={b}
+                  title={`${b} buys from ${s.name}`}
+                  className="h-1.5 w-1.5 rounded-full"
+                  style={{ background: customerColor(b) }}
+                />
+              ))
+            )}
+          </div>
+          <Link
+            to={`/startups/${s.name.toLowerCase()}`}
+            className="shrink-0 rounded border border-line px-1.5 py-0.5 text-[10.5px] text-muted transition-colors hover:border-primary/40 hover:text-primary"
+          >
+            Details →
+          </Link>
         </div>
       </div>
     </div>
@@ -399,7 +425,7 @@ function Listing({
 }
 
 const RAILS = [
-  { k: 'Choice', v: 'Each buyer scores only the sellers in the sectors it needs, on its own past satisfaction, the public ERC-8004 score, and price' },
+  { k: 'Choice', v: 'Each buyer sees the whole roster and scores every seller it can afford, on its own past satisfaction, the public ERC-8004 score, and price' },
   { k: 'Payment', v: 'x402 over EIP-3009. The buyer signs off-chain and the operator submits, so it never needs gas to buy' },
   { k: 'Settlement', v: 'RevenueShare.settle, called by the seller. Revenue splits across every deal backing it' },
   { k: 'Rating', v: 'ERC-8004 feedback, written by the buyer that paid. No judge rates its own portfolio' },
@@ -428,7 +454,7 @@ function RailsCard() {
       <p className="border-t border-line px-5 py-3.5 text-[12px] leading-relaxed text-faint">
         What is simulated is the delivery itself: a buyer's satisfaction is drawn from how good the seller actually is,
         because there is no real service behind these agents. Everything downstream of that opinion is real. The buyer
-        chooses, pays, and rates on its own wallet, and a seller nobody needs earns nothing however good it is.
+        chooses, pays, and rates on its own wallet.
       </p>
     </Card>
   )

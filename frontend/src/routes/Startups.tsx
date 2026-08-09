@@ -1,6 +1,6 @@
 import { Link } from 'react-router-dom'
 import { useOverview } from '@/components/Shell'
-import { Card, Chip, Meter, ReputationRing, AddressChip } from '@/components/ui'
+import { Card, Chip, Meter, ReputationRing, AddressChip, DetailLink } from '@/components/ui'
 import { PageTitle, LoadingState } from '@/routes/Dashboard'
 import { usdc, usdcNum } from '@/lib/format'
 import { judgeColor } from '@/lib/roster'
@@ -176,9 +176,11 @@ function StartupCard({ s, data, queue }: { s: StartupRow; data: Overview; queue?
         <div className="flex items-center gap-4">
           <ReputationRing score={s.market ? s.market.value : null} size={58} label="buyers" />
           <div className="min-w-0 flex-1 space-y-2">
+            {/* Not "from 4 buyers": it overflows this column and truncates, and the label
+                already says these are customers, so the count alone carries it. */}
             <Row
               label="Paying customers"
-              value={s.market ? `${s.market.value} from ${s.market.count} buyer${s.market.count === 1 ? '' : 's'}` : 'never sold'}
+              value={s.market ? `${s.market.value} from ${s.market.count}` : 'never sold'}
               muted={!s.market}
             />
             <Row
@@ -240,6 +242,8 @@ function StartupCard({ s, data, queue }: { s: StartupRow; data: Overview; queue?
           </a>
         </div>
       </div>
+
+      <DetailLink to={`/startups/${s.name.toLowerCase()}`} label={`View ${s.name}'s full record`} />
     </Card>
   )
 }

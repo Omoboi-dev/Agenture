@@ -1,3 +1,4 @@
+import { Link } from 'react-router-dom'
 import { useState, type ReactNode } from 'react'
 import { shortAddr } from '@/lib/format'
 
@@ -175,5 +176,21 @@ export function AddressChip({ addr }: { addr: string }) {
       <span className="h-1 w-1 rounded-full bg-primary/70" />
       {copied ? 'Copied' : shortAddr(addr)}
     </button>
+  )
+}
+
+/**
+ * An unmissable way into a detail page. Making the name a link is not enough: nothing on
+ * a card says a page exists behind it, so people never find them.
+ */
+export function DetailLink({ to, label }: { to: string; label: string }) {
+  return (
+    <Link
+      to={to}
+      className="group flex items-center justify-between gap-3 border-t border-line px-5 py-3 text-[12.5px] font-medium text-primary transition-colors hover:bg-primary/8"
+    >
+      <span>{label}</span>
+      <span aria-hidden className="transition-transform group-hover:translate-x-0.5">→</span>
+    </Link>
   )
 }

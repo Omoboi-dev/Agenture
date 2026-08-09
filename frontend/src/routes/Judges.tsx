@@ -1,6 +1,6 @@
 import { Link } from 'react-router-dom'
 import { useOverview } from '@/components/Shell'
-import { Card, CardHeader, Pill, Meter, AddressChip, Rationale } from '@/components/ui'
+import { Card, CardHeader, Pill, Meter, AddressChip, Rationale, DetailLink } from '@/components/ui'
 import { PageTitle, LoadingState, Empty } from '@/routes/Dashboard'
 import { usdc, bpsToPct } from '@/lib/format'
 import { judgeColor } from '@/lib/roster'
@@ -118,6 +118,11 @@ function JudgeCard({ j, data }: { j: JudgeRow; data: Overview }) {
           Agent #{j.agentId} ↗
         </a>
       </div>
+
+      <DetailLink
+        to={`/judges/${j.name.toLowerCase()}`}
+        label={`View ${j.name.charAt(0).toUpperCase() + j.name.slice(1)}'s full record`}
+      />
     </Card>
   )
 }
