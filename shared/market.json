@@ -2,27 +2,27 @@
   "memory": {
     "QuantDesk": {
       "DataIndexer": {
-        "orders": 4,
-        "units": 40,
-        "spentUsdc": 14,
-        "satisfaction": 0.8937,
-        "lastRunId": 4
+        "orders": 7,
+        "units": 55,
+        "spentUsdc": 19.25,
+        "satisfaction": 0.977,
+        "lastRunId": 7
       },
       "MarketMaker": {
-        "orders": 4,
-        "units": 20,
-        "spentUsdc": 13,
-        "satisfaction": 0.9045,
-        "lastRunId": 4
+        "orders": 5,
+        "units": 24,
+        "spentUsdc": 15.6,
+        "satisfaction": 0.9427,
+        "lastRunId": 5
       }
     },
     "LedgerWorks": {
       "MeshRelay": {
-        "orders": 4,
-        "units": 20,
-        "spentUsdc": 10,
-        "satisfaction": 0.8155,
-        "lastRunId": 4
+        "orders": 5,
+        "units": 23,
+        "spentUsdc": 11.5,
+        "satisfaction": 0.7567,
+        "lastRunId": 5
       },
       "CryptoPayBridge": {
         "orders": 4,
@@ -30,22 +30,29 @@
         "spentUsdc": 8,
         "satisfaction": 0.5989,
         "lastRunId": 4
+      },
+      "DataIndexer": {
+        "orders": 3,
+        "units": 10,
+        "spentUsdc": 3.5,
+        "satisfaction": 1,
+        "lastRunId": 7
       }
     },
     "AtlasOps": {
       "DataIndexer": {
-        "orders": 4,
-        "units": 23,
-        "spentUsdc": 8.05,
-        "satisfaction": 0.8944,
-        "lastRunId": 4
+        "orders": 6,
+        "units": 30,
+        "spentUsdc": 10.5,
+        "satisfaction": 0.962,
+        "lastRunId": 7
       },
       "CargoScheduler": {
-        "orders": 3,
-        "units": 15,
-        "spentUsdc": 5.25,
-        "satisfaction": 0.6827,
-        "lastRunId": 3
+        "orders": 5,
+        "units": 22,
+        "spentUsdc": 7.7,
+        "satisfaction": 0.7511,
+        "lastRunId": 7
       },
       "Kiln": {
         "orders": 1,
@@ -71,11 +78,11 @@
         "lastRunId": 1
       },
       "Kiln": {
-        "orders": 3,
-        "units": 12,
-        "spentUsdc": 4.2,
-        "satisfaction": 0.6052,
-        "lastRunId": 4
+        "orders": 4,
+        "units": 13,
+        "spentUsdc": 4.55,
+        "satisfaction": 0.6434,
+        "lastRunId": 5
       },
       "PixelForge": {
         "orders": 1,
@@ -83,6 +90,20 @@
         "spentUsdc": 0.85,
         "satisfaction": 0.4758,
         "lastRunId": 2
+      },
+      "DataIndexer": {
+        "orders": 2,
+        "units": 6,
+        "spentUsdc": 2.1,
+        "satisfaction": 1,
+        "lastRunId": 7
+      },
+      "Waypoint": {
+        "orders": 1,
+        "units": 3,
+        "spentUsdc": 1.05,
+        "satisfaction": 0.99,
+        "lastRunId": 7
       }
     }
   },
@@ -1182,6 +1203,532 @@
           "revenueUsdc": 0.751559,
           "cutUsdc": 0.037577,
           "judge": "Sable"
+        }
+      ]
+    },
+    {
+      "id": 5,
+      "at": "2026-08-09T16:49:37.762Z",
+      "dryRun": false,
+      "note": {
+        "customer": "LedgerWorks",
+        "text": "I purchased 3 units from MeshRelay and 4 units from DataIndexer based on past satisfaction ratings and client recommendations, despite MeshRelay's lower delivery score being discovered after purchase."
+      },
+      "orders": [
+        {
+          "customer": "QuantDesk",
+          "provider": "DataIndexer",
+          "sector": "onchain-data",
+          "units": 9,
+          "unitPriceUsdc": 0.35,
+          "amountUsdc": 3.15,
+          "reason": "repeat",
+          "paidTx": "0x987cdb1f2403b7208cb26a5b94c4ed2e712eefb0367171502489187152e64721",
+          "rail": "x402",
+          "satisfaction": 1,
+          "rated": 100,
+          "ratedTx": "0x39ce08d60c7da9e139d7e37f6e2dd6669f890f7fc5cdc2258bd7c7b005792988",
+          "delivery": {
+            "verified": true,
+            "jobs": 2,
+            "note": "ranked MarketMaker > CargoScheduler > Zephyr, actual MarketMaker > CargoScheduler > Zephyr, 3 of 3 pairs right"
+          }
+        },
+        {
+          "customer": "QuantDesk",
+          "provider": "MarketMaker",
+          "sector": "market-data",
+          "units": 4,
+          "unitPriceUsdc": 0.65,
+          "amountUsdc": 2.6,
+          "reason": "repeat",
+          "paidTx": "0x5bbe298281c18777d110de25901dad16765666fec989a33043d6ccf7814ed8d3",
+          "rail": "x402",
+          "satisfaction": 1,
+          "rated": 100,
+          "ratedTx": "0x805c7d61dd1eea08b4d98a8cf763dc1747b111ff319c0c33e2383a042e6a391b",
+          "delivery": {
+            "verified": true,
+            "jobs": 2,
+            "note": "ranked PixelForge > DataOracle > BenchmarkBot, actual PixelForge > DataOracle > BenchmarkBot, 3 of 3 pairs right"
+          }
+        },
+        {
+          "customer": "LedgerWorks",
+          "provider": "MeshRelay",
+          "sector": "payments",
+          "units": 3,
+          "unitPriceUsdc": 0.5,
+          "amountUsdc": 1.5,
+          "reason": "repeat",
+          "paidTx": "0xcf707e2899df6b5968c94b805f2d685c51afd1dc685c7da24c768a24b535294d",
+          "rail": "x402",
+          "satisfaction": 0.668,
+          "rated": 67,
+          "ratedTx": "0x40b0d152b2f1e7a4f6e9a2cb7d44faf640ee9d9771d6414ae09bc19897a20f93",
+          "delivery": null
+        },
+        {
+          "customer": "LedgerWorks",
+          "provider": "DataIndexer",
+          "sector": "onchain-data",
+          "units": 4,
+          "unitPriceUsdc": 0.35,
+          "amountUsdc": 1.4,
+          "reason": "reputation",
+          "paidTx": "0x2c920007ef93202d73e6af4b5acbf9d86c742f54886dda78dc3229ddbf0f8705",
+          "rail": "x402",
+          "satisfaction": 1,
+          "rated": 100,
+          "ratedTx": "0x02ead5fd15a6ff03d566ca74c8f8c497c8f98996e9ba115a3b37618aa159e58b",
+          "delivery": {
+            "verified": true,
+            "jobs": 2,
+            "note": "quoted 22.49 USDC for MeshRelay, actual 22.49, off by 0.0%"
+          }
+        },
+        {
+          "customer": "AtlasOps",
+          "provider": "DataIndexer",
+          "sector": "onchain-data",
+          "units": 3,
+          "unitPriceUsdc": 0.35,
+          "amountUsdc": 1.05,
+          "reason": "repeat",
+          "paidTx": "0x8010327b62aa33e5fd7be0e55a4e83a8de0b5a05833614d7528ed2b2bac2f4fd",
+          "rail": "x402",
+          "satisfaction": 1,
+          "rated": 100,
+          "ratedTx": "0x69a8221b25e5f63bb723595cd823e8e50de2acaac6b58d0c14e9f6fb7261909a",
+          "delivery": {
+            "verified": true,
+            "jobs": 2,
+            "note": "ranked CryptoPayBridge > StorageVault > Nimbus, actual CryptoPayBridge > StorageVault > Nimbus, 3 of 3 pairs right"
+          }
+        },
+        {
+          "customer": "AtlasOps",
+          "provider": "CargoScheduler",
+          "sector": "logistics",
+          "units": 3,
+          "unitPriceUsdc": 0.35,
+          "amountUsdc": 1.05,
+          "reason": "repeat",
+          "paidTx": "0x0fb2f552d40c45b5c9f3eacd5047c6bdb5b8be7b1ec9cf92c0440f45d450b145",
+          "rail": "x402",
+          "satisfaction": 0.7,
+          "rated": 70,
+          "ratedTx": "0x171beeb9e6fd70bbd9e15561f68e89573b26737a604744dce5a6f0e689c9507d",
+          "delivery": {
+            "verified": true,
+            "jobs": 3,
+            "note": "route 303.8 against a best possible 271.3, 12.0% longer than optimal"
+          }
+        },
+        {
+          "customer": "StudioLoop",
+          "provider": "Kiln",
+          "sector": "storage",
+          "units": 1,
+          "unitPriceUsdc": 0.35,
+          "amountUsdc": 0.35,
+          "reason": "repeat",
+          "paidTx": "0x95003ef2be0417603f485191747747dfed32295eccc3eab1a281f3fbbf44cba3",
+          "rail": "x402",
+          "satisfaction": 0.701,
+          "rated": 70,
+          "ratedTx": "0xc5c7d54123e3fc3ec31a1732860655a12851843c6dd34ab6e06c262d8bd9909d",
+          "delivery": null
+        },
+        {
+          "customer": "StudioLoop",
+          "provider": "DataIndexer",
+          "sector": "onchain-data",
+          "units": 1,
+          "unitPriceUsdc": 0.35,
+          "amountUsdc": 0.35,
+          "reason": "reputation",
+          "paidTx": "0x04701bf262725deaba18e79dd856a9f34a2686042289866c6923ec74752a02c3",
+          "rail": "x402",
+          "satisfaction": 1,
+          "rated": 100,
+          "ratedTx": "0x61f95a0ca2502ef41343f4c440e786186b05afc77275b323b62d958fc9a31e18",
+          "delivery": {
+            "verified": true,
+            "jobs": 1,
+            "note": "quoted 0.60 USDC for Zephyr, actual 0.60, off by 0.0%"
+          }
+        }
+      ],
+      "settlements": [
+        {
+          "startup": "DataIndexer",
+          "dealId": 10,
+          "revenueUsdc": 2.510073,
+          "cutUsdc": 0.125503,
+          "judge": "Alpha"
+        },
+        {
+          "startup": "DataIndexer",
+          "dealId": 14,
+          "revenueUsdc": 0.328287,
+          "cutUsdc": 0.049243,
+          "judge": "Nova"
+        },
+        {
+          "startup": "DataIndexer",
+          "dealId": 18,
+          "revenueUsdc": 3.11164,
+          "cutUsdc": 0.155582,
+          "judge": "Sable"
+        },
+        {
+          "startup": "MarketMaker",
+          "dealId": 21,
+          "revenueUsdc": 0.450907,
+          "cutUsdc": 0.022545,
+          "judge": "Alpha"
+        },
+        {
+          "startup": "MarketMaker",
+          "dealId": 26,
+          "revenueUsdc": 1.688642,
+          "cutUsdc": 0.253296,
+          "judge": "Nova"
+        },
+        {
+          "startup": "MarketMaker",
+          "dealId": 30,
+          "revenueUsdc": 0.460451,
+          "cutUsdc": 0.023022,
+          "judge": "Sable"
+        },
+        {
+          "startup": "MeshRelay",
+          "dealId": 0,
+          "revenueUsdc": 0.257814,
+          "cutUsdc": 0.01289,
+          "judge": "Alpha"
+        },
+        {
+          "startup": "MeshRelay",
+          "dealId": 5,
+          "revenueUsdc": 0.855463,
+          "cutUsdc": 0.128319,
+          "judge": "Nova"
+        },
+        {
+          "startup": "MeshRelay",
+          "dealId": 8,
+          "revenueUsdc": 0.386723,
+          "cutUsdc": 0.019336,
+          "judge": "Sable"
+        },
+        {
+          "startup": "CargoScheduler",
+          "dealId": 23,
+          "revenueUsdc": 0.35,
+          "cutUsdc": 0.0175,
+          "judge": "Alpha"
+        },
+        {
+          "startup": "CargoScheduler",
+          "dealId": 28,
+          "revenueUsdc": 0.35,
+          "cutUsdc": 0.0525,
+          "judge": "Nova"
+        },
+        {
+          "startup": "CargoScheduler",
+          "dealId": 31,
+          "revenueUsdc": 0.35,
+          "cutUsdc": 0.0175,
+          "judge": "Sable"
+        },
+        {
+          "startup": "Kiln",
+          "dealId": null,
+          "revenueUsdc": 0.35,
+          "cutUsdc": 0,
+          "judge": null,
+          "note": "unfunded traction"
+        }
+      ]
+    },
+    {
+      "id": 6,
+      "at": "2026-08-09T16:53:39.755Z",
+      "dryRun": false,
+      "note": {
+        "customer": "QuantDesk",
+        "text": "I purchased 1 unit from DataIndexer for 0.35 USDC due to prior satisfaction with their service."
+      },
+      "orders": [
+        {
+          "customer": "QuantDesk",
+          "provider": "DataIndexer",
+          "sector": "onchain-data",
+          "units": 1,
+          "unitPriceUsdc": 0.35,
+          "amountUsdc": 0.35,
+          "reason": "repeat",
+          "paidTx": "c5c62622-70f6-4418-becd-a929d58634ea",
+          "rail": "nanopayments",
+          "satisfaction": 1,
+          "rated": 100,
+          "ratedTx": "0x3528bbecc80f95ebac34df2994c71e92207055370867323f6a5729f8125dfa45",
+          "delivery": {
+            "verified": true,
+            "jobs": 1,
+            "note": "quoted 7.72 USDC for BenchmarkBot, actual 7.72, off by 0.0%"
+          }
+        },
+        {
+          "customer": "LedgerWorks",
+          "provider": "DataIndexer",
+          "sector": "onchain-data",
+          "units": 1,
+          "unitPriceUsdc": 0.35,
+          "amountUsdc": 0.35,
+          "reason": "repeat",
+          "paidTx": "980950a8-fc5b-4211-ad44-f58ddef30d7c",
+          "rail": "nanopayments",
+          "satisfaction": 1,
+          "rated": 100,
+          "ratedTx": "0xe5b33c8d2cf5f57a7e198c18623e7cb9f2db33694d7e7d95d79a519c730623d0",
+          "delivery": {
+            "verified": true,
+            "jobs": 1,
+            "note": "quoted 21.10 USDC for SecureGuard, actual 21.10, off by 0.0%"
+          }
+        }
+      ],
+      "settlements": [
+        {
+          "startup": "DataIndexer",
+          "dealId": 10,
+          "revenueUsdc": 0.295302,
+          "cutUsdc": 0.014765,
+          "judge": "Alpha"
+        },
+        {
+          "startup": "DataIndexer",
+          "dealId": 14,
+          "revenueUsdc": 0.038622,
+          "cutUsdc": 0.005793,
+          "judge": "Nova"
+        },
+        {
+          "startup": "DataIndexer",
+          "dealId": 18,
+          "revenueUsdc": 0.366076,
+          "cutUsdc": 0.018303,
+          "judge": "Sable"
+        }
+      ]
+    },
+    {
+      "id": 7,
+      "at": "2026-08-09T16:58:27.694Z",
+      "dryRun": false,
+      "note": {
+        "customer": "QuantDesk",
+        "text": "I purchased 5 units from DataIndexer at $1.75 each due to previous satisfaction, and 2 units from MarketMaker at $1.30 each for similar reasons, unaware that DataIndexer would deliver significantly better quality than MarketMaker."
+      },
+      "orders": [
+        {
+          "customer": "QuantDesk",
+          "provider": "DataIndexer",
+          "sector": "onchain-data",
+          "units": 5,
+          "unitPriceUsdc": 0.35,
+          "amountUsdc": 1.75,
+          "reason": "repeat",
+          "paidTx": "ca80bc1d-27ea-44d3-8a46-b4d339f32122",
+          "rail": "nanopayments",
+          "satisfaction": 1,
+          "rated": 100,
+          "ratedTx": "0x6961272f77ce80be457c0d62796937078f9ec37aeb9a6fcb899be402af420770",
+          "delivery": {
+            "verified": true,
+            "jobs": 2,
+            "note": "quoted 6.90 USDC for Kiln, actual 6.90, off by 0.0%"
+          }
+        },
+        {
+          "customer": "QuantDesk",
+          "provider": "MarketMaker",
+          "sector": "market-data",
+          "units": 2,
+          "unitPriceUsdc": 0.65,
+          "amountUsdc": 1.3,
+          "reason": "repeat",
+          "paidTx": null,
+          "satisfaction": null,
+          "rated": null,
+          "ratedTx": null,
+          "delivery": null
+        },
+        {
+          "customer": "LedgerWorks",
+          "provider": "DataIndexer",
+          "sector": "onchain-data",
+          "units": 5,
+          "unitPriceUsdc": 0.35,
+          "amountUsdc": 1.75,
+          "reason": "repeat",
+          "paidTx": "0faba7fd-df76-4392-a00f-755a3f0eb1fe",
+          "rail": "nanopayments",
+          "satisfaction": 1,
+          "rated": 100,
+          "ratedTx": "0x43253eb5212c0816a40def29d9ce05a43127f565141f064bfae8d7dedd7caeba",
+          "delivery": {
+            "verified": true,
+            "jobs": 2,
+            "note": "ranked SecureGuard > Kiln > Quorum, actual SecureGuard > Kiln > Quorum, 3 of 3 pairs right"
+          }
+        },
+        {
+          "customer": "LedgerWorks",
+          "provider": "MeshRelay",
+          "sector": "payments",
+          "units": 3,
+          "unitPriceUsdc": 0.5,
+          "amountUsdc": 1.5,
+          "reason": "repeat",
+          "paidTx": null,
+          "satisfaction": null,
+          "rated": null,
+          "ratedTx": null,
+          "delivery": null
+        },
+        {
+          "customer": "AtlasOps",
+          "provider": "DataIndexer",
+          "sector": "onchain-data",
+          "units": 4,
+          "unitPriceUsdc": 0.35,
+          "amountUsdc": 1.4,
+          "reason": "repeat",
+          "paidTx": "f72e41ff-05d5-4f00-b6ec-52eccd1a9afc",
+          "rail": "nanopayments",
+          "satisfaction": 1,
+          "rated": 100,
+          "ratedTx": "0x06fbe0388dc753ddfcff5cd869004c0cf4636e015bdf228169a11701888d593c",
+          "delivery": {
+            "verified": true,
+            "jobs": 2,
+            "note": "quoted 0.60 USDC for Nimbus, actual 0.60, off by 0.0%"
+          }
+        },
+        {
+          "customer": "AtlasOps",
+          "provider": "CargoScheduler",
+          "sector": "logistics",
+          "units": 4,
+          "unitPriceUsdc": 0.35,
+          "amountUsdc": 1.4,
+          "reason": "repeat",
+          "paidTx": "731115df-474a-40c1-942d-d9c90459ff21",
+          "rail": "nanopayments",
+          "satisfaction": 0.843,
+          "rated": 84,
+          "ratedTx": "0xf0998891a098df03d5f69197d82abdd1867f3a1f63d542910fe6479c16de4307",
+          "delivery": {
+            "verified": true,
+            "jobs": 3,
+            "note": "route 306.0 against a best possible 290.5, 5.3% longer than optimal"
+          }
+        },
+        {
+          "customer": "StudioLoop",
+          "provider": "DataIndexer",
+          "sector": "onchain-data",
+          "units": 5,
+          "unitPriceUsdc": 0.35,
+          "amountUsdc": 1.75,
+          "reason": "repeat",
+          "paidTx": "016918b4-dbdd-4a57-9977-9d41a7136ebc",
+          "rail": "nanopayments",
+          "satisfaction": 1,
+          "rated": 100,
+          "ratedTx": "0x0a497b85b204a22f30ad67f62d75980afb5cdab69ceb486c5d010de57b15bfbd",
+          "delivery": {
+            "verified": true,
+            "jobs": 2,
+            "note": "quoted 44.62 USDC for MarketMaker, actual 44.62, off by 0.0%"
+          }
+        },
+        {
+          "customer": "StudioLoop",
+          "provider": "Waypoint",
+          "sector": "logistics",
+          "units": 3,
+          "unitPriceUsdc": 0.35,
+          "amountUsdc": 1.05,
+          "reason": "trial",
+          "paidTx": "82b67b7a-2272-4384-a349-ff699a0d73eb",
+          "rail": "nanopayments",
+          "satisfaction": 0.99,
+          "rated": 99,
+          "ratedTx": "0xbd291b0f255fde1d98560782ce1f36df23596532031e4d13f457a77357527a92",
+          "delivery": {
+            "verified": true,
+            "jobs": 3,
+            "note": "route 226.3 against a best possible 226.3, 0.0% longer than optimal"
+          }
+        }
+      ],
+      "settlements": [
+        {
+          "startup": "DataIndexer",
+          "dealId": 10,
+          "revenueUsdc": 2.805376,
+          "cutUsdc": 0.140268,
+          "judge": "Alpha"
+        },
+        {
+          "startup": "DataIndexer",
+          "dealId": 14,
+          "revenueUsdc": 0.366909,
+          "cutUsdc": 0.055036,
+          "judge": "Nova"
+        },
+        {
+          "startup": "DataIndexer",
+          "dealId": 18,
+          "revenueUsdc": 3.477715,
+          "cutUsdc": 0.173885,
+          "judge": "Sable"
+        },
+        {
+          "startup": "CargoScheduler",
+          "dealId": 23,
+          "revenueUsdc": 0.466666,
+          "cutUsdc": 0.023333,
+          "judge": "Alpha"
+        },
+        {
+          "startup": "CargoScheduler",
+          "dealId": 28,
+          "revenueUsdc": 0.466666,
+          "cutUsdc": 0.069999,
+          "judge": "Nova"
+        },
+        {
+          "startup": "CargoScheduler",
+          "dealId": 31,
+          "revenueUsdc": 0.466668,
+          "cutUsdc": 0.023333,
+          "judge": "Sable"
+        },
+        {
+          "startup": "Waypoint",
+          "dealId": null,
+          "revenueUsdc": 1.05,
+          "cutUsdc": 0,
+          "judge": null,
+          "note": "unfunded traction"
         }
       ]
     }

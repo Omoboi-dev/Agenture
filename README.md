@@ -40,6 +40,8 @@ bun run typecheck              # type check everything
 DRY_RUN=1 bun run round        # preview the judges' decisions; no capital moves, not recorded
 bun run round                  # a live round: judges invest from their Circle wallets
 bun run fund-customers         # top the buyers back up to their budgets, paid by the operator
+bun run gateway-deposit        # move buyer USDC into Circle Gateway so payments are gasless
+bun run gateway-deposit -- --check   # show Gateway balances, move nothing
 bun run market -- --dry        # preview what the customers would buy; nothing paid or remembered
 bun run market                 # a live market run: customers buy, rate, and sellers settle
 bun run close-loop 6,7         # force a single deal to settle, by hand
@@ -279,6 +281,19 @@ An earlier version restricted each buyer to sectors it "needed", so a seller nob
 **What this changes.** Demand is now structural. A good agent in a sector nobody buys earns nothing, and that is an answer rather than a bug: BenchmarkBot is a competent security service on a roster with no security buyer, and it should tell a judge something. Revenue tracks quality but does not follow it exactly, because how contested a sector is and how big its buyer's budget is both matter. And the reputation a judge reads is now written by the parties who paid, not by other investors.
 
 **What is still simulated:** the delivery. A customer's satisfaction is drawn from the seller's hidden quality with noise, because there is no real service behind these agents. Everything downstream of that opinion is real: the choice, the payment, the rating, the settlement.
+
+## Payments: Nanopayments, with x402 underneath
+
+An order in this market is a fraction of a USDC. Settling each one onchain means paying Arc gas to move thirty five cents, which is the cost structure x402 exists to remove. So payments go over **Circle Gateway Nanopayments**: the buyer deposits into a Gateway Wallet once, then signs an EIP-3009 authorization against the `GatewayWalletBatched` domain for each purchase. Gateway verifies it immediately, credits the seller, and settles many authorizations together in one onchain batch. The buyer pays no gas per order and neither does the operator.
+
+All three x402 roles are present. The seller states its terms, the buyer signs a payment for them, and `BatchFacilitatorClient` verifies and settles. There is no HTTP server between the agents, so the 402 negotiation happens in process, but what crosses the wire to Circle is exactly what a networked x402 seller would send.
+
+`agents/src/nanopay.ts` holds it. Two things cost real time to find and are worth writing down:
+
+- **The SDK defaults to the mainnet Gateway host, which serves no testnet at all.** `getSupported()` against `gateway-api.circle.com` returns eleven mainnet chains and no Arc. Arc testnet only appears on `gateway-api-testnet.circle.com`, where it is domain 26 and fully supported.
+- **The SDK quickstart wants a raw private key, which our agents do not have.** Their keys are held by Circle under MPC. The signer interface it actually needs is only `{ address, signTypedData }`, and a Circle wallet does exactly that, so the agents keep custody and still produce a valid Gateway authorization.
+
+`x402.ts` remains as the fallback: a direct EIP-3009 transfer submitted onchain by the operator as facilitator. A buyer with no Gateway balance trades over that rather than not trading, and every order records which rail settled it. Set `MARKET_RAIL=x402` to force the onchain path.
 
 ## Two kinds of reputation
 
