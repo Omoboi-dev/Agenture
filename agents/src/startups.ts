@@ -22,9 +22,12 @@ export type Startup = {
   // Revenue and reputation are downstream of those decisions, never of this number
   // directly. Judges never see it, and neither does anyone who has not bought.
   quality: number;
-  // What the agent sells, when it wants to say so itself. Both fields are optional:
-  // catalog.ts infers a sector from the pitch and a price from the ask otherwise.
-  service?: { sectors?: string[]; unitPriceUsdc?: number };
+  // What the agent sells, when it wants to say so itself. sectors and unitPriceUsdc are
+  // optional: catalog.ts infers a sector from the pitch and a price from the ask
+  // otherwise. `impl` names which implementation the agent runs, for sectors where the
+  // work is really performed (see services/). Where it is set, `quality` is not read at
+  // all: the buyer scores what the code actually produced.
+  service?: { sectors?: string[]; unitPriceUsdc?: number; impl?: string };
 };
 
 // The roster lives in shared/startups.json so the frontend reads the same list and

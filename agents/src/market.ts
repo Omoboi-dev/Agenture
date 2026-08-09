@@ -5,6 +5,7 @@ import { publicClient, withRpcRetry } from "./chain.js";
 import { addresses } from "./config.js";
 import { erc20Abi } from "./abis.js";
 import { catalog, SECTOR_LABEL, type Listing } from "./catalog.js";
+import { serviceFor, verifiedSectors, validateImplementations } from "./services/index.js";
 import { liveCustomers, budgetOf, type LiveCustomer } from "./customers.js";
 import { readReputationSummary } from "./dd.js";
 import { KNOWN_CLIENTS } from "./diligence.js";
@@ -147,12 +148,54 @@ export function decide(
 }
 
 /**
- * What the customer actually got. The only place a seller's hidden quality enters the
- * system, and it enters as one buyer's private experience of one purchase, never as a
- * revenue figure. A good agent usually delivers; usually is not always.
+ * What the customer got, when there is nothing real to receive. The fallback: a seller in
+ * a sector no service has been written for cannot deliver anything, so satisfaction comes
+ * from its hidden quality with noise. This is the one authored seam left in the system and
+ * it shrinks every time a sector gets a real implementation under services/.
+ *
+ * Exported because seed-traction produces the same thing: a rating from a client that
+ * paid. If it used a different rule, an agent could arrive rated 84 and then be
+ * contradicted by every buyer that touched it, which would read as a noisy customer
+ * signal rather than as two bits of code disagreeing.
  */
-function experienceOf(quality: number, rnd: () => number): number {
+export function experienceOf(quality: number, rnd: () => number = Math.random): number {
   return clamp(quality + (rnd() * 2 - 1) * 0.15, 0.02, 0.99);
+}
+
+const JOBS_PER_ORDER = Number(process.env.MARKET_JOBS_PER_ORDER ?? "3");
+
+/**
+ * Buy the service for real: the buyer sets a task, the seller performs it, the buyer
+ * checks the result. Runs several jobs per order and averages, because one route or one
+ * screening is a small sample to judge a supplier on.
+ *
+ * Returns null when this sector has no implementation yet, so the caller falls back.
+ */
+async function useService(
+  listing: Listing,
+  buyer: string,
+  units: number,
+  rnd: () => number,
+): Promise<{ satisfaction: number; jobs: number; note: string } | null> {
+  const svc = serviceFor(listing.sectors);
+  const impl = listing.startup.service?.impl;
+  if (!svc || !impl) return null;
+
+  const ctx = { buyer, provider: listing.name, impl, rnd };
+  const jobs = Math.max(1, Math.min(units, JOBS_PER_ORDER));
+  const scores: number[] = [];
+  let last = "";
+
+  for (let i = 0; i < jobs; i++) {
+    const task = await svc.task(ctx);
+    const delivery = await svc.deliver(task, ctx);
+    const review = await svc.review(task, delivery, ctx);
+    scores.push(review.score);
+    last = review.reason;
+  }
+
+  const mean = scores.reduce((a, s) => a + s, 0) / scores.length;
+  return { satisfaction: clamp(mean / 100, 0.01, 1), jobs, note: last };
 }
 
 async function balanceOf(addr: Address): Promise<bigint> {
@@ -254,20 +297,32 @@ async function narrate(
   const history = Object.entries(book)
     .map(([p, e]) => `${p}: ${e.orders} orders, satisfaction ${(e.satisfaction * 100).toFixed(0)}/100`)
     .join("; ");
-  // Spell out that the figure is a total. Given "10 units, 3.50 USDC" a small model
-  // reports it as 3.50 each, and the sentence ends up on the marketplace page.
+  // Two things kept apart on purpose. Handed the reason and the outcome in one clause,
+  // the model reports the score as the reason it bought, which is backwards: the score
+  // is what it thought afterwards. That sentence goes on the marketplace page.
+  const why: Record<Reason, string> = {
+    repeat: "because you have bought from them before and were satisfied",
+    reputation: "because other clients rate them well",
+    trial: "as a first look, having never used them",
+  };
   const bought = basket
     .map(
       (o) =>
         `${o.units} units from ${o.provider} for ${o.amountUsdc.toFixed(2)} USDC in total ` +
-        `(${o.unitPriceUsdc.toFixed(2)} each), rated it ${((o.satisfaction ?? 0) * 100).toFixed(0)} out of 100`,
+        `(${o.unitPriceUsdc.toFixed(2)} each), chosen ${why[o.reason]}`,
     )
+    .join("; ");
+  const results = basket
+    .map((o) => `${o.provider} delivered ${((o.satisfaction ?? 0) * 100).toFixed(0)} out of 100`)
     .join("; ");
 
   try {
     const text = await generate(
       "You are a procurement agent reporting to your operator. One sentence, under 30 words, plain and factual. No preamble, no quotes, no markdown.",
-      `You are ${name}. This period you bought: ${bought}.\nYour record with sellers: ${history || "none"}.\nSay in one sentence what you did and why.`,
+      `You are ${name}.\nWhat you bought this period, and why you picked each: ${bought}.\n` +
+        `How it then turned out: ${results}.\n` +
+        `Your record with sellers before this: ${history || "none, this is your first period"}.\n` +
+        `Say in one sentence what you did and why you picked them. Do not use the delivery scores as the reason you bought: you only learned those afterwards.`,
       0.6,
     );
     const clean = text.trim().replace(/^["']|["']$/g, "").split("\n")[0];
@@ -297,7 +352,15 @@ export async function runMarket(opts: { dryRun?: boolean; operatorKey?: Hex } = 
   const { memory, runs } = readMarket();
   const previous = runs[runs.length - 1];
 
-  console.log(`--- Market · run ${runId}${dryRun ? " (dry)" : ""} ---\n`);
+  // A bad impl name would fall through to a service's default branch and make an agent
+  // quietly terrible for a reason nobody chose. Refuse to trade rather than mislabel one.
+  const problems = validateImplementations(
+    catalog.map((l) => ({ name: l.name, sectors: l.sectors, impl: l.startup.service?.impl })),
+  );
+  if (problems.length > 0) throw new Error(`roster problems:\n  ${problems.join("\n  ")}`);
+
+  console.log(`--- Market · run ${runId}${dryRun ? " (dry)" : ""} ---`);
+  console.log(`Real delivery in: ${verifiedSectors.map((s) => SECTOR_LABEL[s] ?? s).join(", ")}. Elsewhere the rating still comes from the seller's quality.\n`);
 
   const quotes = await quoteBoard();
   const orders: Order[] = [];
@@ -342,6 +405,7 @@ export async function runMarket(opts: { dryRun?: boolean; operatorKey?: Hex } = 
         satisfaction: null,
         rated: null,
         ratedTx: null,
+        delivery: null,
       };
 
       console.log(`  buys ${it.units} x ${label} from ${p.name} · ${fmt(it.amount)} USDC · ${why}`);
@@ -357,14 +421,18 @@ export async function runMarket(opts: { dryRun?: boolean; operatorKey?: Hex } = 
         await sleep(1200);
       }
 
-      // The buyer uses what it paid for and forms an opinion.
-      const satisfaction = experienceOf(p.startup.quality, rnd);
+      // The buyer uses what it paid for and forms an opinion. Where the sector has a real
+      // implementation the seller actually does the work and the buyer checks it; where it
+      // does not, satisfaction falls back to the seller's hidden quality.
+      const real = await useService(p, c.name, it.units, rnd);
+      const satisfaction = real ? real.satisfaction : experienceOf(p.startup.quality, rnd);
       order.satisfaction = Number(satisfaction.toFixed(3));
       order.rated = Math.round(satisfaction * 100);
+      order.delivery = real ? { verified: true, jobs: real.jobs, note: real.note } : null;
       remember(memory, c.name, p.name, it.units, num(it.amount), satisfaction, runId);
       sales.set(p.name, (sales.get(p.name) ?? 0n) + it.amount);
 
-      console.log(`    delivered: ${order.rated}/100`);
+      console.log(`    delivered: ${order.rated}/100${real ? ` · verified over ${real.jobs} jobs · ${real.note}` : " · unverified (no service implementation)"}`);
 
       if (!dryRun && p.startup.agentId !== null) {
         try {
