@@ -67,8 +67,11 @@ export async function runRound(): Promise<number[]> {
   );
   for (const p of cohort) {
     const dd = dossiers.find((d) => d.startup.name === p.startup.name)?.dd;
-    const rep = dd?.reputation ? `${dd.reputation.count} ratings @ ${dd.reputation.value}` : "cold start";
-    console.log(`Diligence — ${p.startup.name} [${describeStage(p)}]: reputation ${rep}, wallet holds ${dd?.usdcBalance ?? 0} USDC`);
+    const say = (s: { count: number; value: number } | null | undefined) => (s ? `${s.value} (${s.count})` : "none");
+    console.log(
+      `Diligence — ${p.startup.name} [${describeStage(p)}]: customers ${say(dd?.market)}, ` +
+        `investors ${say(dd?.investor)}, wallet holds ${dd?.usdcBalance ?? 0} USDC`,
+    );
   }
   console.log("");
 
@@ -218,6 +221,8 @@ export async function runRound(): Promise<number[]> {
     wallet: startup.wallet,
     agentId: startup.agentId === null ? null : Number(startup.agentId),
     reputation: dd.reputation,
+    market: dd.market,
+    investor: dd.investor,
     usdcBalance: dd.usdcBalance,
     pitch: startup.pitch,
   }));

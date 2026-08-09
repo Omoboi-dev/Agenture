@@ -17,6 +17,10 @@ export type Dossier = {
   wallet: string;
   agentId: number | null;
   reputation: { count: number; value: number } | null;
+  /** Split by who wrote it: buyers that paid, versus judges that already backed it.
+   *  Optional because rounds recorded before the split have neither. */
+  market?: { count: number; value: number } | null;
+  investor?: { count: number; value: number } | null;
   usdcBalance: number;
   pitch: {
     idea: string;

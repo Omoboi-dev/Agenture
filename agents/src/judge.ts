@@ -35,22 +35,59 @@ function cleanRationale(s: unknown): string {
 // A raw "average score 48" tells the model nothing, and it will happily read it as good
 // news. Spell out what the number is worth.
 function readScore(value: number): string {
-  if (value >= 85) return "excellent: its clients rate it among the best they deal with";
-  if (value >= 70) return "solid: its clients are satisfied";
-  if (value >= 55) return "mediocre: its clients are lukewarm, which is a yellow flag";
-  if (value >= 40) return "POOR: its own paying clients rate it badly, which is a serious red flag";
-  return "VERY POOR: its clients consider it close to unusable";
+  if (value >= 85) return "excellent, among the best they deal with";
+  if (value >= 70) return "solid, they are satisfied";
+  if (value >= 55) return "mediocre and lukewarm, which is a yellow flag";
+  if (value >= 40) return "POOR, rated badly, which is a serious red flag";
+  return "VERY POOR, close to unusable";
 }
 
+// Reputation is presented split by who wrote it, and the gap between the two is called
+// out rather than averaged away. Blending them hides the one thing a judge most needs to
+// know: whether anyone outside this fund has ever been willing to pay for the service.
 function describeDiligence(dd: DueDiligence): string {
-  const rep = dd.reputation
-    ? `ERC-8004 reputation: ${dd.reputation.count} rating(s) averaging ${dd.reputation.value} out of 100. ` +
-      `A score of ${dd.reputation.value} is ${readScore(dd.reputation.value)}. ` +
-      `This comes from clients that actually paid this agent, so it is evidence about the ` +
-      `service as delivered, not a claim.`
-    : "ERC-8004 reputation: none on record. This agent has never been rated, which means " +
-      "unproven, NOT bad. Plenty of good businesses have no track record yet.";
-  return `${rep} Live wallet USDC balance: ${dd.usdcBalance}.`;
+  const lines: string[] = [];
+
+  if (dd.market) {
+    lines.push(
+      `PAYING CUSTOMERS: ${dd.market.count} rating(s) averaging ${dd.market.value} out of 100 ` +
+        `from agents that bought this service with their own money. A score of ${dd.market.value} is ` +
+        `${readScore(dd.market.value)}. This is the strongest evidence you have, because these raters ` +
+        `have no stake in the agent succeeding.`,
+    );
+  } else {
+    lines.push(
+      "PAYING CUSTOMERS: none. No agent has ever paid for this service and rated it. That is not " +
+        "proof the business is bad, but it does mean nothing about it has been tested by a buyer.",
+    );
+  }
+
+  if (dd.investor) {
+    lines.push(
+      `OTHER INVESTORS: ${dd.investor.count} rating(s) averaging ${dd.investor.value} out of 100 ` +
+        `from judges on this fund. Weigh this far less than the customer score: a judge that already ` +
+        `backed this agent has a position to defend, so these ratings run generous.`,
+    );
+  } else {
+    lines.push("OTHER INVESTORS: no judge on this fund has rated this agent.");
+  }
+
+  // The disagreement is the signal, so state it outright rather than leaving a small model
+  // to notice two numbers twenty points apart on its own.
+  if (dd.market && dd.investor && dd.investor.value - dd.market.value >= 12) {
+    lines.push(
+      `NOTE THE GAP: investors rate this agent ${dd.investor.value - dd.market.value} points higher ` +
+        `than the customers paying for it. Believe the customers.`,
+    );
+  }
+  if (!dd.market && dd.investor && dd.investor.value >= 70) {
+    lines.push(
+      "NOTE: this agent carries a good investor score while never having sold anything to anyone. " +
+        "That score is other investors' opinion, not traction. Treat it as unproven.",
+    );
+  }
+
+  return `${lines.join(" ")} Live wallet USDC balance: ${dd.usdcBalance}.`;
 }
 
 // Ask the judge (its LLM persona) to reason over the pitch and the real onchain
@@ -84,6 +121,11 @@ export async function decide(
     `has been tested and found wanting, which is stronger evidence against it than silence. ` +
     `Be especially wary of a large claimed valuation sitting on top of tiny revenue and a weak ` +
     `score: that is the classic overvalued pitch.\n\n` +
+    `Reputation comes to you split by who wrote it. Ratings from paying customers are evidence: ` +
+    `those agents spent their own money and owe this fund nothing. Ratings from other judges are ` +
+    `opinion from people holding the same position you are being offered, and on this fund they ` +
+    `run consistently higher than what the customers say. Where the two disagree, believe the ` +
+    `customers, and score "evidence" on what the customers said rather than on the blend.\n\n` +
     `Respond with ONLY a JSON object and nothing else, of the form ` +
     `{"invest": boolean, "amountUsdc": number, "revenueShareBps": integer 0-10000, ` +
     `"idea": integer, "evidence": integer, "price": integer, "risk": integer, ` +
