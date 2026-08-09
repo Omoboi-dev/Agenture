@@ -1,5 +1,5 @@
 import "dotenv/config";
-import { createWallet } from "./circle.js";
+import { createWallet, labelFor } from "./circle.js";
 import { addresses } from "./config.js";
 import { startups } from "./startups.js";
 
@@ -9,14 +9,14 @@ const WALLET_SET = process.env.CIRCLE_WALLET_SET ?? "3f824ea9-5876-52b8-ad82-ba4
 
 async function main() {
   const agents = [
-    ...addresses.agenture.judges.map((j) => ({ kind: "judge", name: j.name })),
-    ...startups.map((s) => ({ kind: "startup", name: s.name })),
+    ...addresses.agenture.judges.map((j) => ({ kind: "Judge" as const, name: j.name })),
+    ...startups.map((s) => ({ kind: "Startup" as const, name: s.name })),
   ];
 
   console.log(`Provisioning ${agents.length} Circle wallets in set ${WALLET_SET}\n`);
 
   for (const a of agents) {
-    const w = await createWallet(WALLET_SET);
+    const w = await createWallet(WALLET_SET, labelFor(a.kind, a.name));
     console.log(`${a.kind.padEnd(8)} ${a.name.padEnd(12)} walletId ${w.id}  address ${w.address}`);
     await new Promise((r) => setTimeout(r, 1000));
   }

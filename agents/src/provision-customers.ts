@@ -7,7 +7,7 @@ import { formatUnits, parseUnits } from "viem";
 import { publicClient, walletFromKey, withRpcRetry, waitReceipt } from "./chain.js";
 import { addresses } from "./config.js";
 import { erc20Abi } from "./abis.js";
-import { createWallet } from "./circle.js";
+import { createWallet, labelFor } from "./circle.js";
 import { registerIdentity } from "./identity.js";
 
 // Give each customer agent the two things it needs to be a customer: a wallet only it can
@@ -87,7 +87,7 @@ async function main() {
 
   for (const entry of todo) {
     const seed = seedFor(entry);
-    const wallet = await createWallet(WALLET_SET);
+    const wallet = await createWallet(WALLET_SET, labelFor("Customer", entry.name));
     await sleep(1000);
 
     const funding = gas + seed;

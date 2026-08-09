@@ -19,16 +19,40 @@ export async function createWalletSet(name: string): Promise<string> {
   return id;
 }
 
-export async function createWallet(walletSetId: string): Promise<{ id: string; address: Address }> {
+// Every wallet is created with a label. Without one the Circle console is a list of
+// addresses with nothing to tell a judge from a seller from a buyer, and picking the
+// wrong one when funding or debugging is a real mistake to make. `name` is what the
+// console shows; `refId` is a stable machine key for our own tooling.
+export type WalletLabel = { name: string; refId: string };
+
+export async function createWallet(
+  walletSetId: string,
+  label?: WalletLabel,
+): Promise<{ id: string; address: Address }> {
   const res = await circleClient.createWallets({
     walletSetId,
     blockchains: [BLOCKCHAIN] as never,
     count: 1,
     accountType: "EOA",
+    ...(label ? { metadata: [{ name: label.name, refId: label.refId }] } : {}),
   });
   const w = res.data?.wallets?.[0];
   if (!w?.id || !w?.address) throw new Error("failed to create wallet");
   return { id: w.id, address: w.address as Address };
+}
+
+/** Label a wallet that already exists. Circle allows this after the fact, which is the
+ *  only way to fix the ones minted before labelling was wired in. */
+export async function renameWallet(walletId: string, label: WalletLabel): Promise<void> {
+  await circleClient.updateWallet({ id: walletId, name: label.name, refId: label.refId });
+}
+
+/** One convention, used everywhere, so the console sorts by role and reads at a glance.
+ *  The leading capital is forced because judges are stored lowercase in the roster and
+ *  "Judge alpha" sitting next to "Startup MeshRelay" looks like a bug. */
+export function labelFor(role: "Judge" | "Startup" | "Customer", name: string): WalletLabel {
+  const display = name.charAt(0).toUpperCase() + name.slice(1);
+  return { name: `${role} ${display}`, refId: `${role.toLowerCase()}:${name.toLowerCase()}` };
 }
 
 const TERMINAL = ["COMPLETE", "FAILED", "DENIED", "CANCELLED"];
