@@ -9,6 +9,7 @@ import { addresses } from "./config.js";
 import { erc20Abi } from "./abis.js";
 import { circleExecute } from "./circle.js";
 import { payViaX402 } from "./x402.js";
+import { experienceOf } from "./market.js";
 import { startups } from "./startups.js";
 import type { Draft } from "./generate-startups.js";
 
@@ -39,21 +40,12 @@ function envKey(name: string): Hex {
   return (raw.startsWith("0x") ? raw : `0x${raw}`) as Hex;
 }
 
-// A rating that reflects the business, so the seeded history is informative rather than
-// uniformly flattering. An overvalued agent with barely any revenue should look like one.
+// A seeded rating is a customer's experience of a service it paid for, no different in
+// kind from one written during a market run, so it is produced by the same function over
+// the same ground truth. An overvalued agent looks like one here for the same reason it
+// will look like one later.
 function scoreFor(d: Draft): number {
-  switch (d.profile) {
-    case "proven":
-      return 84 + Math.round(Math.random() * 8); // 84-92
-    case "earlyTraction":
-      return 72 + Math.round(Math.random() * 8); // 72-80
-    case "modest":
-      return 68 + Math.round(Math.random() * 8); // 68-76
-    case "overvalued":
-      return 38 + Math.round(Math.random() * 12); // 38-50
-    default:
-      return 60;
-  }
+  return Math.round(experienceOf(d.quality) * 100);
 }
 
 async function main() {

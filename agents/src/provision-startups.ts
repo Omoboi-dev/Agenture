@@ -7,7 +7,7 @@ import { formatUnits, parseUnits } from "viem";
 import { publicClient, walletFromKey, withRpcRetry, waitReceipt } from "./chain.js";
 import { addresses } from "./config.js";
 import { erc20Abi } from "./abis.js";
-import { createWallet } from "./circle.js";
+import { createWallet, labelFor } from "./circle.js";
 import { registerIdentity } from "./identity.js";
 import { startups } from "./startups.js";
 import type { Draft } from "./generate-startups.js";
@@ -42,6 +42,8 @@ type RosterEntry = {
   walletId: string;
   agentId: number | null;
   pitch: { idea: string; monthlyRevenueUsdc: number; estimatedWorthUsdc: number; askUsdc: number };
+  quality: number;
+  service: { sectors: string[] };
 };
 
 async function main() {
@@ -70,7 +72,7 @@ async function main() {
 
   for (const draft of todo) {
     // 1. Circle wallet: the agent's own signing identity.
-    const wallet = await createWallet(WALLET_SET);
+    const wallet = await createWallet(WALLET_SET, labelFor("Startup", draft.name));
     await sleep(1000);
 
     // 2. Gas. On Arc gas is USDC, so every wallet needs a little to act at all.
@@ -95,10 +97,18 @@ async function main() {
         estimatedWorthUsdc: draft.estimatedWorthUsdc,
         askUsdc: draft.askUsdc,
       },
+      // Carried through from the draft rather than left to defaults. Without quality every
+      // new agent delivers at a flat 0.5 and the whole cohort feels identical to a buyer;
+      // without sectors the catalog has to guess what it sells from its prose.
+      quality: draft.quality,
+      service: { sectors: draft.sectors },
     });
     writeFileSync(ROSTER, `${JSON.stringify(roster, null, 2)}\n`);
 
-    console.log(`${draft.name.padEnd(18)} wallet ${wallet.address}  agentId ${agentId}`);
+    console.log(
+      `${draft.name.padEnd(18)} wallet ${wallet.address}  agentId ${agentId}  ` +
+        `${draft.sectors.join("/")}  truth ${draft.quality.toFixed(2)}`,
+    );
   }
 
   console.log(`\nRoster is now ${roster.startups.length} agents.`);
