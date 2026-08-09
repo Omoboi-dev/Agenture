@@ -43,7 +43,7 @@ export default function JudgeDetail() {
 
       <div className="mb-6 grid grid-cols-2 gap-4 lg:grid-cols-4">
         <Card>
-          <Stat label="Deployed" value={`${usdc(judge.deployed)} / ${usdc(judge.committed)}`} unit="USDC" />
+          <Stat label="Deployed, all time" value={usdc(judge.deployed)} unit="USDC" />
         </Card>
         <Card>
           <Stat label="Realized ROI" value={bpsToPct(judge.roiBps)} accent={judge.roiBps > 0} />
@@ -123,14 +123,15 @@ function Stat({ label, value, unit, sub, accent = false }: { label: string; valu
 }
 
 function MandateCard({ judge }: { judge: JudgeRow }) {
-  const utilization = judge.committed > 0n ? Number((judge.deployed * 100n) / judge.committed) : 0
+  // See Judges.tsx: deployed is a lifetime total and is not bounded by the commitment.
+  const utilization = judge.committed > 0n ? Number((judge.called * 100n) / judge.committed) : 0
   const remaining = judge.budget
   return (
     <Card>
       <CardHeader title="Balance sheet" />
       <div className="px-5 py-5">
         <div className="mb-1.5 flex items-center justify-between">
-          <span className="eyebrow">Utilization</span>
+          <span className="eyebrow">Commitment drawn</span>
           <span className="tnum text-[12px] text-primary">{utilization.toFixed(1)}%</span>
         </div>
         <Meter pct={utilization} tone="primary" />

@@ -58,7 +58,12 @@ function JudgeCard({ j, data }: { j: JudgeRow; data: Overview }) {
   const color = judgeColor(j.name)
   const record = trackRecord(j.name)
   const deals = data.deals.filter((d) => d.judgeName === j.name)
-  const utilization = j.committed > 0n ? Number((j.deployed * 100n) / j.committed) : 0
+  // Called against committed, not deployed against committed. The contract bounds the
+  // first (`called + amount <= committed`) and does not bound the second: invest() spends
+  // the judge's own wallet, so a judge holding USDC from before this Fund was deployed can
+  // and does deploy more than this Fund ever promised it. Dividing those two produced a
+  // meter reading over 100% and a line that looked like an accounting error.
+  const utilization = j.committed > 0n ? Number((j.called * 100n) / j.committed) : 0
   const profitable = j.roiBps > 0
 
   return (
@@ -88,9 +93,9 @@ function JudgeCard({ j, data }: { j: JudgeRow; data: Overview }) {
 
       <div className="px-5 pb-4">
         <div className="mb-1.5 flex items-center justify-between">
-          <span className="eyebrow">Deployed against commitment</span>
+          <span className="eyebrow">Drawn against commitment</span>
           <span className="tnum text-[12px] text-subtle">
-            {usdc(j.deployed)} / {usdc(j.committed)}
+            {usdc(j.called)} / {usdc(j.committed)}
           </span>
         </div>
         <Meter pct={utilization} tone="primary" />
