@@ -218,9 +218,13 @@ export async function payViaNanopayments(
 //   bun run gateway-deposit            deposit the default per buyer
 //   bun run gateway-deposit -- --check show balances, move nothing
 async function main() {
-  const { liveCustomers } = await import("./customers.js");
+  const { liveCustomers, budgetOf } = await import("./customers.js");
   const check = process.argv.includes("--check");
-  const target = parseUnits(process.env.GATEWAY_DEPOSIT_USDC ?? "4", 6);
+  // Default to the buyer's whole budget, not a flat figure. A single order draws on one
+  // rail or the other, so a buyer holding less in Gateway than its largest possible order
+  // silently falls back to paying onchain for that one. Matching the budget keeps every
+  // purchase on the gasless rail.
+  const override = process.env.GATEWAY_DEPOSIT_USDC;
 
   console.log(`=== Gateway balances · ${GATEWAY_URL} ===\n`);
   const t = await arcTerms().catch((e) => {
@@ -231,6 +235,7 @@ async function main() {
   console.log(`Arc nanopayments live: scheme ${t.scheme}, verifying ${String(t.extra.verifyingContract)}\n`);
 
   for (const c of liveCustomers()) {
+    const target = override !== undefined ? parseUnits(override, 6) : budgetOf(c);
     const held = await gatewayBalance(c.wallet);
     const wallet = (await withRpcRetry(() =>
       publicClient.readContract({ address: USDC, abi: erc20Abi, functionName: "balanceOf", args: [c.wallet] }),

@@ -17,6 +17,9 @@ export type Decision = {
   breakdown?: { idea: number; evidence: number; price: number; risk: number };
 };
 
+/** The most of a startup's revenue any judge may take. */
+const MAX_REVENUE_SHARE_BPS = Number(process.env.MAX_REVENUE_SHARE_BPS ?? "3000");
+
 function clamp(n: number, lo: number, hi: number): number {
   if (!Number.isFinite(n)) return lo;
   return Math.min(Math.max(n, lo), hi);
@@ -127,7 +130,7 @@ export async function decide(
     `run consistently higher than what the customers say. Where the two disagree, believe the ` +
     `customers, and score "evidence" on what the customers said rather than on the blend.\n\n` +
     `Respond with ONLY a JSON object and nothing else, of the form ` +
-    `{"invest": boolean, "amountUsdc": number, "revenueShareBps": integer 0-10000, ` +
+    `{"invest": boolean, "amountUsdc": number, "revenueShareBps": integer 0-${MAX_REVENUE_SHARE_BPS}, ` +
     `"idea": integer, "evidence": integer, "price": integer, "risk": integer, ` +
     `"rationale": string}.\n\n` +
     `Do not hand back a single overall score. Rate these four things separately and honestly, ` +
@@ -159,7 +162,12 @@ export async function decide(
 
   const invest = Boolean(raw.invest);
   let amountUsdc = invest ? clamp(Number(raw.amountUsdc), 0, budget) : 0;
-  const revenueShareBps = Math.round(clamp(Number(raw.revenueShareBps), 0, 10000));
+  // Price the risk, do not confiscate the business. Told to demand a higher share when
+  // the evidence is thin, the model reads that as licence and goes to 7500bps: Nova took
+  // 75% of Quorum's revenue in round 5, which no term sheet in the world looks like. The
+  // ceiling is enforced here for the same reason position sizing is, a few lines down.
+  // A judge will not hold a limit it is merely told about.
+  const revenueShareBps = Math.round(clamp(Number(raw.revenueShareBps), 0, MAX_REVENUE_SHARE_BPS));
   const rationale = cleanRationale(raw.rationale);
 
   // Conviction is built from four components rather than a number the model picks, which
