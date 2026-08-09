@@ -1,85 +1,70 @@
 {
   "drafts": [
     {
-      "name": "DataIndexer",
-      "idea": "Indexes Ethereum transaction logs and provides real-time updates to analytics agents via WebSocket, charging $0.005 USDC per log entry.",
-      "profile": "proven",
-      "monthlyRevenueUsdc": 1621,
-      "estimatedWorthUsdc": 27557,
-      "askUsdc": 2,
-      "arrivesWithTraction": true
-    },
-    {
-      "name": "CryptoPayBridge",
-      "idea": "CryptoPayBridge automates cross-chain payments between autonomous agents, charging 0.005 USDC per transaction.",
-      "profile": "earlyTraction",
-      "monthlyRevenueUsdc": 202,
-      "estimatedWorthUsdc": 8282,
+      "name": "Vellum",
+      "idea": "Renders diagrams and annotated charts on demand for reporting agents, returning signed SVG within one block, charging 0.004 USDC per render.",
+      "monthlyRevenueUsdc": 1840,
+      "estimatedWorthUsdc": 40480,
       "askUsdc": 3,
-      "arrivesWithTraction": true
+      "arrivesWithTraction": true,
+      "profile": "proven",
+      "sectors": ["media"],
+      "quality": 0.82
     },
     {
-      "name": "MediaMiner",
-      "idea": "MediaMiner autonomously generates high-quality content summaries for indexing agents, charging 0.005 USDC per summary.",
-      "profile": "preRevenue",
-      "monthlyRevenueUsdc": 0,
-      "estimatedWorthUsdc": 126000,
-      "askUsdc": 5,
-      "arrivesWithTraction": false
+      "name": "Quorum",
+      "idea": "Checks a counterparty agent's ERC-8004 history against the caller's own policy rules and returns a pass or block verdict, charging 0.002 USDC per check.",
+      "monthlyRevenueUsdc": 210,
+      "estimatedWorthUsdc": 9240,
+      "askUsdc": 3,
+      "arrivesWithTraction": true,
+      "profile": "earlyTraction",
+      "sectors": ["compliance", "identity"],
+      "quality": 0.71
     },
     {
-      "name": "SecureGuard",
-      "idea": "SecureGuard autonomously monitors all transactions across the blockchain network, ensuring compliance with regulatory standards and detecting potential fraud. It charges $0.05 per transaction analyzed.",
-      "profile": "overvalued",
-      "monthlyRevenueUsdc": 16,
-      "estimatedWorthUsdc": 2292000,
-      "askUsdc": 6,
-      "arrivesWithTraction": true
-    },
-    {
-      "name": "CargoScheduler",
-      "idea": "Schedules deliveries for logistics agents, charging $0.05 USD per shipment.",
-      "profile": "modest",
-      "monthlyRevenueUsdc": 102,
+      "name": "Waypoint",
+      "idea": "Reorders a delivery agent's pending stops into a shortest-path route and republishes it on every new job, charging 0.003 USDC per reroute.",
+      "monthlyRevenueUsdc": 85,
       "estimatedWorthUsdc": 5000,
       "askUsdc": 2,
-      "arrivesWithTraction": true
+      "arrivesWithTraction": true,
+      "profile": "modest",
+      "sectors": ["logistics"],
+      "quality": 0.58
     },
     {
-      "name": "TrustGuard",
-      "idea": "TrustGuard is an autonomous agent that verifies the authenticity of digital identities by cross-referencing data from multiple decentralized sources, providing a secure and transparent service to compliance agents who charge $0.05 USDC per verification.",
-      "profile": "preRevenue",
-      "monthlyRevenueUsdc": 0,
-      "estimatedWorthUsdc": 188000,
-      "askUsdc": 4,
-      "arrivesWithTraction": false
-    },
-    {
-      "name": "MarketMaker",
-      "idea": "Indexes ERC-721 token transfers and provides real-time liquidity updates to arbitrage agents via WebSocket, charging 0.005 USDC per transaction.",
-      "profile": "proven",
-      "monthlyRevenueUsdc": 1069,
-      "estimatedWorthUsdc": 32070,
-      "askUsdc": 4,
-      "arrivesWithTraction": true
-    },
-    {
-      "name": "StorageVault",
-      "idea": "Stores and retrieves decentralized data efficiently, charging 0.005 USDC per gigabyte.",
+      "name": "Kiln",
+      "idea": "Pins and serves calldata blobs for archival agents with a signed retrieval proof on every read, charging 0.001 USDC per megabyte.",
+      "monthlyRevenueUsdc": 140,
+      "estimatedWorthUsdc": 5600,
+      "askUsdc": 2,
+      "arrivesWithTraction": true,
       "profile": "earlyTraction",
-      "monthlyRevenueUsdc": 151,
-      "estimatedWorthUsdc": 8456,
-      "askUsdc": 4,
-      "arrivesWithTraction": true
+      "sectors": ["storage"],
+      "quality": 0.62
     },
     {
-      "name": "BenchmarkBot",
-      "idea": "BenchmarkBot autonomously benchmarks smart contracts against a predefined set of criteria and provides detailed reports to compliance agents, charging $0.05 USD per contract analyzed.",
-      "profile": "preRevenue",
+      "name": "Zephyr",
+      "idea": "Streams a consolidated best bid and offer across every Arc liquidity venue to trading agents over one subscription, charging 0.002 USDC per tick.",
       "monthlyRevenueUsdc": 0,
-      "estimatedWorthUsdc": 160000,
+      "estimatedWorthUsdc": 180000,
       "askUsdc": 4,
-      "arrivesWithTraction": false
+      "arrivesWithTraction": false,
+      "profile": "preRevenue",
+      "sectors": ["market-data"],
+      "quality": 0.45
+    },
+    {
+      "name": "Nimbus",
+      "idea": "A next generation omnichain settlement mesh unlocking frictionless value transfer for the autonomous economy, charging per transaction.",
+      "monthlyRevenueUsdc": 25,
+      "estimatedWorthUsdc": 1400000,
+      "askUsdc": 6,
+      "arrivesWithTraction": true,
+      "profile": "overvalued",
+      "sectors": ["payments"],
+      "quality": 0.18
     }
   ]
 }

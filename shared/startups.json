@@ -124,7 +124,8 @@
         "sectors": [
           "compliance",
           "security"
-        ]
+        ],
+        "impl": "shallow"
       }
     },
     {
@@ -142,7 +143,8 @@
       "service": {
         "sectors": [
           "logistics"
-        ]
+        ],
+        "impl": "nearest"
       }
     },
     {
@@ -161,7 +163,8 @@
         "sectors": [
           "identity",
           "compliance"
-        ]
+        ],
+        "impl": "lazy"
       }
     },
     {
@@ -216,6 +219,117 @@
       "service": {
         "sectors": [
           "security"
+        ]
+      }
+    },
+    {
+      "name": "Vellum",
+      "wallet": "0xbde23c9bb39e083b569f10d901e3b355cfdc0b40",
+      "walletId": "eca530c0-68d9-564a-bfcb-13d8985155eb",
+      "agentId": 868971,
+      "pitch": {
+        "idea": "Renders diagrams and annotated charts on demand for reporting agents, returning signed SVG within one block, charging 0.004 USDC per render.",
+        "monthlyRevenueUsdc": 1840,
+        "estimatedWorthUsdc": 40480,
+        "askUsdc": 3
+      },
+      "quality": 0.82,
+      "service": {
+        "sectors": [
+          "media"
+        ]
+      }
+    },
+    {
+      "name": "Quorum",
+      "wallet": "0xae72dec84d08b630592efa324df7c7e842a581d5",
+      "walletId": "ee101d02-ae4a-599d-9776-490a69dcccc0",
+      "agentId": 868972,
+      "pitch": {
+        "idea": "Checks a counterparty agent's ERC-8004 history against the caller's own policy rules and returns a pass or block verdict, charging 0.002 USDC per check.",
+        "monthlyRevenueUsdc": 210,
+        "estimatedWorthUsdc": 9240,
+        "askUsdc": 3
+      },
+      "quality": 0.71,
+      "service": {
+        "sectors": [
+          "compliance",
+          "identity"
+        ],
+        "impl": "thorough"
+      }
+    },
+    {
+      "name": "Waypoint",
+      "wallet": "0x65cf5ab2410d5873c458a4a0668ecf6a827e5955",
+      "walletId": "0fff4859-9d70-56fe-ae8a-ed2ecc2ab4a8",
+      "agentId": 868973,
+      "pitch": {
+        "idea": "Reorders a delivery agent's pending stops into a shortest-path route and republishes it on every new job, charging 0.003 USDC per reroute.",
+        "monthlyRevenueUsdc": 85,
+        "estimatedWorthUsdc": 5000,
+        "askUsdc": 2
+      },
+      "quality": 0.58,
+      "service": {
+        "sectors": [
+          "logistics"
+        ],
+        "impl": "twoOpt"
+      }
+    },
+    {
+      "name": "Kiln",
+      "wallet": "0x3ed6042f4a0091342edc672a987738125df8ce44",
+      "walletId": "0c397c9b-9d8a-515d-81e5-0244d20dfdfa",
+      "agentId": 868974,
+      "pitch": {
+        "idea": "Pins and serves calldata blobs for archival agents with a signed retrieval proof on every read, charging 0.001 USDC per megabyte.",
+        "monthlyRevenueUsdc": 140,
+        "estimatedWorthUsdc": 5600,
+        "askUsdc": 2
+      },
+      "quality": 0.62,
+      "service": {
+        "sectors": [
+          "storage"
+        ]
+      }
+    },
+    {
+      "name": "Zephyr",
+      "wallet": "0x6a77dbe36788649d0c804a10d4b61581e40e8c4a",
+      "walletId": "77e3be2c-5bdf-5492-989c-ddfafac5a5ae",
+      "agentId": 868975,
+      "pitch": {
+        "idea": "Streams a consolidated best bid and offer across every Arc liquidity venue to trading agents over one subscription, charging 0.002 USDC per tick.",
+        "monthlyRevenueUsdc": 0,
+        "estimatedWorthUsdc": 180000,
+        "askUsdc": 4
+      },
+      "quality": 0.45,
+      "service": {
+        "sectors": [
+          "market-data"
+        ]
+      }
+    },
+    {
+      "name": "Nimbus",
+      "wallet": "0xb60c885b71d7a1b99c500a4dba275ff9164211e8",
+      "walletId": "4c297fc4-3252-5326-8fb5-23763778f261",
+      "agentId": 868976,
+      "pitch": {
+        "idea": "A next generation omnichain settlement mesh unlocking frictionless value transfer for the autonomous economy, charging per transaction.",
+        "monthlyRevenueUsdc": 25,
+        "estimatedWorthUsdc": 1400000,
+        "askUsdc": 6
+      },
+      "quality": 0.18,
+      "service": {
+        "sectors": [
+          "payments"
         ]
       }
     }

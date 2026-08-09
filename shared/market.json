@@ -1,4 +1,911 @@
 {
-  "memory": {},
-  "runs": []
+  "memory": {
+    "QuantDesk": {
+      "DataIndexer": {
+        "orders": 3,
+        "units": 30,
+        "spentUsdc": 10.5,
+        "satisfaction": 0.8229,
+        "lastRunId": 3
+      },
+      "MarketMaker": {
+        "orders": 3,
+        "units": 15,
+        "spentUsdc": 9.75,
+        "satisfaction": 0.8408,
+        "lastRunId": 3
+      }
+    },
+    "LedgerWorks": {
+      "MeshRelay": {
+        "orders": 3,
+        "units": 15,
+        "spentUsdc": 7.5,
+        "satisfaction": 0.8255,
+        "lastRunId": 3
+      },
+      "CryptoPayBridge": {
+        "orders": 3,
+        "units": 12,
+        "spentUsdc": 6,
+        "satisfaction": 0.6039,
+        "lastRunId": 3
+      }
+    },
+    "AtlasOps": {
+      "DataIndexer": {
+        "orders": 3,
+        "units": 17,
+        "spentUsdc": 5.95,
+        "satisfaction": 0.824,
+        "lastRunId": 3
+      },
+      "CargoScheduler": {
+        "orders": 3,
+        "units": 15,
+        "spentUsdc": 5.25,
+        "satisfaction": 0.6827,
+        "lastRunId": 3
+      }
+    },
+    "StudioLoop": {
+      "StorageVault": {
+        "orders": 2,
+        "units": 4,
+        "spentUsdc": 2.6,
+        "satisfaction": 0.6752,
+        "lastRunId": 3
+      },
+      "MediaMiner": {
+        "orders": 1,
+        "units": 1,
+        "spentUsdc": 0.85,
+        "satisfaction": 0.4784,
+        "lastRunId": 1
+      },
+      "Kiln": {
+        "orders": 2,
+        "units": 8,
+        "spentUsdc": 2.8,
+        "satisfaction": 0.6774,
+        "lastRunId": 3
+      },
+      "PixelForge": {
+        "orders": 1,
+        "units": 1,
+        "spentUsdc": 0.85,
+        "satisfaction": 0.4758,
+        "lastRunId": 2
+      }
+    }
+  },
+  "runs": [
+    {
+      "id": 1,
+      "at": "2026-08-09T00:23:48.410Z",
+      "dryRun": false,
+      "note": {
+        "customer": "QuantDesk",
+        "text": "I purchased 10 units from DataIndexer at $0.35 each and 5 units from MarketMaker at $0.65 each due to their respective ratings of 73 and 78 out of 100."
+      },
+      "orders": [
+        {
+          "customer": "QuantDesk",
+          "provider": "DataIndexer",
+          "sector": "onchain-data",
+          "units": 10,
+          "unitPriceUsdc": 0.35,
+          "amountUsdc": 3.5,
+          "reason": "reputation",
+          "paidTx": "0x8c32245a5d6b39a8eb96cacc4529ee335258bcd4d22d6be3f4d655ec31cab691",
+          "satisfaction": 0.732,
+          "rated": 73,
+          "ratedTx": "0xaf8a7beec5633611896fa12ea3c41ce05763f9b604f1f7c5fd987e5a769ac2a5"
+        },
+        {
+          "customer": "QuantDesk",
+          "provider": "MarketMaker",
+          "sector": "market-data",
+          "units": 5,
+          "unitPriceUsdc": 0.65,
+          "amountUsdc": 3.25,
+          "reason": "trial",
+          "paidTx": "0xe84e48df596cc20cfe0f9d752bf2752f29ae38c667097d9c7c96b1856209eaee",
+          "satisfaction": 0.784,
+          "rated": 78,
+          "ratedTx": "0x9e16cd5e7400a1e2326dc52fba9bb0720d99543802728626b88acdd7922c4429"
+        },
+        {
+          "customer": "LedgerWorks",
+          "provider": "MeshRelay",
+          "sector": "payments",
+          "units": 5,
+          "unitPriceUsdc": 0.5,
+          "amountUsdc": 2.5,
+          "reason": "reputation",
+          "paidTx": "0x5750561a0cb306916c5be6f6b7573784cd2fb0ad448c2e9d7e584edcc877282c",
+          "satisfaction": 0.653,
+          "rated": 65,
+          "ratedTx": "0x2f7c8787ea242eab2a85bbd453de0add129c534fe1aa12472e2e368013149c6f"
+        },
+        {
+          "customer": "LedgerWorks",
+          "provider": "CryptoPayBridge",
+          "sector": "payments",
+          "units": 4,
+          "unitPriceUsdc": 0.5,
+          "amountUsdc": 2,
+          "reason": "reputation",
+          "paidTx": "0x2cd9b6b56ca6f78e63444c552b423a36038b1026c166e00a7aadf8727258024f",
+          "satisfaction": 0.512,
+          "rated": 51,
+          "ratedTx": "0x3cf02f57fbe8c6bb5e7b28194f74b4a2a35456717621f2afd5add7dea8d2c965"
+        },
+        {
+          "customer": "AtlasOps",
+          "provider": "DataIndexer",
+          "sector": "onchain-data",
+          "units": 5,
+          "unitPriceUsdc": 0.35,
+          "amountUsdc": 1.75,
+          "reason": "reputation",
+          "paidTx": "0x7ef441919ed1e947d49fc0813f1a3a43554c97be5c284f02e29b81247efed53c",
+          "satisfaction": 0.793,
+          "rated": 79,
+          "ratedTx": "0x96a9b873f6451200e91f89fa60f25b9556c1496ff46532d43e557fbbe614875a"
+        },
+        {
+          "customer": "AtlasOps",
+          "provider": "CargoScheduler",
+          "sector": "logistics",
+          "units": 5,
+          "unitPriceUsdc": 0.35,
+          "amountUsdc": 1.75,
+          "reason": "reputation",
+          "paidTx": "0x5f377bfafc1eb6044275dcc76ddd478920ed3d034f092266a3e64dd0b1e7ac76",
+          "satisfaction": 0.575,
+          "rated": 58,
+          "ratedTx": "0xe00d2a38858adb9770f75d2099ac43490ea0b349b245dc103863dfb9ded35fec"
+        },
+        {
+          "customer": "StudioLoop",
+          "provider": "StorageVault",
+          "sector": "storage",
+          "units": 2,
+          "unitPriceUsdc": 0.65,
+          "amountUsdc": 1.3,
+          "reason": "reputation",
+          "paidTx": "0x45108e7464b3e0962cb08cdd9936fb9ddce8e886aa59f430afee3bb99b365414",
+          "satisfaction": 0.698,
+          "rated": 70,
+          "ratedTx": "0x4f2bf39354fda8bbc76648aa07e2023cb1f49aae2c2ed2c9e038b036cd873763"
+        },
+        {
+          "customer": "StudioLoop",
+          "provider": "MediaMiner",
+          "sector": "media",
+          "units": 1,
+          "unitPriceUsdc": 0.85,
+          "amountUsdc": 0.85,
+          "reason": "trial",
+          "paidTx": "0x4c499676ea44b46bb8d107c7b58f392fd2f7f73b7881ce79f8c4d7c9d5c2369d",
+          "satisfaction": 0.478,
+          "rated": 48,
+          "ratedTx": "0x7f052aa58a028b5d222efc646e90d1f30bc2416ef7f2509b77d1e1c51bb50795"
+        }
+      ],
+      "settlements": [
+        {
+          "startup": "DataIndexer",
+          "dealId": 10,
+          "revenueUsdc": 2.21477,
+          "cutUsdc": 0.110738,
+          "judge": "Alpha"
+        },
+        {
+          "startup": "DataIndexer",
+          "dealId": 14,
+          "revenueUsdc": 0.289665,
+          "cutUsdc": 0.043449,
+          "judge": "Nova"
+        },
+        {
+          "startup": "DataIndexer",
+          "dealId": 18,
+          "revenueUsdc": 2.745565,
+          "cutUsdc": 0.137278,
+          "judge": "Sable"
+        },
+        {
+          "startup": "MarketMaker",
+          "dealId": 21,
+          "revenueUsdc": 0.563634,
+          "cutUsdc": 0.028181,
+          "judge": "Alpha"
+        },
+        {
+          "startup": "MarketMaker",
+          "dealId": 26,
+          "revenueUsdc": 2.110802,
+          "cutUsdc": 0.31662,
+          "judge": "Nova"
+        },
+        {
+          "startup": "MarketMaker",
+          "dealId": 30,
+          "revenueUsdc": 0.575564,
+          "cutUsdc": 0.028778,
+          "judge": "Sable"
+        },
+        {
+          "startup": "MeshRelay",
+          "dealId": 0,
+          "revenueUsdc": 0.429691,
+          "cutUsdc": 0.021484,
+          "judge": "Alpha"
+        },
+        {
+          "startup": "MeshRelay",
+          "dealId": 5,
+          "revenueUsdc": 1.425772,
+          "cutUsdc": 0.213865,
+          "judge": "Nova"
+        },
+        {
+          "startup": "MeshRelay",
+          "dealId": 8,
+          "revenueUsdc": 0.644537,
+          "cutUsdc": 0.032226,
+          "judge": "Sable"
+        },
+        {
+          "startup": "CryptoPayBridge",
+          "dealId": 22,
+          "revenueUsdc": 0.263385,
+          "cutUsdc": 0.013169,
+          "judge": "Alpha"
+        },
+        {
+          "startup": "CryptoPayBridge",
+          "dealId": 27,
+          "revenueUsdc": 0.329231,
+          "cutUsdc": 0.049384,
+          "judge": "Nova"
+        },
+        {
+          "startup": "CryptoPayBridge",
+          "dealId": 29,
+          "revenueUsdc": 0.197539,
+          "cutUsdc": 0.009876,
+          "judge": "Sable"
+        },
+        {
+          "startup": "CryptoPayBridge",
+          "dealId": 32,
+          "revenueUsdc": 0.263385,
+          "cutUsdc": 0.013169,
+          "judge": "Alpha"
+        },
+        {
+          "startup": "CryptoPayBridge",
+          "dealId": 33,
+          "revenueUsdc": 0.765843,
+          "cutUsdc": 0.114876,
+          "judge": "Nova"
+        },
+        {
+          "startup": "CryptoPayBridge",
+          "dealId": 34,
+          "revenueUsdc": 0.180617,
+          "cutUsdc": 0.00903,
+          "judge": "Sable"
+        },
+        {
+          "startup": "CargoScheduler",
+          "dealId": 23,
+          "revenueUsdc": 0.583333,
+          "cutUsdc": 0.029166,
+          "judge": "Alpha"
+        },
+        {
+          "startup": "CargoScheduler",
+          "dealId": 28,
+          "revenueUsdc": 0.583333,
+          "cutUsdc": 0.087499,
+          "judge": "Nova"
+        },
+        {
+          "startup": "CargoScheduler",
+          "dealId": 31,
+          "revenueUsdc": 0.583334,
+          "cutUsdc": 0.029166,
+          "judge": "Sable"
+        },
+        {
+          "startup": "StorageVault",
+          "dealId": 11,
+          "revenueUsdc": 0.485008,
+          "cutUsdc": 0.02425,
+          "judge": "Alpha"
+        },
+        {
+          "startup": "StorageVault",
+          "dealId": 15,
+          "revenueUsdc": 0.063433,
+          "cutUsdc": 0.009514,
+          "judge": "Nova"
+        },
+        {
+          "startup": "StorageVault",
+          "dealId": 19,
+          "revenueUsdc": 0.751559,
+          "cutUsdc": 0.037577,
+          "judge": "Sable"
+        },
+        {
+          "startup": "MediaMiner",
+          "dealId": 24,
+          "revenueUsdc": 0.242857,
+          "cutUsdc": 0.012142,
+          "judge": "Alpha"
+        },
+        {
+          "startup": "MediaMiner",
+          "dealId": 25,
+          "revenueUsdc": 0.607143,
+          "cutUsdc": 0.091071,
+          "judge": "Nova"
+        }
+      ]
+    },
+    {
+      "id": 2,
+      "at": "2026-08-09T12:31:03.032Z",
+      "dryRun": false,
+      "note": {
+        "customer": "StudioLoop",
+        "text": "I purchased 4 units from Kiln and 1 unit from PixelForge as initial explorations since I had never used either product before."
+      },
+      "orders": [
+        {
+          "customer": "QuantDesk",
+          "provider": "DataIndexer",
+          "sector": "onchain-data",
+          "units": 10,
+          "unitPriceUsdc": 0.35,
+          "amountUsdc": 3.5,
+          "reason": "repeat",
+          "paidTx": "0xd58a97f4e1b41eeedd3e8b6897bb0259262bfd06fd5053afdc0bd30bc51a7ea3",
+          "satisfaction": 0.924,
+          "rated": 92,
+          "ratedTx": "0xd6c26da663483984a0cd06b24fc93d8f6b9388dd19afc54df35fc6a95c97408c"
+        },
+        {
+          "customer": "QuantDesk",
+          "provider": "MarketMaker",
+          "sector": "market-data",
+          "units": 5,
+          "unitPriceUsdc": 0.65,
+          "amountUsdc": 3.25,
+          "reason": "repeat",
+          "paidTx": "0xa2fb02b131b5c974ab46080be1cb6c9a9889bb456b91a552c08e403b97e01f80",
+          "satisfaction": 0.962,
+          "rated": 96,
+          "ratedTx": "0xbd0f5f760a71e9e7e9a95ee88c4faabe64f4b91f45276867579e2590163b6194"
+        },
+        {
+          "customer": "LedgerWorks",
+          "provider": "MeshRelay",
+          "sector": "payments",
+          "units": 5,
+          "unitPriceUsdc": 0.5,
+          "amountUsdc": 2.5,
+          "reason": "repeat",
+          "paidTx": "0x18786f460e890c8e3b0be41f93f2eed9acef8fb9699a4f25183d6bd2d60a29f3",
+          "satisfaction": 0.883,
+          "rated": 88,
+          "ratedTx": "0xbd461f07e6a7525f7dcfc38d91c32eed38ea2b738d4af426623925351d259aaf"
+        },
+        {
+          "customer": "LedgerWorks",
+          "provider": "CryptoPayBridge",
+          "sector": "payments",
+          "units": 4,
+          "unitPriceUsdc": 0.5,
+          "amountUsdc": 2,
+          "reason": "repeat",
+          "paidTx": "0xc06d0870c57c3d9e9d25fef5cf3cd77cdc8062049b2cc288347f8d4c35f713d3",
+          "satisfaction": 0.518,
+          "rated": 52,
+          "ratedTx": "0xfb32983f001e63c8dd513bf4df8e5a7cd9b5e1e15741e20d254cb710ff0dabc1"
+        },
+        {
+          "customer": "AtlasOps",
+          "provider": "DataIndexer",
+          "sector": "onchain-data",
+          "units": 6,
+          "unitPriceUsdc": 0.35,
+          "amountUsdc": 2.1,
+          "reason": "repeat",
+          "paidTx": "0x6d8d87c1718e6285b47050fb26350ebc7282219432d497e2e094ea217058d9ce",
+          "satisfaction": 0.836,
+          "rated": 84,
+          "ratedTx": "0x4d3c0225518f8776a44427a24d95fa4a1964f1fb84dfc1f19f6dc1589529da5d"
+        },
+        {
+          "customer": "AtlasOps",
+          "provider": "CargoScheduler",
+          "sector": "logistics",
+          "units": 5,
+          "unitPriceUsdc": 0.35,
+          "amountUsdc": 1.75,
+          "reason": "repeat",
+          "paidTx": "0xea12b489dd7763a8828550c595f0415e7a8e157db8dd8e104632e75b5c16d7ce",
+          "satisfaction": 0.587,
+          "rated": 59,
+          "ratedTx": "0xaedc01257ccb7ca3f6420fc160cb2674c493301348f4c534127c996e59a86aea"
+        },
+        {
+          "customer": "StudioLoop",
+          "provider": "Kiln",
+          "sector": "storage",
+          "units": 4,
+          "unitPriceUsdc": 0.35,
+          "amountUsdc": 1.4,
+          "reason": "trial",
+          "paidTx": "0x12ab4ea60995786c87dcbff7fc997564ec605783448cd0da5a3734686c1dcc5d",
+          "satisfaction": 0.643,
+          "rated": 64,
+          "ratedTx": "0x19a838b0fb38ac304d2e14b965d171e4635f9f942c7089f90112d07ebe3b1564"
+        },
+        {
+          "customer": "StudioLoop",
+          "provider": "PixelForge",
+          "sector": "media",
+          "units": 1,
+          "unitPriceUsdc": 0.85,
+          "amountUsdc": 0.85,
+          "reason": "trial",
+          "paidTx": "0xc573fe754129e71c0f376720540447e55d9da17009f740c0e1385ac955f0692a",
+          "satisfaction": 0.476,
+          "rated": 48,
+          "ratedTx": "0xb7d27d56d42757a723e1d174ae8fe9c1e420af161d4df101c115a89c7f1e6fc2"
+        }
+      ],
+      "settlements": [
+        {
+          "startup": "DataIndexer",
+          "dealId": 10,
+          "revenueUsdc": 2.362422,
+          "cutUsdc": 0.118121,
+          "judge": "Alpha"
+        },
+        {
+          "startup": "DataIndexer",
+          "dealId": 14,
+          "revenueUsdc": 0.308976,
+          "cutUsdc": 0.046346,
+          "judge": "Nova"
+        },
+        {
+          "startup": "DataIndexer",
+          "dealId": 18,
+          "revenueUsdc": 2.928602,
+          "cutUsdc": 0.14643,
+          "judge": "Sable"
+        },
+        {
+          "startup": "MarketMaker",
+          "dealId": 21,
+          "revenueUsdc": 0.563634,
+          "cutUsdc": 0.028181,
+          "judge": "Alpha"
+        },
+        {
+          "startup": "MarketMaker",
+          "dealId": 26,
+          "revenueUsdc": 2.110802,
+          "cutUsdc": 0.31662,
+          "judge": "Nova"
+        },
+        {
+          "startup": "MarketMaker",
+          "dealId": 30,
+          "revenueUsdc": 0.575564,
+          "cutUsdc": 0.028778,
+          "judge": "Sable"
+        },
+        {
+          "startup": "MeshRelay",
+          "dealId": 0,
+          "revenueUsdc": 0.429691,
+          "cutUsdc": 0.021484,
+          "judge": "Alpha"
+        },
+        {
+          "startup": "MeshRelay",
+          "dealId": 5,
+          "revenueUsdc": 1.425772,
+          "cutUsdc": 0.213865,
+          "judge": "Nova"
+        },
+        {
+          "startup": "MeshRelay",
+          "dealId": 8,
+          "revenueUsdc": 0.644537,
+          "cutUsdc": 0.032226,
+          "judge": "Sable"
+        },
+        {
+          "startup": "CryptoPayBridge",
+          "dealId": 22,
+          "revenueUsdc": 0.263385,
+          "cutUsdc": 0.013169,
+          "judge": "Alpha"
+        },
+        {
+          "startup": "CryptoPayBridge",
+          "dealId": 27,
+          "revenueUsdc": 0.329231,
+          "cutUsdc": 0.049384,
+          "judge": "Nova"
+        },
+        {
+          "startup": "CryptoPayBridge",
+          "dealId": 29,
+          "revenueUsdc": 0.197539,
+          "cutUsdc": 0.009876,
+          "judge": "Sable"
+        },
+        {
+          "startup": "CryptoPayBridge",
+          "dealId": 32,
+          "revenueUsdc": 0.263385,
+          "cutUsdc": 0.013169,
+          "judge": "Alpha"
+        },
+        {
+          "startup": "CryptoPayBridge",
+          "dealId": 33,
+          "revenueUsdc": 0.765843,
+          "cutUsdc": 0.114876,
+          "judge": "Nova"
+        },
+        {
+          "startup": "CryptoPayBridge",
+          "dealId": 34,
+          "revenueUsdc": 0.180617,
+          "cutUsdc": 0.00903,
+          "judge": "Sable"
+        },
+        {
+          "startup": "CargoScheduler",
+          "dealId": 23,
+          "revenueUsdc": 0.583333,
+          "cutUsdc": 0.029166,
+          "judge": "Alpha"
+        },
+        {
+          "startup": "CargoScheduler",
+          "dealId": 28,
+          "revenueUsdc": 0.583333,
+          "cutUsdc": 0.087499,
+          "judge": "Nova"
+        },
+        {
+          "startup": "CargoScheduler",
+          "dealId": 31,
+          "revenueUsdc": 0.583334,
+          "cutUsdc": 0.029166,
+          "judge": "Sable"
+        },
+        {
+          "startup": "Kiln",
+          "dealId": null,
+          "revenueUsdc": 1.4,
+          "cutUsdc": 0,
+          "judge": null,
+          "note": "unfunded traction"
+        },
+        {
+          "startup": "PixelForge",
+          "dealId": 2,
+          "revenueUsdc": 0.274578,
+          "cutUsdc": 0.013728,
+          "judge": "Alpha"
+        },
+        {
+          "startup": "PixelForge",
+          "dealId": 6,
+          "revenueUsdc": 0.575422,
+          "cutUsdc": 0.086313,
+          "judge": "Nova"
+        }
+      ]
+    },
+    {
+      "id": 3,
+      "at": "2026-08-09T13:55:24.309Z",
+      "dryRun": false,
+      "note": {
+        "customer": "StudioLoop",
+        "text": "I purchased 4 units from Kiln and 2 units from StorageVault based on previous satisfactory experiences with both vendors."
+      },
+      "orders": [
+        {
+          "customer": "QuantDesk",
+          "provider": "DataIndexer",
+          "sector": "onchain-data",
+          "units": 10,
+          "unitPriceUsdc": 0.35,
+          "amountUsdc": 3.5,
+          "reason": "repeat",
+          "paidTx": "0x8c3669565c1465b24a3311abc93ad8b44373a192e9efad93462eaf14c9773f48",
+          "satisfaction": 0.844,
+          "rated": 84,
+          "ratedTx": "0x65119139faf96adef0bab27c2069b8a21426f1998aa64e3550c625064aa95c28",
+          "delivery": null
+        },
+        {
+          "customer": "QuantDesk",
+          "provider": "MarketMaker",
+          "sector": "market-data",
+          "units": 5,
+          "unitPriceUsdc": 0.65,
+          "amountUsdc": 3.25,
+          "reason": "repeat",
+          "paidTx": "0xadfa62da55cf9dae8efd9b0ac2e9dbab445f5b9cbf55d3601b1ec92cb2c243f2",
+          "satisfaction": 0.82,
+          "rated": 82,
+          "ratedTx": "0xb4951f438df6464955d9037f868efedf88c0e1543c2126fde5b34ce0a4760b86",
+          "delivery": null
+        },
+        {
+          "customer": "LedgerWorks",
+          "provider": "MeshRelay",
+          "sector": "payments",
+          "units": 5,
+          "unitPriceUsdc": 0.5,
+          "amountUsdc": 2.5,
+          "reason": "repeat",
+          "paidTx": "0x25c8704935a99d525eb60e77a58d26bf8bd95e28554f6fbe9d8ffb3187dd2b78",
+          "satisfaction": 0.946,
+          "rated": 95,
+          "ratedTx": "0xe0c96a182e672a3b74df77db478bf6de2e75086a2ff1638a137f34cae8f6ca04",
+          "delivery": null
+        },
+        {
+          "customer": "LedgerWorks",
+          "provider": "CryptoPayBridge",
+          "sector": "payments",
+          "units": 4,
+          "unitPriceUsdc": 0.5,
+          "amountUsdc": 2,
+          "reason": "repeat",
+          "paidTx": "0x7bda718202a36e9a90c9e420893d10baff8b29e8514b669987fe3e034ef4f6f9",
+          "satisfaction": 0.739,
+          "rated": 74,
+          "ratedTx": "0xfa51cec40614f5298932b49dc596ca7ba316286069383fada04d885b15345698",
+          "delivery": null
+        },
+        {
+          "customer": "AtlasOps",
+          "provider": "DataIndexer",
+          "sector": "onchain-data",
+          "units": 6,
+          "unitPriceUsdc": 0.35,
+          "amountUsdc": 2.1,
+          "reason": "repeat",
+          "paidTx": "0xccc21cb03a35dc2132b7a4943827acf87c9b5463b210ec192e081ba99d2239b4",
+          "satisfaction": 0.845,
+          "rated": 84,
+          "ratedTx": "0x0b7765b09051f51f75cfe956031b6ed52a1ed4340d6eadba4db92ab004fcacc5",
+          "delivery": null
+        },
+        {
+          "customer": "AtlasOps",
+          "provider": "CargoScheduler",
+          "sector": "logistics",
+          "units": 5,
+          "unitPriceUsdc": 0.35,
+          "amountUsdc": 1.75,
+          "reason": "repeat",
+          "paidTx": "0x02b335a66521cb1541dfb5d16242c64b39506b127549887ada75e36d2d9d6e98",
+          "satisfaction": 0.837,
+          "rated": 84,
+          "ratedTx": "0x0c0874e939d4f56eaee4bafe712c2c373cf5436b10b412dd0755b08db70f6508",
+          "delivery": {
+            "verified": true,
+            "jobs": 3,
+            "note": "route 296.7 against a best possible 273.3, 8.6% longer than optimal"
+          }
+        },
+        {
+          "customer": "StudioLoop",
+          "provider": "Kiln",
+          "sector": "storage",
+          "units": 4,
+          "unitPriceUsdc": 0.35,
+          "amountUsdc": 1.4,
+          "reason": "repeat",
+          "paidTx": "0xbaa83e97466fdfe6c101f3a999d271c4e2f7d79d1497c863219736ecabe3a11a",
+          "satisfaction": 0.728,
+          "rated": 73,
+          "ratedTx": "0xfc9d6137278870e24abd9d982dd3eda2e2555b80f96c00bc57b8ec4383066ccf",
+          "delivery": null
+        },
+        {
+          "customer": "StudioLoop",
+          "provider": "StorageVault",
+          "sector": "storage",
+          "units": 2,
+          "unitPriceUsdc": 0.65,
+          "amountUsdc": 1.3,
+          "reason": "repeat",
+          "paidTx": "0x8a1445511793fff516e4bdadd640084a1108d0bbbe884eeec04e4f59bf5d6fe2",
+          "satisfaction": 0.641,
+          "rated": 64,
+          "ratedTx": "0xa43153e23f9b9e1fef6b1c02834f1cb770883e721c02a05d3a27d8707487f0e8",
+          "delivery": null
+        }
+      ],
+      "settlements": [
+        {
+          "startup": "DataIndexer",
+          "dealId": 10,
+          "revenueUsdc": 2.362422,
+          "cutUsdc": 0.118121,
+          "judge": "Alpha"
+        },
+        {
+          "startup": "DataIndexer",
+          "dealId": 14,
+          "revenueUsdc": 0.308976,
+          "cutUsdc": 0.046346,
+          "judge": "Nova"
+        },
+        {
+          "startup": "DataIndexer",
+          "dealId": 18,
+          "revenueUsdc": 2.928602,
+          "cutUsdc": 0.14643,
+          "judge": "Sable"
+        },
+        {
+          "startup": "MarketMaker",
+          "dealId": 21,
+          "revenueUsdc": 0.563634,
+          "cutUsdc": 0.028181,
+          "judge": "Alpha"
+        },
+        {
+          "startup": "MarketMaker",
+          "dealId": 26,
+          "revenueUsdc": 2.110802,
+          "cutUsdc": 0.31662,
+          "judge": "Nova"
+        },
+        {
+          "startup": "MarketMaker",
+          "dealId": 30,
+          "revenueUsdc": 0.575564,
+          "cutUsdc": 0.028778,
+          "judge": "Sable"
+        },
+        {
+          "startup": "MeshRelay",
+          "dealId": 0,
+          "revenueUsdc": 0.429691,
+          "cutUsdc": 0.021484,
+          "judge": "Alpha"
+        },
+        {
+          "startup": "MeshRelay",
+          "dealId": 5,
+          "revenueUsdc": 1.425772,
+          "cutUsdc": 0.213865,
+          "judge": "Nova"
+        },
+        {
+          "startup": "MeshRelay",
+          "dealId": 8,
+          "revenueUsdc": 0.644537,
+          "cutUsdc": 0.032226,
+          "judge": "Sable"
+        },
+        {
+          "startup": "CryptoPayBridge",
+          "dealId": 22,
+          "revenueUsdc": 0.263385,
+          "cutUsdc": 0.013169,
+          "judge": "Alpha"
+        },
+        {
+          "startup": "CryptoPayBridge",
+          "dealId": 27,
+          "revenueUsdc": 0.329231,
+          "cutUsdc": 0.049384,
+          "judge": "Nova"
+        },
+        {
+          "startup": "CryptoPayBridge",
+          "dealId": 29,
+          "revenueUsdc": 0.197539,
+          "cutUsdc": 0.009876,
+          "judge": "Sable"
+        },
+        {
+          "startup": "CryptoPayBridge",
+          "dealId": 32,
+          "revenueUsdc": 0.263385,
+          "cutUsdc": 0.013169,
+          "judge": "Alpha"
+        },
+        {
+          "startup": "CryptoPayBridge",
+          "dealId": 33,
+          "revenueUsdc": 0.765843,
+          "cutUsdc": 0.114876,
+          "judge": "Nova"
+        },
+        {
+          "startup": "CryptoPayBridge",
+          "dealId": 34,
+          "revenueUsdc": 0.180617,
+          "cutUsdc": 0.00903,
+          "judge": "Sable"
+        },
+        {
+          "startup": "CargoScheduler",
+          "dealId": 23,
+          "revenueUsdc": 0.583333,
+          "cutUsdc": 0.029166,
+          "judge": "Alpha"
+        },
+        {
+          "startup": "CargoScheduler",
+          "dealId": 28,
+          "revenueUsdc": 0.583333,
+          "cutUsdc": 0.087499,
+          "judge": "Nova"
+        },
+        {
+          "startup": "CargoScheduler",
+          "dealId": 31,
+          "revenueUsdc": 0.583334,
+          "cutUsdc": 0.029166,
+          "judge": "Sable"
+        },
+        {
+          "startup": "Kiln",
+          "dealId": null,
+          "revenueUsdc": 1.4,
+          "cutUsdc": 0,
+          "judge": null,
+          "note": "unfunded traction"
+        },
+        {
+          "startup": "StorageVault",
+          "dealId": 11,
+          "revenueUsdc": 0.485008,
+          "cutUsdc": 0.02425,
+          "judge": "Alpha"
+        },
+        {
+          "startup": "StorageVault",
+          "dealId": 15,
+          "revenueUsdc": 0.063433,
+          "cutUsdc": 0.009514,
+          "judge": "Nova"
+        },
+        {
+          "startup": "StorageVault",
+          "dealId": 19,
+          "revenueUsdc": 0.751559,
+          "cutUsdc": 0.037577,
+          "judge": "Sable"
+        }
+      ]
+    }
+  ]
 }
