@@ -8,7 +8,6 @@ import roster from '@shared/customers.json'
 export type CustomerMeta = {
   name: string
   role: string
-  needs: string[]
   budgetUsdc: number
   weights: { experience: number; reputation: number; price: number }
   explore: number

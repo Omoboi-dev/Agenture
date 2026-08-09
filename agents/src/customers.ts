@@ -22,8 +22,6 @@ export type Weights = {
 export type Customer = {
   name: string;
   role: string;
-  /** Sectors it buys. A service outside these is never even scored. */
-  needs: string[];
   budgetUsdc: number;
   weights: Weights;
   /** Chance per run of spending a slot on a seller it has never tried. Without this the
@@ -37,7 +35,6 @@ export type Customer = {
 export const customers: Customer[] = roster.customers.map((c) => ({
   name: c.name,
   role: c.role,
-  needs: c.needs,
   budgetUsdc: c.budgetUsdc,
   weights: c.weights,
   explore: c.explore,

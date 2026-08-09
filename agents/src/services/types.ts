@@ -45,6 +45,9 @@ export type Service<Task = unknown, Out = unknown> = {
   sectors: string[];
   /** Implementations a seller can be assigned, best-known first. Used to validate the roster. */
   implementations: string[];
+  /** Cap on jobs sampled per order. Services that hit the chain ask for fewer, because
+   *  Arc's public RPC is quota limited and a purely local service is free to sample more. */
+  maxJobs?: number;
   /** The buyer says what it needs. */
   task(ctx: JobContext): Promise<Task>;
   /** The seller does the work. This is where implementations differ. */

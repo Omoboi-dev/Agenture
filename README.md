@@ -97,7 +97,7 @@ The rest of this document describes how Agenture is built.
 
 - A **judge** is an established entrepreneur agent. It has an ERC-8004 onchain identity, a persona (an investing thesis), a Circle wallet it signs from, and its own USDC balance allocated to it by the fund.
 - A **startup** is any non judge agent. It arrives with an idea, some self reported revenue or estimated worth, and an ask. Some already run a real service and earn; some are pre revenue. Once funded it becomes a seller: a sector it operates in and a price per unit of whatever it does.
-- A **customer** is an agent that buys. It is not part of the fund, holds its own wallet, spends its own USDC, and has standing needs that only some of the roster can meet. It is the only party here with no stake in a startup succeeding, which is why its opinion counts for something.
+- A **customer** is an agent that buys. It is not part of the fund, holds its own wallet, spends its own USDC, and browses the whole marketplace to decide for itself what to buy. It is the only party here with no stake in a startup succeeding, which is why its opinion counts for something.
 - The **fund** is the LP vehicle and the book of record. It does not pay for deals; it *allocates*, moving real USDC out into each judge's own wallet. From there a judge is an independent investor spending its own balance, so every decision is both authorized and paid for by the judge that made it.
 - **Revenue share** is how the fund is repaid. Each deal carries a revenue share in basis points; when a startup settles what it sold, that cut streams to the fund and is credited to the deal's judge.
 - **Reputation** is the memory of the system. The customer that paid for a service rates it on ERC-8004, and that score is exactly what the next round's due diligence reads back. The rater is deliberately not the investor: a judge scoring its own portfolio company is an investor marking its own homework, and no amount of putting it onchain fixes that. Diligence reads the two apart and shows a judge both, because the disagreement between them is itself information. See "Two kinds of reputation" below.
@@ -234,7 +234,7 @@ Step by step:
 3. **Decision.** Each judge, independently, reasons over every pitch with its own persona and returns a decision with a conviction score.
 4. **Rank then allocate.** Each judge sorts the pitches it wants by conviction and funds them in order until its own wallet runs out. This is why the batched arena matters: a judge compares the whole cohort before spending scarce capital, instead of committing to whoever pitched first.
 5. **Invest.** For each funded pitch the judge's Circle wallet signs `Fund.invest`. The deal is registered with RevenueShare and USDC moves to the startup.
-6. **Earn.** Customers shop. Each one scores the sellers in the sectors it needs and pays the ones it picks via x402: the buyer's Circle wallet signs an EIP-3009 authorization and the operator settles it onchain as facilitator. The seller receives real USDC, agent to agent. Nobody is guaranteed a sale.
+6. **Earn.** Customers shop. Each one scores every seller it can afford and pays the ones it picks via x402: the buyer's Circle wallet signs an EIP-3009 authorization and the operator settles it onchain as facilitator. The seller receives real USDC, agent to agent. Nobody is guaranteed a sale.
 7. **Feedback.** Each buyer rates what it received on ERC-8004, from its own wallet. That score is what the next round's due diligence reads, closing the loop, and it comes from a party with no stake in the fund.
 8. **Settle.** The seller's Circle wallet calls `RevenueShare.settle` on what it sold, paying the fund's cut. Revenue splits across every deal backing it, in proportion to what each judge put in. The rest stays with the seller.
 
@@ -268,7 +268,9 @@ Four customer agents (`shared/customers.json`, driven by `agents/src/market.ts`)
 
 A run goes: read the public reputation of every seller, let each customer decide independently, pay by x402, form an opinion about what arrived, rate the seller on ERC-8004, and have the sellers settle the fund's share of what they sold.
 
-**How a customer decides.** It only ever scores sellers in the sectors it needs, so most of the roster is invisible to it. Among those it weighs three things, in whatever proportion its persona sets: its own satisfaction with that seller in the past, the public ERC-8004 score, and price. Budget is then split across its picks by that score, and it buys whole units. A seller it rates highly gets a bigger share of the wallet, which is how satisfaction becomes revenue without anything computing revenue from quality.
+**How a customer decides.** It sees the whole roster. Anything it can afford one unit of is a candidate, and it weighs three things about each, in whatever proportion its persona sets: its own satisfaction with that seller in the past, the public ERC-8004 score, and price.
+
+An earlier version restricted each buyer to sectors it "needed", so a seller nobody wanted would earn nothing. That is a real effect, but it was a rule imposed on the market rather than something the market produced, and it left two thirds of the roster invisible to any given buyer. The buyers still differ plenty without it: they weigh those three things differently, and each has a private history no one else can read. A payments buyer now sometimes buys onchain data, because it browsed and that was the best thing it could afford, which is what a marketplace is. Budget is then split across its picks by that score, and it buys whole units. A seller it rates highly gets a bigger share of the wallet, which is how satisfaction becomes revenue without anything computing revenue from quality.
 
 **Why a policy and not a language model.** A model call per customer per run would exhaust a daily quota in a handful of cycles, and it would make the market stop when the provider does. It would also not buy you much: given twelve options and a budget, a small model tends to produce the same basket for every persona, which is the failure the judges already hit. A rule based customer is not less of an agent for it. It holds its own keys, nobody tells it what to buy, and its choices turn on a private history no other agent can read. One model call per run does happen: a single customer explains its shopping in a sentence for the marketplace feed. It changes nothing and the run is unaffected if it fails.
 
@@ -327,6 +329,16 @@ Note `nearest` scoring 9 on one instance. Greedy routing has bad days, and the b
 | `lazy` | 47.5 | nothing, and passes everything |
 
 `shallow` is the interesting one. Nothing about it is sabotaged: it reads the reputation number most systems would expose, and it fails because on this deployment that number runs about twenty points high and worst on the agents that deserve it least. It waves through SecureGuard and PixelForge. The project's own argument about whose ratings count is now costing a seller real revenue.
+
+**Onchain and market data** (`onchain.ts`). The buyer asks for a USDC balance, or for three agents ranked by what they hold, and then looks it up itself. Providers differ on the two axes real ones differ on. `cached` serves from a real block about three hours back through the same RPC: its answer was correct then and is wrong now by exactly however much the chain moved. `partial` indexes only ten of every sixteen addresses and has nothing to say about the rest.
+
+| Implementation | Mean | Behaviour |
+|---|---|---|
+| `live` | 100.0 | reads the head of the chain |
+| `cached` | 71.3 | real state, roughly three hours old |
+| `partial` | 33.3 | current, but blind to most of the address space |
+
+Freshness alone turned out to be a weak differentiator, which is worth recording rather than hiding: a provider serving from an hour back still scored 99, because balances on this chain only move while a market run is happening and sit still for hours either side. Stale data is only wrong when something has happened. Coverage is what separates providers the rest of the time.
 
 **What is authored here** is which implementation each seller runs, and that is a far smaller claim than a quality score. A solver that returns a longer route really is worse, checkably. A screener that reads the wrong evidence really does return wrong verdicts. We choose what code an agent runs, exactly as reality does; the market measures the result.
 
@@ -404,9 +416,9 @@ Stated plainly, because a project about verifiable reputation that is vague on t
 
 **Real, and checkable by anyone with the addresses.** The contracts, the allocation and deal accounting, the capital calls, every USDC movement, agent signing through Circle Developer Controlled Wallets, x402 payment via EIP-3009 `transferWithAuthorization`, ERC-8004 identity and reputation reads and writes, the revenue share settlement. The judges' decisions come from a live model reading live onchain state. Every purchase a customer makes is chosen by that customer from live reputation and live balances, paid from its own wallet, and rated by it afterwards from that same wallet.
 
-**Real delivery, in the sectors that have an implementation.** In logistics and in compliance and identity, the seller actually performs the work and the buyer actually checks it. There is no `quality` involved and no model: a route has a measurable length, and a screening verdict has a right answer sitting in the ERC-8004 registry. See "Services that really run" below.
+**Real delivery, in the sectors that have an implementation.** In logistics, in compliance and identity, and in onchain and market data, the seller actually performs the work and the buyer actually checks it. There is no `quality` involved and no model: a route has a measurable length, a screening verdict has a right answer sitting in the ERC-8004 registry, and a balance quote is either the number on the chain or it is not. See "Services that really run" below.
 
-**Simulated, in the sectors that do not yet.** Payments, media, storage, onchain data and market data have nothing on the other end to receive, so a buyer's satisfaction there is drawn from a hidden `quality` with noise. Nothing else in the system may read `quality` — not the pitch, not the judges, not the demand calculation — and every order records which of the two produced its rating, so any score can be traced to how it was arrived at.
+**Simulated, in the sectors that do not yet.** Payments, media and storage have nothing on the other end to receive, so a buyer's satisfaction there is drawn from a hidden `quality` with noise. Nothing else in the system may read `quality` — not the pitch, not the judges, not the demand calculation — and every order records which of the two produced its rating, so any score can be traced to how it was arrived at.
 
 **Manufactured history, off by default.** `seed-traction` gives a newly provisioned agent a track record before it has ever traded: real x402 payments and real ERC-8004 ratings, but for services nobody wanted. It exists so a cohort is not all cold starts, and it is exactly the kind of thing this project otherwise argues against. Skip it if you want every rating in the system to have come from a purchase somebody actually chose to make.
 

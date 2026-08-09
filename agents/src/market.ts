@@ -28,8 +28,8 @@ import {
   type MarketRun,
 } from "./marketlog.js";
 
-// The market. Four customer agents, each with its own wallet and its own standing needs,
-// decide what to buy from the funded roster. Nobody assigns them a budget line and
+// The market. Four customer agents, each with its own wallet, browse the whole roster and
+// decide what to buy. Nobody assigns them a budget line and
 // nothing tells a seller it has been chosen: revenue is what is left over after four
 // independent shopping trips.
 //
@@ -89,9 +89,17 @@ export function decide(
   runId = 1,
   maxOrders = MAX_ORDERS,
 ): Intent[] {
-  const affordable = quotes.filter(
-    (q) => q.sectors.some((s) => c.needs.includes(s)) && q.unitPrice <= budget,
-  );
+  // Every seller on the roster, not a slice of it. A buyer browses the whole marketplace
+  // and decides for itself; the only thing that rules a seller out is not being able to
+  // afford one unit of it.
+  //
+  // An earlier version restricted each buyer to sectors it "needed", so that an agent
+  // nobody wanted would earn nothing. That is a real effect, but it was a rule imposed on
+  // the market rather than something the market produced, and it left two thirds of the
+  // roster invisible to any given buyer. The buyers still differ from each other without
+  // it: they weigh price, reputation and their own experience differently, and each one
+  // has a private history nobody else can read.
+  const affordable = quotes.filter((q) => q.unitPrice <= budget);
   if (affordable.length === 0) return [];
 
   const cheapest = affordable.reduce((lo, q) => (q.unitPrice < lo ? q.unitPrice : lo), affordable[0].unitPrice);
@@ -182,7 +190,7 @@ async function useService(
   if (!svc || !impl) return null;
 
   const ctx = { buyer, provider: listing.name, impl, rnd };
-  const jobs = Math.max(1, Math.min(units, JOBS_PER_ORDER));
+  const jobs = Math.max(1, Math.min(units, svc.maxJobs ?? JOBS_PER_ORDER));
   const scores: number[] = [];
   let last = "";
 
@@ -378,7 +386,7 @@ export async function runMarket(opts: { dryRun?: boolean; operatorKey?: Hex } = 
 
     const intents = decide(c, quotes, memory[c.name] ?? {}, budget, rnd, runId);
     if (intents.length === 0) {
-      console.log(`${c.name} found nothing on offer in ${c.needs.map((n) => SECTOR_LABEL[n] ?? n).join(", ")}.\n`);
+      console.log(`${c.name} found nothing on the marketplace it could afford.\n`);
       continue;
     }
 
@@ -432,7 +440,7 @@ export async function runMarket(opts: { dryRun?: boolean; operatorKey?: Hex } = 
       remember(memory, c.name, p.name, it.units, num(it.amount), satisfaction, runId);
       sales.set(p.name, (sales.get(p.name) ?? 0n) + it.amount);
 
-      console.log(`    delivered: ${order.rated}/100${real ? ` · verified over ${real.jobs} jobs · ${real.note}` : " · unverified (no service implementation)"}`);
+      console.log(`    delivered: ${order.rated}/100${real ? ` · verified over ${real.jobs} job${real.jobs === 1 ? "" : "s"} · ${real.note}` : " · unverified (no service implementation)"}`);
 
       if (!dryRun && p.startup.agentId !== null) {
         try {

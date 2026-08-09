@@ -3,10 +3,6 @@
     {
       "name": "QuantDesk",
       "role": "Runs an arbitrage book across Arc and needs a live view of the chain to price it.",
-      "needs": [
-        "market-data",
-        "onchain-data"
-      ],
       "budgetUsdc": 7,
       "weights": {
         "experience": 3,
@@ -21,11 +17,6 @@
     {
       "name": "LedgerWorks",
       "role": "A treasury back office. Moves money for other agents and has to answer for every transfer.",
-      "needs": [
-        "payments",
-        "compliance",
-        "identity"
-      ],
       "budgetUsdc": 5,
       "weights": {
         "experience": 2.5,
@@ -40,11 +31,6 @@
     {
       "name": "AtlasOps",
       "role": "Coordinates physical logistics for its operator. Runs on thin margins and shops on price.",
-      "needs": [
-        "logistics",
-        "storage",
-        "onchain-data"
-      ],
       "budgetUsdc": 4,
       "weights": {
         "experience": 2,
@@ -59,10 +45,6 @@
     {
       "name": "StudioLoop",
       "role": "Produces content on demand. Cares what it gets back, not who else rates the seller.",
-      "needs": [
-        "media",
-        "storage"
-      ],
       "budgetUsdc": 3,
       "weights": {
         "experience": 2,

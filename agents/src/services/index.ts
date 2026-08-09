@@ -1,6 +1,7 @@
 import type { Service } from "./types.js";
 import { logistics } from "./logistics.js";
 import { reputationScreening } from "./reputation.js";
+import { onchainData } from "./onchain.js";
 
 export type { Service, JobContext, Delivery, Review } from "./types.js";
 
@@ -10,7 +11,7 @@ export type { Service, JobContext, Delivery, Review } from "./types.js";
 // but the rating comes from the seller's hidden `quality` rather than from anything it
 // produced. Every order records which of the two it was, so a rating in this system can
 // always be traced to how it was arrived at.
-export const services: Service<never, never>[] = [logistics, reputationScreening] as unknown as Service<never, never>[];
+export const services: Service<never, never>[] = [logistics, reputationScreening, onchainData] as unknown as Service<never, never>[];
 
 export function serviceFor(sectors: string[]): Service<never, never> | undefined {
   return services.find((s) => s.sectors.some((sec) => sectors.includes(sec)));

@@ -51,7 +51,8 @@
       "service": {
         "sectors": [
           "market-data"
-        ]
+        ],
+        "impl": "cached"
       }
     },
     {
@@ -69,7 +70,8 @@
       "service": {
         "sectors": [
           "onchain-data"
-        ]
+        ],
+        "impl": "live"
       }
     },
     {
@@ -183,7 +185,8 @@
         "sectors": [
           "market-data",
           "onchain-data"
-        ]
+        ],
+        "impl": "live"
       }
     },
     {
@@ -312,7 +315,8 @@
       "service": {
         "sectors": [
           "market-data"
-        ]
+        ],
+        "impl": "partial"
       }
     },
     {
