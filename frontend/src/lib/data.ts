@@ -2,7 +2,7 @@ import type { Address } from 'viem'
 import { publicClient } from './chain'
 import { addresses } from './addresses'
 import { fundAbi, reputationAbi, erc20Abi, revenueShareAbi } from './abis'
-import { judgePersonas, startups, startupByWallet, historicalRaters } from './roster'
+import { judgePersonas, startups, startupByWallet, allRaters, marketRaters, investorRaters } from './roster'
 import { customers as customerRoster } from './market'
 
 const FUND = addresses.agenture.fund as Address
@@ -29,13 +29,10 @@ async function withRetry<T>(fn: () => Promise<T>, tries = 7): Promise<T> {
   throw new Error('unreachable')
 }
 
-const KNOWN_CLIENTS = Array.from(
-  new Set(
-    [addresses.agenture.operator, ...addresses.agenture.judges.map((j) => j.wallet), ...historicalRaters].map((a) =>
-      a.toLowerCase(),
-    ),
-  ),
-) as Address[]
+const lower = (xs: string[]) => Array.from(new Set(xs.map((a) => a.toLowerCase()))) as Address[]
+const KNOWN_CLIENTS = lower(allRaters)
+const MARKET_CLIENTS = lower(marketRaters)
+const INVESTOR_CLIENTS = lower(investorRaters)
 
 export type FundState = {
   cash: bigint
@@ -80,6 +77,11 @@ export type StartupRow = {
   agentId: number
   pitch: (typeof startups)[number]['pitch']
   reputation: { count: number; value: number } | null
+  /** The same reputation split by who wrote it. `market` is buyers that paid for the
+   *  service; `investor` is judges rating agents they already backed. They disagree, and
+   *  the disagreement is the point: see agents/src/diligence.ts. */
+  market: { count: number; value: number } | null
+  investor: { count: number; value: number } | null
   balance: bigint
   /** Cumulative revenue this agent has reported across all its deals, read from
    *  RevenueShare. The only onchain record of what it actually sold. */
@@ -133,14 +135,16 @@ export async function loadOverview(): Promise<Overview> {
   const judgeCfgs = addresses.agenture.judges
   const judgeStatePromises = judgeCfgs.map((j) => fund('getJudge', [j.wallet as Address]))
   const dealPromises = Array.from({ length: dealCount }, (_, i) => fund('getDeal', [BigInt(i)]))
-  const repPromises = startups.map((s) =>
+  const summary = (agentId: number, clients: Address[]) =>
     publicClient.readContract({
       address: REP,
       abi: reputationAbi,
       functionName: 'getSummary',
-      args: [BigInt(s.agentId), KNOWN_CLIENTS, '', ''],
-    }),
-  )
+      args: [BigInt(agentId), clients, '', ''],
+    })
+  const repPromises = startups.map((s) => summary(s.agentId, KNOWN_CLIENTS))
+  const marketRepPromises = startups.map((s) => summary(s.agentId, MARKET_CLIENTS))
+  const investorRepPromises = startups.map((s) => summary(s.agentId, INVESTOR_CLIENTS))
   const balPromises = startups.map((s) =>
     publicClient.readContract({ address: USDC, abi: erc20Abi, functionName: 'balanceOf', args: [s.wallet as Address] }),
   )
@@ -164,17 +168,20 @@ export async function loadOverview(): Promise<Overview> {
     publicClient.readContract({ address: USDC, abi: erc20Abi, functionName: 'balanceOf', args: [c.wallet as Address] }),
   )
 
-  const [judgeStates, deals, reps, bals, judgeBals, dealRevenues, customerBals] = await withRetry(() =>
-    Promise.all([
-      Promise.all(judgeStatePromises),
-      Promise.all(dealPromises),
-      Promise.all(repPromises),
-      Promise.all(balPromises),
-      Promise.all(judgeBalPromises),
-      Promise.all(revenuePromises),
-      Promise.all(customerBalPromises),
-    ]),
-  )
+  const [judgeStates, deals, reps, marketReps, investorReps, bals, judgeBals, dealRevenues, customerBals] =
+    await withRetry(() =>
+      Promise.all([
+        Promise.all(judgeStatePromises),
+        Promise.all(dealPromises),
+        Promise.all(repPromises),
+        Promise.all(marketRepPromises),
+        Promise.all(investorRepPromises),
+        Promise.all(balPromises),
+        Promise.all(judgeBalPromises),
+        Promise.all(revenuePromises),
+        Promise.all(customerBalPromises),
+      ]),
+    )
 
   const judges: JudgeRow[] = judgeCfgs.map((j, i) => {
     const st = judgeStates[i] as { active: boolean; agentId: bigint; committed: bigint; called: bigint; deployed: bigint; returned: bigint }
@@ -214,14 +221,20 @@ export async function loadOverview(): Promise<Overview> {
     status: Number(d.status),
   }))
 
+  const asSignal = (r: unknown) => {
+    const [count, value] = r as [bigint, bigint, number]
+    return Number(count) > 0 ? { count: Number(count), value: Number(value) } : null
+  }
+
   const startupRows: StartupRow[] = startups.map((s, i) => {
-    const [count, value] = reps[i] as [bigint, bigint, number]
     return {
       name: s.name,
       wallet: s.wallet,
       agentId: s.agentId,
       pitch: s.pitch,
-      reputation: Number(count) > 0 ? { count: Number(count), value: Number(value) } : null,
+      reputation: asSignal(reps[i]),
+      market: asSignal(marketReps[i]),
+      investor: asSignal(investorReps[i]),
       balance: bals[i] as bigint,
       // Sum the reported revenue of every deal this agent holds. One agent can be backed
       // by several judges, and each of those deals meters its sales separately.

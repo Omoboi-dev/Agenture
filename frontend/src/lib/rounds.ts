@@ -9,6 +9,9 @@ export type Dossier = {
   wallet: string
   agentId: number | null
   reputation: { count: number; value: number } | null
+  /** Split by who wrote it. Absent on rounds recorded before the split existed. */
+  market?: { count: number; value: number } | null
+  investor?: { count: number; value: number } | null
   usdcBalance: number
   pitch: { idea: string; monthlyRevenueUsdc: number; estimatedWorthUsdc: number; askUsdc: number }
 }

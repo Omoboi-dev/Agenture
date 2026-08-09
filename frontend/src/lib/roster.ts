@@ -1,5 +1,6 @@
 import roster from '@shared/startups.json'
 import { customers } from '@/lib/market'
+import { addresses } from '@/lib/addresses'
 
 // Display metadata that mirrors the agents' config (personas + pitches). Onchain facts
 // (mandates, deals, reputation, balances) are read live; this is the human-facing copy.
@@ -49,14 +50,27 @@ export function startupByWallet(wallet: string): StartupMeta | undefined {
   return startups.find((s) => s.wallet.toLowerCase() === w)
 }
 
-// The raters whose ERC-8004 feedback the fund trusts: operator + judges + the customer
-// agents that buy these services + historical pre-migration wallets. Mirrors the agents'
-// diligence set, and getSummary aggregates over exactly this list.
-export const historicalRaters = [
+// Whose ERC-8004 feedback counts, split by who wrote it. Mirrors agents/src/diligence.ts,
+// and getSummary aggregates over exactly these lists.
+//
+// The split is by rater rather than by tag because a rater's incentive is the thing that
+// matters and does not drift: a buyer that paid is evidence, a judge that funded the deal
+// is an opinion with a position behind it.
+
+/** Agents that paid for a service and rated what they got. */
+export const marketRaters = [
   ...customers.map((c) => c.wallet).filter((w): w is string => Boolean(w)),
   '0xd4d1bae70e727c9f66c3ed0efbf7bf57b46fd92f', // the original single house customer
+]
+
+/** The fund's own side, including judges' pre-migration EOA wallets. */
+export const investorRaters = [
+  addresses.agenture.operator,
+  ...addresses.agenture.judges.map((j) => j.wallet),
   '0x7F2733B91b12bcF2cfE99E2aa2617286b93cA7de',
   '0xf2fD1775118E21Ea5B9507235d3556C97181a9F7',
   '0x62050AB71Cd055cD48ed4fc2aD940606F7d63467',
   '0xcA76529b251502130b8AAaD091c03b72F37e0008',
 ]
+
+export const allRaters = [...marketRaters, ...investorRaters]

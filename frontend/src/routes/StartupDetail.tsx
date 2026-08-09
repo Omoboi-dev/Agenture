@@ -68,7 +68,7 @@ function Header({ startup, funded }: { startup: StartupRow; funded: boolean }) {
             <div className="flex flex-wrap items-center gap-3">
               <h1 className="text-[28px] font-semibold tracking-tight text-ink">{startup.name}</h1>
               {funded ? <Pill tone="gain" dot>Funded</Pill> : <Pill tone="neutral">Pitching</Pill>}
-              {!startup.reputation && <Chip tone="caution">Cold start</Chip>}
+              {!startup.market && <Chip tone="caution">Never sold</Chip>}
             </div>
             <p className="mt-2 max-w-2xl text-[14px] leading-relaxed text-muted">{startup.pitch.idea}</p>
             <div className="mt-3 flex flex-wrap items-center gap-2">
@@ -128,7 +128,9 @@ function ClaimedCard({ startup }: { startup: StartupRow }) {
 }
 
 function VerifiedCard({ startup, returned }: { startup: StartupRow; returned: bigint }) {
-  const rep = startup.reputation
+  // The headline score is what buyers said, never the blend with what investors said.
+  // See agents/src/diligence.ts: the two disagree, and averaging them buries the reason.
+  const rep = startup.market
   const snapshot = latestDossier(startup.name)
   const claimed = startup.pitch.monthlyRevenueUsdc
   const provenPct = claimed > 0 ? Math.min(100, (usdcNum(returned) / claimed) * 100) : 0
@@ -138,9 +140,9 @@ function VerifiedCard({ startup, returned }: { startup: StartupRow; returned: bi
       <CardHeader title="Onchain verified record" right={<Pill tone="primary">Verified</Pill>} />
       <div className="px-5 py-5">
         <div className="flex items-center gap-5">
-          <ReputationRing score={rep ? rep.value : null} size={82} label="index" />
+          <ReputationRing score={rep ? rep.value : null} size={82} label="buyers" />
           <div className="min-w-0">
-            <div className="eyebrow mb-1.5">Reputation score</div>
+            <div className="eyebrow mb-1.5">Rated by paying customers</div>
             {rep ? (
               <>
                 <div className="tnum text-[22px] font-semibold text-ink">
@@ -148,17 +150,37 @@ function VerifiedCard({ startup, returned }: { startup: StartupRow; returned: bi
                   <span className="text-[13px] text-faint">/100</span>
                 </div>
                 <div className="mt-1 text-[12px] text-primary">
-                  averaged over {rep.count} rating{rep.count === 1 ? '' : 's'} from trusted clients
+                  averaged over {rep.count} rating{rep.count === 1 ? '' : 's'} from agents that paid for the service
                 </div>
               </>
             ) : (
               <>
-                <div className="text-[16px] font-semibold text-caution">No record</div>
-                <div className="mt-1 text-[12px] text-faint">Never rated. The judges price this as real risk.</div>
+                <div className="text-[16px] font-semibold text-caution">Never sold</div>
+                <div className="mt-1 text-[12px] text-faint">
+                  No agent has paid for this service and rated it.
+                  {startup.investor && ` Investors rate it ${startup.investor.value}, but they hold the position.`}
+                </div>
               </>
             )}
           </div>
         </div>
+
+        {startup.investor && (
+          <div className="mt-5 rounded-md border border-line bg-surface-3/50 px-4 py-3">
+            <div className="flex items-baseline justify-between">
+              <span className="eyebrow">Rated by other investors</span>
+              <span className="tnum text-[14px] font-semibold text-subtle">
+                {startup.investor.value}
+                <span className="text-[11px] text-faint">/100 · {startup.investor.count}</span>
+              </span>
+            </div>
+            <p className="mt-1.5 text-[11.5px] leading-relaxed text-faint">
+              {startup.market && startup.investor.value - startup.market.value >= 12
+                ? `Judges on this fund rate it ${startup.investor.value - startup.market.value} points above its own customers. They already hold the position; the buyers do not.`
+                : 'Judges on this fund, rating agents they backed. Shown apart from the customer score because an investor scoring its own position is not evidence.'}
+            </p>
+          </div>
+        )}
 
         <div className="mt-6 grid grid-cols-2 gap-5 border-t border-line pt-5">
           <div>

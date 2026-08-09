@@ -141,10 +141,10 @@ function HeroDeal({ data }: { data: Overview | null }) {
                 </div>
               </div>
             </div>
-            {dossier.reputation ? (
-              <Pill tone="primary">Rep {dossier.reputation.value}</Pill>
+            {dossier.market ? (
+              <Pill tone="primary">Buyers {dossier.market.value}</Pill>
             ) : (
-              <Pill tone="caution">Cold start</Pill>
+              <Pill tone="caution">Never sold</Pill>
             )}
           </div>
 
@@ -152,8 +152,8 @@ function HeroDeal({ data }: { data: Overview | null }) {
 
           <div className="mt-4 grid grid-cols-3 gap-2">
             <MiniStat
-              label="Onchain ratings"
-              value={dossier.reputation ? String(dossier.reputation.count) : '0'}
+              label="Customer ratings"
+              value={dossier.market ? String(dossier.market.count) : '0'}
               verified
             />
             <MiniStat

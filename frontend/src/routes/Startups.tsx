@@ -23,7 +23,7 @@ export default function Startups() {
 
   const deployed = data.deals.reduce((a, d) => a + d.amount, 0n)
   const returned = data.deals.reduce((a, d) => a + d.returned, 0n)
-  const proven = dealFlow.filter((s) => s.reputation).length
+  const proven = dealFlow.filter((s) => s.market).length
 
   return (
     <div className="mx-auto max-w-[1340px]">
@@ -156,7 +156,7 @@ function StartupCard({ s, data, queue }: { s: StartupRow; data: Overview; queue?
                   {queue === undefined ? 'Seeking' : queue <= 3 ? `Next round · #${queue}` : `Queue #${queue}`}
                 </Chip>
               )}
-              {!s.reputation && <Chip tone="caution">Cold start</Chip>}
+              {!s.market && <Chip tone="caution">Never sold</Chip>}
             </div>
           </div>
         </div>
@@ -170,18 +170,27 @@ function StartupCard({ s, data, queue }: { s: StartupRow; data: Overview; queue?
           <span className="eyebrow text-primary">Onchain record</span>
           <span className="text-[10px] uppercase tracking-wide text-faint">verified</span>
         </div>
+        {/* The ring shows the customer score, not the blend. A judge's rating of a company
+            it already backed is an opinion with a position behind it, and averaging the two
+            hides the only number nobody here had a reason to inflate. */}
         <div className="flex items-center gap-4">
-          <ReputationRing score={s.reputation ? s.reputation.value : null} size={58} label="rep" />
+          <ReputationRing score={s.market ? s.market.value : null} size={58} label="buyers" />
           <div className="min-w-0 flex-1 space-y-2">
             <Row
-              label="Ratings"
-              value={s.reputation ? `${s.reputation.count} from trusted clients` : 'none yet'}
-              muted={!s.reputation}
+              label="Paying customers"
+              value={s.market ? `${s.market.value} from ${s.market.count} buyer${s.market.count === 1 ? '' : 's'}` : 'never sold'}
+              muted={!s.market}
+            />
+            <Row
+              label="Other investors"
+              value={s.investor ? `${s.investor.value} from ${s.investor.count}` : 'none'}
+              muted
             />
             <Row label="Wallet holds" value={`${usdc(s.balance)} USDC`} />
             <Row label="Paid to the fund" value={`${usdc(returned)} USDC`} muted={returned === 0n} />
           </div>
         </div>
+        <RatingGap s={s} />
       </div>
 
       {/* Claimed half */}
@@ -233,6 +242,28 @@ function StartupCard({ s, data, queue }: { s: StartupRow; data: Overview; queue?
       </div>
     </Card>
   )
+}
+
+// Where the two sources disagree, say so. On this deployment the investor average runs
+// above what the buyers report, and the widest gaps sit on agents no customer has ever
+// paid, which is exactly the case a reputation system exists to catch.
+function RatingGap({ s }: { s: StartupRow }) {
+  const gap = s.market && s.investor ? s.investor.value - s.market.value : null
+  if (gap !== null && gap >= 12) {
+    return (
+      <p className="mt-3 text-[11.5px] leading-relaxed text-caution">
+        Investors rate it {gap} points above its own paying customers.
+      </p>
+    )
+  }
+  if (!s.market && s.investor && s.investor.value >= 70) {
+    return (
+      <p className="mt-3 text-[11.5px] leading-relaxed text-caution">
+        Carries a {s.investor.value} from investors while never having sold to anyone.
+      </p>
+    )
+  }
+  return null
 }
 
 function Row({ label, value, muted = false }: { label: string; value: string; muted?: boolean }) {

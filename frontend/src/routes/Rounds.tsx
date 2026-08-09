@@ -112,7 +112,7 @@ function Matrix({ round }: { round: RoundLog }) {
                 <th key={d.name} className="px-2 pb-2 text-left">
                   <div className="text-[13px] font-medium text-subtle">{d.name}</div>
                   <div className="tnum text-[10px] font-normal text-faint">
-                    {d.reputation ? `rep ${d.reputation.value} · ${d.reputation.count} ratings` : 'cold start'}
+                    {d.market ? `buyers ${d.market.value} · ${d.market.count}` : d.reputation ? `investors ${d.reputation.value} · ${d.reputation.count}` : 'cold start'}
                   </div>
                 </th>
               ))}
