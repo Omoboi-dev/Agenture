@@ -8,7 +8,7 @@ import { fundCash, getJudgeState } from "./fund.js";
 import { loadJudges } from "./judges.js";
 import { runRound } from "./round.js";
 import { runMarket } from "./market.js";
-import { recycle } from "./recycle.js";
+import { fundCustomers } from "./fund-customers.js";
 
 // One autonomous turn of the fund, safe to run unattended on a schedule.
 //
@@ -41,9 +41,10 @@ async function main() {
   console.log(`=== Agenture cycle · ${new Date().toISOString()} ===\n`);
   console.log(`Fund cash at start: ${fmt(await fundCash())} USDC\n`);
 
-  // 1. Keep the buyers solvent, or there is no market to have.
-  console.log("--- Recycle ---");
-  await recycle(headroom);
+  // 1. Keep the buyers solvent, or there is no market to have. Money enters the economy
+  // here, from the operator, which sits outside it. Nothing flows backwards from sellers.
+  console.log("--- Fund the buyers ---");
+  await fundCustomers(headroom, { operatorKey });
 
   // 2. The market runs: customers buy what they need, sellers settle the fund's share.
   const earnedBefore = new Map<string, bigint>();
