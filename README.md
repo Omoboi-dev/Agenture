@@ -4,13 +4,13 @@ An autonomous AI venture fund on [Arc](https://docs.arc.io), where AI agents inv
 
 A panel of AI judge agents, each an established entrepreneur with its own onchain track record, hears pitches from startup agents. The judges run due diligence on each startup's verifiable onchain record (ERC-8004 reputation, live balances, real revenue), then each judge independently decides whether to back it from its own wallet.
 
-Funded startups then have to sell something. A separate set of customer agents, each holding its own wallet and owing the fund nothing, buys what it needs from the roster over x402 and rates the sellers it paid. A share of that revenue streams back to the fund, so a judge's returns depend on whether real buyers came back. Every decision inside the loop is made and signed by an agent, settled in USDC. A human starts a round and supplies capital; no human picks a deal, sets its terms or approves a payment.
+Funded startups then have to sell something. A separate set of customer agents, each holding its own wallet and owing the fund nothing, buys what it needs from the roster over Circle Gateway Nanopayments and rates the sellers it paid. A share of that revenue streams back to the fund, so a judge's returns depend on whether real buyers came back. Every decision inside the loop is made and signed by an agent, settled in USDC. A human starts a round and supplies capital; no human picks a deal, sets its terms or approves a payment.
 
 Think Shark Tank, run by AI, settled onchain in real stablecoin. Built for the Encode x Arc Programmable Money Hackathon (Agentic Economy track).
 
 ## Status
 
-Live on Arc testnet, end to end. Judges, startups and customers each hold a Circle Developer Controlled Wallet and sign their own onchain actions. A round runs due diligence over real ERC-8004 reputation, the judges decide with a live model, and the winners are funded onchain. Then the market runs: four customer agents pick their own suppliers, pay them via x402 (the buyer signs an EIP-3009 authorization, the operator settles it as facilitator), and write the ERC-8004 feedback that the next round's diligence reads. Sellers settle each deal's revenue share back to the fund. The whole loop runs on real Circle and Arc rails.
+Live on Arc testnet, end to end. Judges, startups and customers each hold a Circle Developer Controlled Wallet and sign their own onchain actions. A round runs due diligence over real ERC-8004 reputation, the judges decide with a live model, and the winners are funded onchain. Then the market runs: four customer agents pick their own suppliers, pay them over Circle Gateway Nanopayments (the buyer signs an EIP-3009 authorization and Gateway settles it in a batch, so no gas is paid per order), and write the ERC-8004 feedback that the next round's diligence reads. Sellers settle each deal's revenue share back to the fund. The whole loop runs on real Circle and Arc rails.
 
 The frontend is built and reads Arc live: a landing page, the fund dashboard, the arena, the judge panel, the startup roster, the round archive, per judge and per startup detail pages, and an LP page. It is read only, so supplying capital still means calling the contract directly.
 
@@ -58,7 +58,6 @@ bun run generate-startups      # draft new agents to shared/startup-drafts.json 
 bun run provision-startups     # give reviewed drafts a wallet, gas and an ERC-8004 identity
 bun run provision-customers    # give each buyer a wallet, gas, an identity and its first float
 bun run name-wallets           # label every Circle wallet so the console shows who is who
-bun run seed-traction          # let a customer buy from and rate agents that arrive proven
 ```
 
 Every round appends its record to `shared/rounds.json`: the diligence each startup was judged on, and each judge's verdict, conviction, rationale and resulting deal. A judge's reasoning is prose and only its conclusion lands onchain, so this file is the only place the deliberation survives. The frontend reads it alongside live Arc state.
@@ -131,7 +130,7 @@ flowchart TB
   JUDGE --> ORCH
   ORCH --> CUST
   CUST -->|reads reputation before buying| REP
-  CUST -->|x402 payment + rating| CIRCLE
+  CUST -->|nanopayment + rating| CIRCLE
   ORCH -->|invest / settle / feedback| CIRCLE
   CIRCLE -->|signed contract calls| FUND
   CIRCLE --> RS
@@ -164,7 +163,7 @@ Everything that must be trustless lives onchain. All amounts use the 6 decimal U
 - Identity: `register(uri)` mints an agentId to the caller.
 - Reputation: `giveFeedback(agentId, value, decimals, tag1, tag2, endpoint, uri, hash)` lets a client (a judge) rate an agent (a startup). Self feedback is blocked, the rater must differ from the agent owner. `getSummary(agentId, clients[], tag1, tag2)` returns the count and averaged score across a named set of raters. It reverts on an empty client list, so a caller must pass the raters it trusts.
 
-**USDC** on Arc is both the native gas token and an ERC-20 at `0x3600...0000`, the same pool viewed two ways. It is standard Circle USDC v2, so it supports EIP-3009 and EIP-2612, which is what makes x402 settle Arc native.
+**USDC** on Arc is both the native gas token and an ERC-20 at `0x3600...0000`, the same pool viewed two ways. It is standard Circle USDC v2, so it supports EIP-3009 and EIP-2612, which is what lets a buyer authorise a payment with a signature instead of a transaction.
 
 ### Offchain layer (agents/)
 
@@ -172,7 +171,7 @@ The agents are TypeScript on viem, the Vercel AI SDK, and the Circle Developer C
 
 - **config.ts / chain.ts**: the Arc chain definition, a read only viem public client, and `walletFromKey` (used only by the operator admin path). `withRpcRetry` and `waitReceipt` wrap every read and receipt wait in a long backoff, because the public Arc RPC has a tight request quota and returns "request limit reached" on bursts.
 - **circle.ts**: the Circle DCW client and the `circleExecute` helper. This is how agents sign (see Signing model below).
-- **llm.ts**: the single model seam. Today it points at Qwen 2.5 7B on 0G compute through an OpenAI compatible endpoint. `generateJson` asks for JSON and parses the first object robustly, returning null so callers can fall back safely. Swapping to a stronger model later is a one line change here.
+- **llm.ts**: the single model seam uses qwen OpenAI compatible endpoint. `generateJson` asks for JSON and parses the first object robustly, returning null so callers can fall back safely. Swapping to a stronger model later is a one line change here.
 - **judges.ts**: the judge personas (name, investing thesis), merged at run time with the Circle wallet address, walletId and agentId from `addresses.json`.
 - **startups.ts**: the fixture roster of startup agents, each with a Circle wallet address, walletId, an optional ERC-8004 agentId, and a pitch (idea, self reported revenue, estimated worth, ask).
 - **catalog.ts**: the selling side. What sector each agent operates in and what one unit of its service costs. A sector is read from the roster when the agent declares one and inferred from its pitch otherwise, so an agent provisioned later is tradeable the moment it exists.
@@ -185,8 +184,8 @@ The agents are TypeScript on viem, the Vercel AI SDK, and the Circle Developer C
   Those components are then weighted by the judge's own priorities, in `judges.ts`. Sable counts evidence double and the idea half; Nova the reverse; Alpha stays even. This is not decoration: with one shared rubric and a one-line persona, all three judges returned byte-identical breakdowns on every pitch, because a prescriptive rubric drowns out a personality. The weighting is what makes three judges into three opinions.
 
   Position sizing is enforced in code rather than asked for, for the same reason. Each judge has a cap on how much of its wallet may go into one deal, and a harder ceiling when the evidence is weak. Told to keep cheques under 2 USDC on unproven agents, Alpha wrote 3; asked to be bold, Nova put its entire 35 USDC balance into a single deal with an agent its own clients rated 44 out of 100. A model will not hold a limit it is merely told about.
-- **fund.ts / feedback.ts / revenue.ts / identity.ts**: onchain action wrappers. Agent actions (invest, settle, give feedback) sign through Circle; operator actions (register identity, facilitate x402) use viem.
-- **x402.ts**: the earning rail. A customer agent's Circle wallet signs an EIP-3009 `transferWithAuthorization` off-chain (gasless), and the operator submits it onchain as the x402 facilitator, so a startup earns real USDC agent to agent. A buyer therefore needs gas only to rate, never to pay.
+- **fund.ts / feedback.ts / revenue.ts / identity.ts**: onchain action wrappers. Agent actions (invest, settle, give feedback) sign through Circle; operator actions (register identity, submit a fallback settlement) use viem.
+- **nanopay.ts / x402.ts**: the earning rail. `nanopay.ts` is the primary one: the buyer signs a Gateway authorization off-chain and Circle settles it in a batch. `x402.ts` is the direct fallback, where the operator submits the buyer's signed EIP-3009 transfer onchain itself. Either way the buyer signs rather than sends, so it needs gas only to rate, never to pay.
 - **Entry points**: `round.ts` (the investment half), `market.ts` (the earning half), `cycle.ts` (both plus funding the buyers), `close-loop.ts` (an operator escape hatch for forcing one deal to settle), `allocate.ts` and `onboard-circle.ts` (operator onboarding), `provision-circle.ts`, `provision-startups.ts` and `provision-customers.ts` (mint the agent wallets).
 
 ## Signing model
@@ -221,8 +220,8 @@ sequenceDiagram
   Note over O,C: Earning half (market.ts)
   O->>C: read every seller's public reputation
   O->>O: each customer picks its own suppliers
-  O->>Ci: customer signs x402 payment (EIP-3009)
-  O->>C: operator settles x402, USDC to the startup
+  O->>Ci: customer signs a Gateway authorization (EIP-3009)
+  O->>C: Circle settles it in a batch, USDC to the startup
   O->>Ci: giveFeedback() as the customer wallet
   Ci->>C: seller reputation updated by the buyer that paid
   O->>Ci: settle() as the startup wallet
@@ -236,7 +235,7 @@ Step by step:
 3. **Decision.** Each judge, independently, reasons over every pitch with its own persona and returns a decision with a conviction score.
 4. **Rank then allocate.** Each judge sorts the pitches it wants by conviction and funds them in order until its own wallet runs out. This is why the batched arena matters: a judge compares the whole cohort before spending scarce capital, instead of committing to whoever pitched first.
 5. **Invest.** For each funded pitch the judge's Circle wallet signs `Fund.invest`. The deal is registered with RevenueShare and USDC moves to the startup.
-6. **Earn.** Customers shop. Each one scores every seller it can afford and pays the ones it picks via x402: the buyer's Circle wallet signs an EIP-3009 authorization and the operator settles it onchain as facilitator. The seller receives real USDC, agent to agent. Nobody is guaranteed a sale.
+6. **Earn.** Customers shop. Each one scores every seller it can afford and pays the ones it picks over Circle Gateway Nanopayments: the buyer's Circle wallet signs an EIP-3009 authorization and Circle settles it in a batch. The seller receives real USDC, agent to agent. Nobody is guaranteed a sale.
 7. **Feedback.** Each buyer rates what it received on ERC-8004, from its own wallet. That score is what the next round's due diligence reads, closing the loop, and it comes from a party with no stake in the fund.
 8. **Settle.** The seller's Circle wallet calls `RevenueShare.settle` on what it sold, paying the fund's cut. Revenue splits across every deal backing it, in proportion to what each judge put in. The rest stays with the seller.
 
@@ -266,34 +265,33 @@ Earlier versions recycled it instead, pulling USDC back out of the sellers to re
 
 ## The market
 
-Four customer agents (`shared/customers.json`, driven by `agents/src/market.ts`). Each has its own Circle wallet, its own USDC, a set of sectors it buys in, and a budget per run. They are not part of the fund and nothing coordinates them.
+Four customer agents (`shared/customers.json`, driven by `agents/src/market.ts`). Each has its own Circle wallet, its own USDC, a budget per run, and its own way of weighing a seller. They are not part of the fund and nothing coordinates them.
 
-A run goes: read the public reputation of every seller, let each customer decide independently, pay by x402, form an opinion about what arrived, rate the seller on ERC-8004, and have the sellers settle the fund's share of what they sold.
+A run goes: read the public reputation of every seller, let each customer decide independently, pay by nanopayment, form an opinion about what arrived, rate the seller on ERC-8004, and have the sellers settle the fund's share of what they sold.
 
 **How a customer decides.** It sees the whole roster. Anything it can afford one unit of is a candidate, and it weighs three things about each, in whatever proportion its persona sets: its own satisfaction with that seller in the past, the public ERC-8004 score, and price.
 
-An earlier version restricted each buyer to sectors it "needed", so a seller nobody wanted would earn nothing. That is a real effect, but it was a rule imposed on the market rather than something the market produced, and it left two thirds of the roster invisible to any given buyer. The buyers still differ plenty without it: they weigh those three things differently, and each has a private history no one else can read. A payments buyer now sometimes buys onchain data, because it browsed and that was the best thing it could afford, which is what a marketplace is. Budget is then split across its picks by that score, and it buys whole units. A seller it rates highly gets a bigger share of the wallet, which is how satisfaction becomes revenue without anything computing revenue from quality.
+ A payments buyer now sometimes buys onchain data, because it browsed and that was the best thing it could afford, which is what a marketplace is. Budget is then split across its picks by that score, and it buys whole units. A seller it rates highly gets a bigger share of the wallet, which is how satisfaction becomes revenue without anything computing revenue from quality.
 
-**Why a policy and not a language model.** A model call per customer per run would exhaust a daily quota in a handful of cycles, and it would make the market stop when the provider does. It would also not buy you much: given twelve options and a budget, a small model tends to produce the same basket for every persona, which is the failure the judges already hit. A rule based customer is not less of an agent for it. It holds its own keys, nobody tells it what to buy, and its choices turn on a private history no other agent can read. One model call per run does happen: a single customer explains its shopping in a sentence for the marketplace feed. It changes nothing and the run is unaffected if it fails.
+
 
 **Exploration.** Each customer spends a slot, some of the time, on a seller it has not dealt with lately rather than the next best familiar name. Not "never tried" but "not lately", because a seller judged on one delivery can have been unlucky, and if a weak first impression locked it out permanently the fund would be holding positions in agents that are unsellable for reasons no longer true. Never tried counts as maximally stale, so a newly funded agent still gets its first customer this way.
 
 **What this changes.** Demand is now structural. A good agent in a sector nobody buys earns nothing, and that is an answer rather than a bug: BenchmarkBot is a competent security service on a roster with no security buyer, and it should tell a judge something. Revenue tracks quality but does not follow it exactly, because how contested a sector is and how big its buyer's budget is both matter. And the reputation a judge reads is now written by the parties who paid, not by other investors.
 
-**What is still simulated:** the delivery. A customer's satisfaction is drawn from the seller's hidden quality with noise, because there is no real service behind these agents. Everything downstream of that opinion is real: the choice, the payment, the rating, the settlement.
 
-## Payments: Nanopayments, with x402 underneath
+## Payments: Circle Gateway Nanopayments
 
-An order in this market is a fraction of a USDC. Settling each one onchain means paying Arc gas to move thirty five cents, which is the cost structure x402 exists to remove. So payments go over **Circle Gateway Nanopayments**: the buyer deposits into a Gateway Wallet once, then signs an EIP-3009 authorization against the `GatewayWalletBatched` domain for each purchase. Gateway verifies it immediately, credits the seller, and settles many authorizations together in one onchain batch. The buyer pays no gas per order and neither does the operator.
+An order in this market is a fraction of a USDC. Settling each one onchain means paying Arc gas to move thirty five cents, which is more friction than the purchase is worth. So payments go over **Circle Gateway Nanopayments**: the buyer deposits into a Gateway Wallet once, then signs an EIP-3009 authorization against the `GatewayWalletBatched` domain for each purchase. Gateway verifies it immediately, credits the seller, and settles many authorizations together in one onchain batch. The buyer pays no gas per order and neither does the operator.
 
-All three x402 roles are present. The seller states its terms, the buyer signs a payment for them, and `BatchFacilitatorClient` verifies and settles. There is no HTTP server between the agents, so the 402 negotiation happens in process, but what crosses the wire to Circle is exactly what a networked x402 seller would send.
+All three roles are present. The seller states its terms, the buyer signs a payment for them, and `BatchFacilitatorClient` verifies and settles through Circle. There is no HTTP server between the agents, so the negotiation happens in process, but what crosses the wire to Circle is exactly what a networked seller would send.
 
 `agents/src/nanopay.ts` holds it. Two things cost real time to find and are worth writing down:
 
 - **The SDK defaults to the mainnet Gateway host, which serves no testnet at all.** `getSupported()` against `gateway-api.circle.com` returns eleven mainnet chains and no Arc. Arc testnet only appears on `gateway-api-testnet.circle.com`, where it is domain 26 and fully supported.
 - **The SDK quickstart wants a raw private key, which our agents do not have.** Their keys are held by Circle under MPC. The signer interface it actually needs is only `{ address, signTypedData }`, and a Circle wallet does exactly that, so the agents keep custody and still produce a valid Gateway authorization.
 
-`x402.ts` remains as the fallback: a direct EIP-3009 transfer submitted onchain by the operator as facilitator. A buyer with no Gateway balance trades over that rather than not trading, and every order records which rail settled it. Set `MARKET_RAIL=x402` to force the onchain path.
+A direct onchain rail remains as the fallback: the same EIP-3009 signature from the buyer, submitted to USDC by the operator, one transaction per payment. A buyer with no Gateway balance trades over that rather than not trading, and every order records which rail settled it. Set `MARKET_RAIL=x402` to force the onchain path.
 
 ## Two kinds of reputation
 
@@ -322,7 +320,7 @@ So a judge is shown both numbers, told which one is evidence, and told outright 
 
 ## Services that really run
 
-For two sectors the transaction is not a simulation at all. The buyer states a task, the seller performs it, and the buyer scores what came back by working out the answer itself. No hidden `quality`, no model, no judgement call in the scoring. Implementations live in `agents/src/services/`.
+For five sectors the transaction is not a simulation at all. The buyer states a task, the seller performs it, and the buyer scores what came back by working out the answer itself. No hidden `quality`, no model, no judgement call in the scoring. Three services cover them, in `agents/src/services/`: logistics, compliance and identity, and onchain and market data.
 
 **Logistics** (`logistics.ts`). The buyer sends eight stops; the seller returns the order to visit them in; the buyer measures the route. Eight is chosen so the buyer can brute force the true optimum and score against it rather than against a guess. A route that skips a stop scores zero before quality is even considered. Measured over six identical problems:
 
@@ -369,7 +367,7 @@ A startup does not queue up at the same committee every week. It pitches once, a
 
 A round hears a cohort of at most four: newcomers first, shuffled so roster order does not decide who leads, plus one returning company when one has qualified. If nobody is seeking capital, no round is recorded at all.
 
-**Not every newcomer is a cold start.** Real deal flow includes agents that already sell something, so `seed-traction` has a customer genuinely buy from and rate the agents that claim existing revenue, before they ever pitch. The payments and the ERC-8004 feedback are real onchain events. The rater is a customer rather than a judge, so the signal is independent of the fund, and every customer wallet is in the trusted rater set that `getSummary` aggregates over.
+**A newcomer earns its record by selling, not by being given one.** Every rating in this system came from a purchase a customer chose to make. Kiln is the clearest case: it was provisioned with no history, a buyer explored it on its first market run, paid for storage and rated it, and it went into its first pitch carrying a customer score it had earned. Nothing seeds reputation ahead of trading, and every customer wallet is in the trusted rater set that `getSummary` aggregates over.
 
 ## The arena model
 
@@ -385,10 +383,10 @@ This beats deciding per arrival because a judge can rank the whole cohort and sp
 
 Authorization is expressed by who signs each transaction.
 
-- **Operator** (the deployer wallet, a viem EOA) is the fund admin and the x402 facilitator. It deposits capital, registers judges, and submits customers' signed x402 authorizations onchain. It is the only address that can onboard judges.
+- **Operator** (the deployer wallet, a viem EOA) is the fund admin and the fallback settlement facilitator. It deposits capital, registers judges, and submits customers' signed authorizations onchain when Gateway is not used. It is the only address that can onboard judges.
 - **Judge wallets** (Circle DCW) sign their own investments and their own feedback. The Fund checks the caller is a registered active judge, and the USDC contract stops it spending more than it holds, so no one else can invest on its behalf and no judge can overdraw.
 - **Startup wallets** (Circle DCW) sign their own settlements. RevenueShare checks the caller is the deal's startup, so only the startup can report and pay its own revenue.
-- **Customer wallet** (Circle DCW) pays startups for their services via x402. It signs EIP-3009 authorizations off-chain and never submits a transaction itself; the facilitator does that.
+- **Customer wallet** (Circle DCW) pays startups for their services. It signs EIP-3009 authorizations off-chain and never submits a payment transaction itself; Circle Gateway does that, in a batch.
 
 Agent keys live inside Circle under MPC and are never exported. The operator key lives in a gitignored `.env` and is read only at signing time. Nothing signs on behalf of another role.
 
@@ -397,55 +395,53 @@ Agent keys live inside Circle under MPC and are never exported. The operator key
 - `shared/addresses.json` is the single source of truth: chain id, RPC, explorer, USDC, the ERC-8004 and ERC-8183 addresses, and the Agenture deployment (Fund, RevenueShare, operator, the customer wallet, the Circle wallet set, and the judges with their Circle wallet address, walletId and agentId). Both the agents and a future frontend read it.
 - `agents/.env` (gitignored) holds the LLM endpoint (`LLM_BASE_URL`, `LLM_API_KEY`, `LLM_MODEL`), the Circle credentials (`CIRCLE_API_KEY`, `ENTITY_SECRET`), and the operator key. `.env.example` documents every variable. Agents are driven by their Circle `walletId`, not by keys.
 
+## Products used
+
+**Arc testnet** (chain id 5042002). USDC is the native gas token, so every wallet holds a little USDC to pay fees and no second token exists anywhere in the system.
+
+**USDC** is the only unit of account: capital calls, investments, purchases, revenue share and gas.
+
+**Circle Wallets (Developer Controlled)** give all 25 agents their signing identity. Three judges, eighteen sellers and four buyers each hold one, keys held by Circle under MPC and never exported. Every onchain action an agent takes is signed by that agent, not by the operator.
+
+**Circle Gateway Nanopayments** settle agent to agent payments. Buyers deposit into a Gateway Wallet once, then sign an EIP-3009 authorization against the `GatewayWalletBatched` domain per purchase; Gateway verifies immediately and batches many payments into a single onchain settlement, so no gas is paid per order. `agents/src/nanopay.ts`.
+
+**ERC-8004** is the identity and reputation layer. Every agent has an onchain identity; every rating is written by the buyer that paid for the service, and read back by the judges as diligence.
+
+**Circle Agent Stack.** Circle defines this as agent wallets, nanopayments and the Circle Agent Marketplace. Agenture uses the first two directly. It does not list on the Circle Agent Marketplace, because its sellers trade inside this fund and not offering services to the public yet.
+
+
 ## Current deployed state (Arc testnet, chain id 5042002)
 
-- USDC: `0x3600000000000000000000000000000000000000`
-- Fund: `0xa28Aa701E6390d477937F9F9F634840f75B84bEf`
-- RevenueShare: `0x0D9cCC9A04BB518Cbd704afA7C9394aC50ef6f7f`
-- Operator: `0x3E6AAfA597fC658cF5b7E42a9F07711785a9519E`
-- Customer (x402 payer): `0xd4d1bae70e727c9f66c3ed0efbf7bf57b46fd92f`
-- Circle wallet set: `3f824ea9-5876-52b8-ad82-ba4cfe2f8cf3`
-- ERC-8004 Identity / Reputation / Validation and the ERC-8183 job escrow: see `addresses.json`
+| | |
+| --- | --- |
+| USDC | `0x3600000000000000000000000000000000000000` |
+| Fund | `0x415dF1899E0326950aE22fe5D1F4Cf9A17e82Fb4` |
+| RevenueShare | `0xB01B5122AC89D98A4140C1D09b499F971013Dca8` |
+| Gateway Wallet | `0x0077777d7EBA4688BDeF3E311b846F25870A19B9` |
+| Operator | `0x3E6AAfA597fC658cF5b7E42a9F07711785a9519E` |
+| Circle wallet set | `3f824ea9-5876-52b8-ad82-ba4cfe2f8cf3` |
 
-Judges (16 USDC allocated to each wallet, signing from Circle wallets):
+ERC-8004 Identity, Reputation and Validation, and the ERC-8183 job escrow, are in `shared/addresses.json`. Every agent wallet is in `addresses.json`, `startups.json` and `customers.json`; the Circle console lists them by name (`Judge Alpha`, `Startup MeshRelay`, `Customer QuantDesk`).
 
-| Judge | Persona | Circle wallet | agentId |
-| --- | --- | --- | --- |
-| Alpha | proven traction, disciplined | `0x92e4c325...0172` | 851598 |
-| Nova | growth, high risk tolerance | `0xf291bef6...9490` | 851659 |
-| Sable | conservative value | `0xb6f5a908...1281` | 851660 |
+**Judges.** The fund commits capital; each judge draws it down itself with a capital call. Deployed exceeds committed for some judges because `invest` spends the judge own wallet, which still holds USDC from before the Aug 2 redeploy.
 
-Startups (fixture roster, signing from Circle wallets):
+| Judge | Persona | Wallet | Committed | Deployed | Returned | ROI | agentId |
+| --- | --- | --- | --- | --- | --- | --- | --- |
+| Alpha | proven traction, disciplined | `0x92e4c325…0172` | 37.04 | 36.89 | 2.04 | 5.54% | 851598 |
+| Nova | growth, high risk tolerance | `0xf291bef6…9490` | 43.71 | 57.38 | 8.71 | 15.18% | 851659 |
+| Sable | conservative value | `0xb6f5a908…1281` | 37.77 | 29.24 | 2.77 | 9.48% | 851660 |
 
-| Startup | agentId | Note |
+**Buyers.** Four customer agents, each with its own wallet, its own budget and its own private purchase history.
+
+| Buyer | Wallet | agentId |
 | --- | --- | --- |
-| MeshRelay | 851590 | real reputation |
-| PixelForge | 851661 | pre revenue, rated after its first deal |
-| DataOracle | 851662 | cold start |
+| QuantDesk | `0x8b4f6435…42d5` | 868048 |
+| LedgerWorks | `0x8dbfa409…eedf` | 868049 |
+| AtlasOps | `0x50b607e6…4c2c` | 868050 |
+| StudioLoop | `0xbda4f8d5…c06e` | 868051 |
 
-The Fund and RevenueShare were redeployed on Aug 2 2026 when the capital model changed from a shared pool to per judge allocation, so deal numbering restarts at #0. ERC-8004 identities and every rating survived the redeploy, since those live in registries Agenture does not own. Round 1 on the new contracts: all three judges backed MeshRelay and DataOracle from their own wallets, and Sable passed on the pre revenue PixelForge.
+**Sellers.** Eighteen startup agents in `shared/startups.json`, each with a Circle wallet, an ERC-8004 identity, a sector and a unit price.
 
-## What is real and what is stubbed
+**Activity to date.** 51 deals. 123.51 USDC deployed, 13.53 returned. Six rounds recorded, 57 verdicts. Ten market runs, 68 paid orders, 128.10 USDC of agent to agent volume, of which 23 settled gasless through Gateway and 34 were rated on work the buyer verified itself.
 
-Stated plainly, because a project about verifiable reputation that is vague on this point is not worth much.
-
-**Real, and checkable by anyone with the addresses.** The contracts, the allocation and deal accounting, the capital calls, every USDC movement, agent signing through Circle Developer Controlled Wallets, x402 payment via EIP-3009 `transferWithAuthorization`, ERC-8004 identity and reputation reads and writes, the revenue share settlement. The judges' decisions come from a live model reading live onchain state. Every purchase a customer makes is chosen by that customer from live reputation and live balances, paid from its own wallet, and rated by it afterwards from that same wallet.
-
-**Real delivery, in the sectors that have an implementation.** In logistics, in compliance and identity, and in onchain and market data, the seller actually performs the work and the buyer actually checks it. There is no `quality` involved and no model: a route has a measurable length, a screening verdict has a right answer sitting in the ERC-8004 registry, and a balance quote is either the number on the chain or it is not. See "Services that really run" below.
-
-**Simulated, in the sectors that do not yet.** Payments, media and storage have nothing on the other end to receive, so a buyer's satisfaction there is drawn from a hidden `quality` with noise. Nothing else in the system may read `quality` — not the pitch, not the judges, not the demand calculation — and every order records which of the two produced its rating, so any score can be traced to how it was arrived at.
-
-**Manufactured history, off by default.** `seed-traction` gives a newly provisioned agent a track record before it has ever traded: real x402 payments and real ERC-8004 ratings, but for services nobody wanted. It exists so a cohort is not all cold starts, and it is exactly the kind of thing this project otherwise argues against. Skip it if you want every rating in the system to have come from a purchase somebody actually chose to make.
-
-**Simplified, deliberately.** Customers decide with a policy rather than a language model (see "The market"). Buyer balances are topped up by the operator rather than earned by the buyers themselves, which is honest as far as it goes: a real buying agent is funded by its own treasury too. A round is started by the operator rather than a timer, so capital never moves unattended; everything after that trigger is decided and signed by the agents.
-
-**The path to removing the last of it** is to give sellers real work to do: a media agent that actually summarises, a compliance agent that actually reads a counterparty's ERC-8004 record and returns a verdict, a storage agent that actually stores and returns a hash. Then the buyer scores what it received rather than what a number said it would receive, and `quality` disappears. See the roadmap.
-
-## Not yet built (roadmap)
-
-- **Real service delivery, removing the last simulated seam.** Each seller performs the work it charges for and the buyer scores what came back, so `quality` stops existing. Several sectors need no model at all and are verifiable: a compliance agent reads a counterparty's ERC-8004 record from Arc and returns a verdict, an onchain data agent answers a real query about real blocks, a storage agent returns the blob and its hash, a logistics agent solves a routing problem with a checkable optimum. Media and research sectors would be genuine model calls. A seller is then good or bad because its implementation is, which is how it works outside a simulation.
-- An onchain Arena registry where startups self submit pitches, replacing the fixture roster.
-- Sellers setting their own prices, and customers negotiating instead of taking the listed one.
-- Weighting a customer rating by how much that customer actually spent, so a buyer with one small order does not count the same as one that came back six times.
-- LP deposit and withdrawal from the frontend, wallet connect, and a per deal detail page.
-- Judge to judge and portfolio level reputation, and withdrawal for LPs.
+The Fund and RevenueShare were redeployed on Aug 2 2026 when the capital model changed from a shared pool to per judge commitments. ERC-8004 identities and every rating survived, since those live in registries Agenture does not own.

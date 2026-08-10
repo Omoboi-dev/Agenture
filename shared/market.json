@@ -2,11 +2,11 @@
   "memory": {
     "QuantDesk": {
       "DataIndexer": {
-        "orders": 9,
-        "units": 69,
-        "spentUsdc": 24.15,
-        "satisfaction": 0.9917,
-        "lastRunId": 9
+        "orders": 10,
+        "units": 79,
+        "spentUsdc": 27.65,
+        "satisfaction": 0.995,
+        "lastRunId": 10
       },
       "MarketMaker": {
         "orders": 5,
@@ -16,11 +16,11 @@
         "lastRunId": 5
       },
       "Quorum": {
-        "orders": 1,
-        "units": 1,
-        "spentUsdc": 0.5,
+        "orders": 2,
+        "units": 7,
+        "spentUsdc": 3.5,
         "satisfaction": 1,
-        "lastRunId": 8
+        "lastRunId": 10
       },
       "MediaMiner": {
         "orders": 1,
@@ -32,11 +32,11 @@
     },
     "LedgerWorks": {
       "MeshRelay": {
-        "orders": 7,
-        "units": 28,
-        "spentUsdc": 14,
-        "satisfaction": 0.8036,
-        "lastRunId": 9
+        "orders": 8,
+        "units": 32,
+        "spentUsdc": 16,
+        "satisfaction": 0.747,
+        "lastRunId": 10
       },
       "CryptoPayBridge": {
         "orders": 4,
@@ -46,27 +46,27 @@
         "lastRunId": 4
       },
       "DataIndexer": {
-        "orders": 5,
-        "units": 19,
-        "spentUsdc": 6.65,
+        "orders": 6,
+        "units": 26,
+        "spentUsdc": 9.1,
         "satisfaction": 1,
-        "lastRunId": 9
+        "lastRunId": 10
       }
     },
     "AtlasOps": {
       "DataIndexer": {
-        "orders": 7,
-        "units": 36,
-        "spentUsdc": 12.6,
-        "satisfaction": 0.9772,
-        "lastRunId": 9
+        "orders": 8,
+        "units": 42,
+        "spentUsdc": 14.7,
+        "satisfaction": 0.9863,
+        "lastRunId": 10
       },
       "CargoScheduler": {
-        "orders": 6,
-        "units": 27,
-        "spentUsdc": 9.45,
-        "satisfaction": 0.78,
-        "lastRunId": 9
+        "orders": 7,
+        "units": 32,
+        "spentUsdc": 11.2,
+        "satisfaction": 0.8227,
+        "lastRunId": 10
       },
       "Kiln": {
         "orders": 1,
@@ -106,18 +106,18 @@
         "lastRunId": 2
       },
       "DataIndexer": {
-        "orders": 3,
-        "units": 10,
-        "spentUsdc": 3.5,
+        "orders": 4,
+        "units": 14,
+        "spentUsdc": 4.9,
         "satisfaction": 1,
-        "lastRunId": 9
+        "lastRunId": 10
       },
       "Waypoint": {
-        "orders": 2,
-        "units": 7,
-        "spentUsdc": 2.45,
-        "satisfaction": 0.9927,
-        "lastRunId": 9
+        "orders": 3,
+        "units": 11,
+        "spentUsdc": 3.85,
+        "satisfaction": 0.9956,
+        "lastRunId": 10
       }
     }
   },
@@ -2168,6 +2168,307 @@
           "cutUsdc": 0,
           "judge": null,
           "note": "unfunded traction"
+        }
+      ]
+    },
+    {
+      "id": 10,
+      "at": "2026-08-09T23:42:47.339Z",
+      "dryRun": false,
+      "note": {
+        "customer": "QuantDesk",
+        "text": "I purchased 10 units from DataIndexer at $0.35 each due to previous satisfaction, and 6 units from Quorum at $0.50 each for similar reasons."
+      },
+      "orders": [
+        {
+          "customer": "QuantDesk",
+          "provider": "DataIndexer",
+          "sector": "onchain-data",
+          "units": 10,
+          "unitPriceUsdc": 0.35,
+          "amountUsdc": 3.5,
+          "reason": "repeat",
+          "paidTx": "e887ab9c-e186-43c1-971f-2ea1694462cf",
+          "rail": "nanopayments",
+          "satisfaction": 1,
+          "rated": 100,
+          "ratedTx": "0x23e0032386f1899801cac8b62112567d2fe939b32921684aeb0fb318d3bcd8b0",
+          "delivery": {
+            "verified": true,
+            "jobs": 2,
+            "note": "quoted 45.44 USDC for PixelForge, actual 45.44, off by 0.0%"
+          }
+        },
+        {
+          "customer": "QuantDesk",
+          "provider": "Quorum",
+          "sector": "compliance",
+          "units": 6,
+          "unitPriceUsdc": 0.5,
+          "amountUsdc": 3,
+          "reason": "repeat",
+          "paidTx": "7f7689ea-31f8-4be5-b932-ab44dc56696a",
+          "rail": "nanopayments",
+          "satisfaction": 1,
+          "rated": 100,
+          "ratedTx": "0xc59c060cf53ae632e8e90b9d8233b21fa828ddf0b6ba58bbfbe28d3ee5d25355",
+          "delivery": {
+            "verified": true,
+            "jobs": 3,
+            "note": "all 4 counterparties screened correctly"
+          }
+        },
+        {
+          "customer": "LedgerWorks",
+          "provider": "DataIndexer",
+          "sector": "onchain-data",
+          "units": 7,
+          "unitPriceUsdc": 0.35,
+          "amountUsdc": 2.45,
+          "reason": "repeat",
+          "paidTx": "e9125507-41cb-4587-a85f-d4e2ffbb52b6",
+          "rail": "nanopayments",
+          "satisfaction": 1,
+          "rated": 100,
+          "ratedTx": "0x90122fcbe4fcd6a6947d4a67e4b9789e83062aea744d3b9eb896ab18490bc94c",
+          "delivery": {
+            "verified": true,
+            "jobs": 2,
+            "note": "ranked PixelForge > TrustGuard > Zephyr, actual PixelForge > TrustGuard > Zephyr, 3 of 3 pairs right"
+          }
+        },
+        {
+          "customer": "LedgerWorks",
+          "provider": "MeshRelay",
+          "sector": "payments",
+          "units": 4,
+          "unitPriceUsdc": 0.5,
+          "amountUsdc": 2,
+          "reason": "repeat",
+          "paidTx": "af8983aa-e16a-499b-b3a7-3e1e19a9a080",
+          "rail": "nanopayments",
+          "satisfaction": 0.662,
+          "rated": 66,
+          "ratedTx": "0x836347d08e3a0b383f99e936259ba0814b35c0340da482d596e8a0bfc3c72937",
+          "delivery": null
+        },
+        {
+          "customer": "AtlasOps",
+          "provider": "DataIndexer",
+          "sector": "onchain-data",
+          "units": 6,
+          "unitPriceUsdc": 0.35,
+          "amountUsdc": 2.1,
+          "reason": "repeat",
+          "paidTx": "53963862-44b7-4a0f-bd1b-8c525569fbce",
+          "rail": "nanopayments",
+          "satisfaction": 1,
+          "rated": 100,
+          "ratedTx": "0x6ca08e855d26845cb2f81cf93d5c21f4a93640853b7e53212c5ea698816b1854",
+          "delivery": {
+            "verified": true,
+            "jobs": 2,
+            "note": "quoted 0.60 USDC for Nimbus, actual 0.60, off by 0.0%"
+          }
+        },
+        {
+          "customer": "AtlasOps",
+          "provider": "CargoScheduler",
+          "sector": "logistics",
+          "units": 5,
+          "unitPriceUsdc": 0.35,
+          "amountUsdc": 1.75,
+          "reason": "repeat",
+          "paidTx": "25cf523c-7fd1-4861-a7f1-57daa358776b",
+          "rail": "nanopayments",
+          "satisfaction": 0.887,
+          "rated": 89,
+          "ratedTx": "0x80283c136a88161197891789a7c03427ed1c72b530320f61f6c6dcbc383f0742",
+          "delivery": {
+            "verified": true,
+            "jobs": 3,
+            "note": "route 257.5 against a best possible 257.5, 0.0% longer than optimal"
+          }
+        },
+        {
+          "customer": "StudioLoop",
+          "provider": "Waypoint",
+          "sector": "logistics",
+          "units": 4,
+          "unitPriceUsdc": 0.35,
+          "amountUsdc": 1.4,
+          "reason": "repeat",
+          "paidTx": "f1bbd807-27b0-4802-bd16-8ae399d2699c",
+          "rail": "nanopayments",
+          "satisfaction": 1,
+          "rated": 100,
+          "ratedTx": "0x8f3ff289a3477dfc598b3d61ef811054f2fd0bd1be6109a6332ce1f12761ba26",
+          "delivery": {
+            "verified": true,
+            "jobs": 3,
+            "note": "route 255.8 against a best possible 255.8, 0.0% longer than optimal"
+          }
+        },
+        {
+          "customer": "StudioLoop",
+          "provider": "DataIndexer",
+          "sector": "onchain-data",
+          "units": 4,
+          "unitPriceUsdc": 0.35,
+          "amountUsdc": 1.4,
+          "reason": "repeat",
+          "paidTx": "436d2a65-20bb-4b23-a229-dc93156a13dc",
+          "rail": "nanopayments",
+          "satisfaction": 1,
+          "rated": 100,
+          "ratedTx": "0xb98e5aa0b4cecee270a06ba96bf5a54f726dba4469cc869834814a5cfe627833",
+          "delivery": {
+            "verified": true,
+            "jobs": 2,
+            "note": "ranked MarketMaker > MeshRelay > TrustGuard, actual MarketMaker > MeshRelay > TrustGuard, 3 of 3 pairs right"
+          }
+        }
+      ],
+      "settlements": [
+        {
+          "startup": "DataIndexer",
+          "dealId": 10,
+          "revenueUsdc": 1.357334,
+          "cutUsdc": 0.067866,
+          "judge": "Alpha"
+        },
+        {
+          "startup": "DataIndexer",
+          "dealId": 14,
+          "revenueUsdc": 0.177522,
+          "cutUsdc": 0.026628,
+          "judge": "Nova"
+        },
+        {
+          "startup": "DataIndexer",
+          "dealId": 18,
+          "revenueUsdc": 1.682634,
+          "cutUsdc": 0.084131,
+          "judge": "Sable"
+        },
+        {
+          "startup": "DataIndexer",
+          "dealId": 43,
+          "revenueUsdc": 1.682634,
+          "cutUsdc": 0.168263,
+          "judge": "Alpha"
+        },
+        {
+          "startup": "DataIndexer",
+          "dealId": 47,
+          "revenueUsdc": 2.86724,
+          "cutUsdc": 0.430086,
+          "judge": "Nova"
+        },
+        {
+          "startup": "DataIndexer",
+          "dealId": 49,
+          "revenueUsdc": 1.682636,
+          "cutUsdc": 0.168263,
+          "judge": "Sable"
+        },
+        {
+          "startup": "Quorum",
+          "dealId": 37,
+          "revenueUsdc": 0.857142,
+          "cutUsdc": 0.064285,
+          "judge": "Alpha"
+        },
+        {
+          "startup": "Quorum",
+          "dealId": 39,
+          "revenueUsdc": 2.142858,
+          "cutUsdc": 1.607143,
+          "judge": "Nova"
+        },
+        {
+          "startup": "MeshRelay",
+          "dealId": 0,
+          "revenueUsdc": 0.211514,
+          "cutUsdc": 0.010575,
+          "judge": "Alpha"
+        },
+        {
+          "startup": "MeshRelay",
+          "dealId": 5,
+          "revenueUsdc": 0.701832,
+          "cutUsdc": 0.105274,
+          "judge": "Nova"
+        },
+        {
+          "startup": "MeshRelay",
+          "dealId": 8,
+          "revenueUsdc": 0.317271,
+          "cutUsdc": 0.015863,
+          "judge": "Sable"
+        },
+        {
+          "startup": "MeshRelay",
+          "dealId": 35,
+          "revenueUsdc": 0.211514,
+          "cutUsdc": 0.010575,
+          "judge": "Alpha"
+        },
+        {
+          "startup": "MeshRelay",
+          "dealId": 38,
+          "revenueUsdc": 0.430326,
+          "cutUsdc": 0.064548,
+          "judge": "Nova"
+        },
+        {
+          "startup": "MeshRelay",
+          "dealId": 41,
+          "revenueUsdc": 0.127543,
+          "cutUsdc": 0.006377,
+          "judge": "Sable"
+        },
+        {
+          "startup": "CargoScheduler",
+          "dealId": 23,
+          "revenueUsdc": 0.583333,
+          "cutUsdc": 0.029166,
+          "judge": "Alpha"
+        },
+        {
+          "startup": "CargoScheduler",
+          "dealId": 28,
+          "revenueUsdc": 0.583333,
+          "cutUsdc": 0.087499,
+          "judge": "Nova"
+        },
+        {
+          "startup": "CargoScheduler",
+          "dealId": 31,
+          "revenueUsdc": 0.583334,
+          "cutUsdc": 0.029166,
+          "judge": "Sable"
+        },
+        {
+          "startup": "Waypoint",
+          "dealId": 42,
+          "revenueUsdc": 0.466666,
+          "cutUsdc": 0.046666,
+          "judge": "Alpha"
+        },
+        {
+          "startup": "Waypoint",
+          "dealId": 46,
+          "revenueUsdc": 0.233333,
+          "cutUsdc": 0.034999,
+          "judge": "Nova"
+        },
+        {
+          "startup": "Waypoint",
+          "dealId": 48,
+          "revenueUsdc": 0.700001,
+          "cutUsdc": 0.07,
+          "judge": "Sable"
         }
       ]
     }

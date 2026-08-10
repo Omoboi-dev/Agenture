@@ -1227,6 +1227,252 @@
           "txHash": "0xc52521b92e5d5f90af58a7d7df2ca1a243a79941e161056524a1719427693194"
         }
       ]
+    },
+    {
+      "id": 6,
+      "startedAt": "2026-08-09T23:34:03.947Z",
+      "endedAt": "2026-08-09T23:35:40.488Z",
+      "dryRun": false,
+      "cashBeforeUsdc": 53.935573,
+      "cashAfterUsdc": 24.046134,
+      "dossiers": [
+        {
+          "name": "Waypoint",
+          "wallet": "0x65cf5ab2410d5873c458a4a0668ecf6a827e5955",
+          "agentId": 868973,
+          "reputation": {
+            "count": 2,
+            "value": 99
+          },
+          "market": {
+            "count": 2,
+            "value": 99
+          },
+          "investor": null,
+          "usdcBalance": 0.6,
+          "pitch": {
+            "idea": "Reorders a delivery agent's pending stops into a shortest-path route and republishes it on every new job, charging 0.003 USDC per reroute.",
+            "monthlyRevenueUsdc": 85,
+            "estimatedWorthUsdc": 5000,
+            "askUsdc": 2
+          }
+        },
+        {
+          "name": "Kiln",
+          "wallet": "0x3ed6042f4a0091342edc672a987738125df8ce44",
+          "agentId": 868974,
+          "reputation": {
+            "count": 5,
+            "value": 61
+          },
+          "market": {
+            "count": 5,
+            "value": 61
+          },
+          "investor": null,
+          "usdcBalance": 6.9,
+          "pitch": {
+            "idea": "Pins and serves calldata blobs for archival agents with a signed retrieval proof on every read, charging 0.001 USDC per megabyte.",
+            "monthlyRevenueUsdc": 140,
+            "estimatedWorthUsdc": 5600,
+            "askUsdc": 2
+          }
+        },
+        {
+          "name": "DataIndexer",
+          "wallet": "0x2cd44a3c70281e945b1c5dcce92a8fa1c8dd0bc0",
+          "agentId": 859359,
+          "reputation": {
+            "count": 25,
+            "value": 95
+          },
+          "market": {
+            "count": 25,
+            "value": 95
+          },
+          "investor": null,
+          "usdcBalance": 36.408499,
+          "pitch": {
+            "idea": "Indexes Ethereum transaction logs and provides real-time updates to analytics agents via WebSocket, charging $0.005 USDC per log entry.",
+            "monthlyRevenueUsdc": 1621,
+            "estimatedWorthUsdc": 27557,
+            "askUsdc": 2
+          }
+        }
+      ],
+      "verdicts": [
+        {
+          "judge": "alpha",
+          "startup": "Waypoint",
+          "invest": true,
+          "score": 86,
+          "breakdown": {
+            "idea": 25,
+            "evidence": 28,
+            "price": 15,
+            "risk": 18
+          },
+          "rationale": "The idea of reordering delivery agent stops to optimize routes is both useful and innovative. The high customer ratings indicate strong execution capability. While the asking price seems reasonable relative to the potential revenue, the low onchain evidence score suggests some execution risk. However, the compelling plan and positive customer feedback outweigh this concern.",
+          "requestedUsdc": 2,
+          "revenueShareBps": 1000,
+          "outcome": "committed",
+          "allocatedUsdc": 2,
+          "dealId": 42,
+          "txHash": "0xc66c34284824c2df6ccb76ef89c3543f880b500e92b503d0ff848bae9afed205"
+        },
+        {
+          "judge": "alpha",
+          "startup": "DataIndexer",
+          "invest": true,
+          "score": 80,
+          "breakdown": {
+            "idea": 25,
+            "evidence": 25,
+            "price": 15,
+            "risk": 15
+          },
+          "rationale": "The business idea is innovative and useful, indexing Ethereum transaction logs for real-time updates to analytics agents. The pricing seems reasonable given the revenue generated. The onchain evidence shows a strong customer base with high ratings, indicating trust and satisfaction. While the valuation is high relative to the revenue, the risk is mitigated by the strong customer feedback and the low investment required.",
+          "requestedUsdc": 2,
+          "revenueShareBps": 1000,
+          "outcome": "committed",
+          "allocatedUsdc": 2,
+          "dealId": 43,
+          "txHash": "0x55e7f475bc371f61e7c6bc97a771b5d7b39e18d59288fbe29886005a8b62c760"
+        },
+        {
+          "judge": "alpha",
+          "startup": "Kiln",
+          "invest": true,
+          "score": 65,
+          "breakdown": {
+            "idea": 25,
+            "evidence": 15,
+            "price": 10,
+            "risk": 15
+          },
+          "rationale": "The idea of providing archival services with signed retrieval proofs is innovative and useful, especially given the increasing need for secure data storage solutions. The pricing seems reasonable considering the cost of storage and the added security feature. While the evidence is somewhat limited, the positive customer ratings suggest potential success. The risk is moderate due to the relatively low asking amount and the existing customer base.",
+          "requestedUsdc": 2,
+          "revenueShareBps": 1000,
+          "outcome": "committed",
+          "allocatedUsdc": 2,
+          "dealId": 44,
+          "txHash": "0x07524d14a71b532deee6e3caa51070ef316daef1bb0dfe59e40b9cc874a2ba32"
+        },
+        {
+          "judge": "nova",
+          "startup": "Kiln",
+          "invest": true,
+          "score": 86,
+          "breakdown": {
+            "idea": 28,
+            "evidence": 15,
+            "price": 18,
+            "risk": 17
+          },
+          "rationale": "The idea of pins and serving calldata blobs for archival agents with signed retrieval proofs is innovative and useful, especially given the growing need for secure data storage solutions. The pricing model seems reasonable, considering the cost of storage and retrieval. While the evidence is somewhat limited, the mediocre customer ratings suggest there might be room for improvement in execution. The risk is moderate due to the novelty of the concept and potential challenges in scaling. Given the potential upside, I am willing to take on this risk.",
+          "requestedUsdc": 1,
+          "revenueShareBps": 1500,
+          "outcome": "committed",
+          "allocatedUsdc": 1,
+          "dealId": 45,
+          "txHash": "0xb0bc40b7b4f6e70678180d8264dcd3900e3b65421fdc4787b5565fa9ee08ff49"
+        },
+        {
+          "judge": "nova",
+          "startup": "Waypoint",
+          "invest": true,
+          "score": 84,
+          "breakdown": {
+            "idea": 25,
+            "evidence": 28,
+            "price": 18,
+            "risk": 14
+          },
+          "rationale": "The idea of reordering delivery agent stops to optimize routes is genuinely useful and addresses a real need in logistics. The strong customer ratings indicate a well-executed product. While the asking price seems reasonable given the revenue, the low onchain evidence and zero wallet balance suggest significant execution risk.",
+          "requestedUsdc": 1,
+          "revenueShareBps": 1500,
+          "outcome": "committed",
+          "allocatedUsdc": 1,
+          "dealId": 46,
+          "txHash": "0xebccb4a53cb8f71c8ba4f3c2564b996a04b8c36ce48fd3da5734b5117917470a"
+        },
+        {
+          "judge": "nova",
+          "startup": "DataIndexer",
+          "invest": true,
+          "score": 81,
+          "breakdown": {
+            "idea": 25,
+            "evidence": 25,
+            "price": 15,
+            "risk": 15
+          },
+          "rationale": "The idea of indexing Ethereum transaction logs and providing real-time updates is innovative and useful, especially given the growing importance of blockchain data analysis. The customer ratings are excellent, indicating strong satisfaction despite limited on-chain evidence. While the valuation seems high relative to the reported revenue, the potential for significant growth and the willingness to take on higher risk align with my investment strategy.",
+          "requestedUsdc": 3.408038,
+          "revenueShareBps": 1500,
+          "outcome": "committed",
+          "allocatedUsdc": 3.408038,
+          "dealId": 47,
+          "txHash": "0xbb7dbba0d924ec6a68b12a18efa5832ec51b1ea9a892781f5bf6a22c0d52db4a"
+        },
+        {
+          "judge": "sable",
+          "startup": "Waypoint",
+          "invest": true,
+          "score": 87,
+          "breakdown": {
+            "idea": 25,
+            "evidence": 28,
+            "price": 18,
+            "risk": 15
+          },
+          "rationale": "The idea of reordering delivery agent routes to optimize efficiency is both useful and plausible given the current state of logistics technology. The high customer ratings indicate strong execution capability. While the asking price seems reasonable relative to the claimed valuation, the lack of a live wallet balance suggests potential financial instability. However, the strong customer ratings provide significant confidence in the agent's ability to deliver results.",
+          "requestedUsdc": 3,
+          "revenueShareBps": 1000,
+          "outcome": "committed",
+          "allocatedUsdc": 3,
+          "dealId": 48,
+          "txHash": "0xf221dae86cf673a58b58042b26124e2e33ff9dcccfb717371f4e893cdcaa28f1"
+        },
+        {
+          "judge": "sable",
+          "startup": "DataIndexer",
+          "invest": true,
+          "score": 80,
+          "breakdown": {
+            "idea": 25,
+            "evidence": 25,
+            "price": 15,
+            "risk": 15
+          },
+          "rationale": "The business idea is moderately useful and defensible given the increasing importance of analyzing blockchain data. The evidence shows strong customer satisfaction, indicating a viable product. While the price seems reasonable relative to the ask, the risk assessment is moderate due to the relatively low revenue and the need for continued growth.",
+          "requestedUsdc": 2,
+          "revenueShareBps": 1000,
+          "outcome": "committed",
+          "allocatedUsdc": 2,
+          "dealId": 49,
+          "txHash": "0x80aaecbed0d1105082f46e7cf8af7fa45f7ac235285be7cbc06bfafaf052386a"
+        },
+        {
+          "judge": "sable",
+          "startup": "Kiln",
+          "invest": true,
+          "score": 64,
+          "breakdown": {
+            "idea": 25,
+            "evidence": 15,
+            "price": 15,
+            "risk": 15
+          },
+          "rationale": "The idea of pins and serving calldata blobs for archival agents with signed retrieval proofs seems genuinely useful, especially given the growing need for secure data storage solutions. The pricing model appears reasonable, charging 0.001 USDC per megabyte, which is competitive compared to similar services. However, the evidence provided is somewhat weak, with mediocre ratings from paying customers and no ratings from other investors on this fund. Despite these weaknesses, the potential for growth in the market for secure data storage is significant, making this investment potentially rewarding despite the risks.",
+          "requestedUsdc": 3,
+          "revenueShareBps": 1000,
+          "outcome": "committed",
+          "allocatedUsdc": 3,
+          "dealId": 50,
+          "txHash": "0xb41968167315e43624f0e06eae9b7f25def3e31c8fdbf1030e3807343ec6900b"
+        }
+      ]
     }
   ]
 }
